@@ -16,8 +16,8 @@
         "allowed_code_ids": [
           "1"
         ],
-        "max_gas_before": "2000000",
-        "max_gas_after": "2000000"
+        "max_gas_before": "5000000",
+        "max_gas_after": "5000000"
       },
       "next_account_id": "1"
     },
@@ -86,26 +86,7 @@
         "ibc_query_icq_channel": "",
         "osmosis_crosschain_swap_address": ""
       },
-      "epochs": [
-        {
-          "identifier": "query",
-          "start_time": "0001-01-01T00:00:00Z",
-          "duration": "60s",
-          "current_epoch": "0",
-          "current_epoch_start_time": "0001-01-01T00:00:00Z",
-          "epoch_counting_started": false,
-          "current_epoch_start_height": "0"
-        },
-        {
-          "identifier": "swap",
-          "start_time": "0001-01-01T00:00:00Z",
-          "duration": "120s",
-          "current_epoch": "0",
-          "current_epoch_start_time": "0001-01-01T00:00:00Z",
-          "epoch_counting_started": false,
-          "current_epoch_start_height": "0"
-        }
-      ],
+      "epochs": [],
       "port_id": "feeabs"
     },
     "feegrant": {
@@ -123,7 +104,12 @@
     },
     "globalfee": {
       "params": {
-        "minimum_gas_prices": [],
+        "minimum_gas_prices": [
+          {
+            "denom": "uxion",
+            "amount": "0.001000000000000000"
+          }
+        ],
         "bypass_min_fee_msg_types": [
           "/xion.v1.MsgSend",
           "/xion.v1.MsgMultiSend",
@@ -147,23 +133,23 @@
         "min_deposit": [
           {
             "denom": "uxion",
-            "amount": "10000000"
+            "amount": "1000000000"
           }
         ],
-        "max_deposit_period": "172800s",
-        "voting_period": "172800s",
+        "max_deposit_period": "24h0m0s",
+        "voting_period": "24h0m0s",
         "quorum": "0.334000000000000000",
         "threshold": "0.500000000000000000",
         "veto_threshold": "0.334000000000000000",
         "min_initial_deposit_ratio": "0.000000000000000000",
         "proposal_cancel_ratio": "0.500000000000000000",
         "proposal_cancel_dest": "",
-        "expedited_voting_period": "86400s",
+        "expedited_voting_period": "3600s",
         "expedited_threshold": "0.667000000000000000",
         "expedited_min_deposit": [
           {
             "denom": "uxion",
-            "amount": "50000000"
+            "amount": "5000000000"
           }
         ],
         "burn_vote_quorum": false,
@@ -248,7 +234,7 @@
     },
     "jwk": {
       "params": {
-        "time_offset": "30000",
+        "time_offset": "30000000000",
         "deployment_gas": "10000"
       },
       "audienceList": []
@@ -280,19 +266,19 @@
     "params": null,
     "slashing": {
       "params": {
-        "signed_blocks_window": "100",
+        "signed_blocks_window": "10000",
         "min_signed_per_window": "0.500000000000000000",
-        "downtime_jail_duration": "600s",
+        "downtime_jail_duration": "10m0s",
         "slash_fraction_double_sign": "0.050000000000000000",
-        "slash_fraction_downtime": "0.010000000000000000"
+        "slash_fraction_downtime": "0.001000000000000000"
       },
       "signing_infos": [],
       "missed_blocks": []
     },
     "staking": {
       "params": {
-        "unbonding_time": "1814400s",
-        "max_validators": 100,
+        "unbonding_time": "504h0m0s",
+        "max_validators": 35,
         "max_entries": 7,
         "historical_entries": 10000,
         "bond_denom": "uxion",
@@ -311,7 +297,7 @@
         "denom_creation_fee": [
           {
             "denom": "uxion",
-            "amount": "10000000"
+            "amount": "1000000000"
           }
         ],
         "denom_creation_gas_consume": "2000000"
