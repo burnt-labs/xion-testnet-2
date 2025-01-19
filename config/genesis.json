@@ -29,7 +29,22 @@
         "sig_verify_cost_ed25519": "590",
         "sig_verify_cost_secp256k1": "1000"
       },
-      "accounts": []
+      "accounts": [
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv",
+          "pub_key": null,
+          "account_number": "0",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "xion1xrqz2wpt4rw8rtdvrc4n4yn5h54jm0nn4evn2x",
+          "pub_key": null,
+          "account_number": "1",
+          "sequence": "0"
+        }
+      ]
     },
     "authz": {
       "authorization": []
@@ -39,9 +54,66 @@
         "send_enabled": [],
         "default_send_enabled": true
       },
-      "balances": [],
-      "supply": [],
-      "denom_metadata": [],
+      "balances": [
+        {
+          "address": "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv",
+          "coins": [
+            {
+              "denom": "uxion",
+              "amount": "40000000000000"
+            }
+          ]
+        },
+        {
+          "address": "xion1xrqz2wpt4rw8rtdvrc4n4yn5h54jm0nn4evn2x",
+          "coins": [
+            {
+              "denom": "uxion",
+              "amount": "40000000000000"
+            }
+          ]
+        }
+      ],
+      "supply": [
+        {
+          "denom": "uxion",
+          "amount": "200000000000000"
+        }
+      ],
+      "denom_metadata": [
+        {
+          "description": "The native staking token of the Xion network.",
+          "denom_units": [
+            {
+              "denom": "uxion",
+              "exponent": 0,
+              "aliases": [
+                "microxion"
+              ]
+            },
+            {
+              "denom": "mxion",
+              "exponent": 3,
+              "aliases": [
+                "millixion"
+              ]
+            },
+            {
+              "denom": "XION",
+              "exponent": 6,
+              "aliases": [
+                "xion"
+              ]
+            }
+          ],
+          "base": "uxion",
+          "display": "XION",
+          "name": "xion",
+          "symbol": "XION",
+          "uri": "",
+          "uri_hash": ""
+        }
+      ],
       "send_enabled": []
     },
     "capability": {
@@ -237,7 +309,13 @@
         "time_offset": "30000000000",
         "deployment_gas": "10000"
       },
-      "audienceList": []
+      "audienceList": [
+        {
+          "aud": "project-test-5ae234a7-6b74-46af-a7b7-969f3df38cc0",
+          "key": "{\"alg\":\"R256\",\"e\":\"AQAB\",\"kty\":\"RSA\",\"n\":\"1pAzc7xPeyJOYtmq90AQ7QYbpKKsHAfc6eDg44a-5oV-HPyMnAKgk_YwGzVY6xNVFiOYtDFszcE_Ed1DxqJMXe6WMMvcwLlfNoG4SlbKkUzM5RKwxLdgPvNguMtxOy_qc3BVtlWJyQbEIY26IOs7kR1IEPZ2Z1QTXw5ttEM-4CAoS7nSHNNuMzyC7fgFYURCIvJyhKrrtO6fS6qOu0pa42-IQc_jprbyTlfCYHAGCIqZxYjOTf36yg1jobg5JhWHc2bwEyI8E_6rj0sLzMjUvC59y8sF1_ZF8Zn3IxK0z8Tnj_rA04FTG47L2FZQvOvQzxsJBJAFKLi6LX_S5pA7RHBe1tIb-UIh43WNPBgXLrVpC8dafS31BZtoQso9uSFbmNVvIyHy7vq-YON5GnfM7EK-DxOrBuAkchDDpS2y1ciiK-Em4v2NH8dIl4-P0kVxchKuNlZDBdf4XoF3Vun6DgTaa_Tu_YcdB1j1bwFi8S2pyk6N2wXYwO9FLoQhIQRCQHDq6lksGrx9PvC1WoYTHMjG8aTY_XV6x8vd5mjybjw620YL_Xu-8ByA_xRDD3gbdNIZ4hbFs5ZehpO0yMroSk6Tf0ujteXtQ7GqLarsU_ROHnMDQoNiQaRN6NRQ-IwqN9x4rpy-DN5ErMGjt-QFKhLrcjvpq8zQ0u57THBWS0E\"}",
+          "admin": "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv"
+        }
+      ]
     },
     "mint": {
       "minter": {
@@ -277,12 +355,12 @@
     },
     "staking": {
       "params": {
-        "unbonding_time": "504h0m0s",
+        "unbonding_time": "21600s",
         "max_validators": 35,
         "max_entries": 7,
         "historical_entries": 10000,
         "bond_denom": "uxion",
-        "min_commission_rate": "0.000000000000000000"
+        "min_commission_rate": "0.050000000000000000"
       },
       "last_total_power": "0",
       "last_validator_powers": [],
