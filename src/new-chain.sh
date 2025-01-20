@@ -9,7 +9,7 @@
 # - Chain daemon binary (xiond) must be in PATH
 # - jq must be installed
 
-set -euo pipefail
+set -Eeuo pipefail
 
 if [[ -z "$1" ]]; then
   echo "Usage: $0 <chain-id>"
@@ -22,12 +22,20 @@ RPC_URL="https://rpc.xion-mainnet-1.burnt.com:443"
 CODE_IDS=("1" "")
 GENESIS_TIME="2025-01-28T00:00:00.000000Z"
 
+ACCOUNTS=(
+  "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv"
+  "xion1xrqz2wpt4rw8rtdvrc4n4yn5h54jm0nn4evn2x"
+)
+
+SUPPLY="2000000000000000"  # Total supply in uXION
+
 CONFIG_DIR="config"
 GENTX_DIR="$CONFIG_DIR/gentx"
 MODULES=(
   "abstractaccount"
   "auth"
   "bank"
+  "bank_denoms_metadata"
   "consensus" 
   "distribution"
   "globalfee"
@@ -54,11 +62,17 @@ merge_params_into_genesis() {
   local module=$1
   local params
   local jq_script
+  local query="params"
 
   case "$module" in
     "abstractaccount")
       jq_script='.app_state["abstractaccount"]["params"] += $params'
       module="abstract-account"
+      ;;
+    "bank_denoms_metadata")
+      module="bank"
+      query="denoms-metadata"
+      jq_script='.app_state[$module]["denom_metadata"] = [$params["metadatas"][] | select(.name == "xion")]'
       ;;
     "consensus")
       jq_script='.consensus["params"]["block"] = $params["params"]["block"]' 
@@ -71,8 +85,9 @@ merge_params_into_genesis() {
       ;;
   esac
 
-  echo "Querying $module params..."
-  params="$($DAEMON_NAME query $module params --node $RPC_URL --output json || echo "{}")"
+
+  echo "Querying $module $query..."
+  params="$($DAEMON_NAME query $module $query --node $RPC_URL --output json || echo "{}")"
 
   jq --arg module "$module" --argjson params "$params" \
     "$jq_script" "$CONFIG_DIR/genesis.json" > "$TMP_DIR/genesis.json"
@@ -83,7 +98,6 @@ merge_params_into_genesis() {
 create_genesis_file() {
   $DAEMON_NAME init moniker --default-denom uxion --chain-id $CHAIN_ID --home $(pwd)
   rm $CONFIG_DIR/node_key.json $CONFIG_DIR/priv_validator_key.json
-  mv $CONFIG_DIR/genesis.json $CONFIG_DIR/genesis.json
 }
 
  add_code_ids(){
@@ -101,6 +115,39 @@ validate_genesis_file() {
   $DAEMON_NAME genesis validate-genesis $CONFIG_DIR/genesis.json --home $(pwd) --trace
 }
 
+add_genesis_account() {
+  local account_number=$1
+  local addr=$2
+
+  local jq_script='.app_state["auth"]["accounts"] += [{"@type": "/cosmos.auth.v1beta1.BaseAccount", "address": $addr, "pub_key": null, "account_number": $account_number, "sequence": "0"}]'
+
+  jq --arg addr "$addr" --arg account_number "$account_number" \
+    "$jq_script" "$CONFIG_DIR/genesis.json" > "$TMP_DIR/genesis.json"
+
+  cp $TMP_DIR/genesis.json $CONFIG_DIR/genesis.json
+}
+
+add_genesis_balance() {
+  local addr=$1
+  local coins=$2
+
+  local jq_script='.app_state["bank"]["balances"] += [{"address": $addr, "coins": $coins}]'
+
+  jq --arg addr "$addr" --argjson coins "$coins" \
+    "$jq_script" "$CONFIG_DIR/genesis.json" > "$TMP_DIR/genesis.json"
+
+  cp $TMP_DIR/genesis.json $CONFIG_DIR/genesis.json
+}
+
+add_genesis_accounts() {
+  set -x
+  for account_number in $(seq 0 $((${#ACCOUNTS[@]} - 1))); do
+    addr=${ACCOUNTS[$account_number]}
+    add_genesis_account $account_number $addr
+    add_genesis_balance $addr '[{"denom": "uxion", "amount": "100000000000000"}]'
+  done
+}
+
 modify_genesis_file() {
   echo "Modifying genesis file..."
   jq ".genesis_time = \"$GENESIS_TIME\" |
@@ -109,7 +156,9 @@ modify_genesis_file() {
       .app_state.feeabs.params.native_ibced_in_osmosis = \"\" |
       .app_state.feeabs.params.chain_name = \"\" |
       .app_state.feeabs.epochs = [] |
-      .app_state.gov.params.expedited_voting_period = \"3600s\"" \
+      .app_state.gov.params.expedited_voting_period = \"3600s\" |
+      .app_state.staking.params.unbonding_time = \"21600s\" |
+      .app_state.staking.params.min_commission_rate = \"0.050000000000000000\"" \
       $CONFIG_DIR/genesis.json > $TMP_DIR/genesis.json
   mv $TMP_DIR/genesis.json "$CONFIG_DIR/genesis.json"
 }
@@ -147,8 +196,9 @@ main() {
   for module in "${MODULES[@]}"; do
     merge_params_into_genesis $module
   done
-  add_code_ids
+  # # add_code_ids
   
+  add_genesis_accounts
   modify_genesis_file
   validate_genesis_file
 

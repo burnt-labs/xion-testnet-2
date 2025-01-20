@@ -21,18 +21,18 @@ All validators that wish to be included in the new Xion testnet chain can follow
 
 ### Share [genesis.json](https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/refs/heads/main/config/genesis.json) and start collecting gen_txs from the validators
 
-- Tue Jan 7 2025 16:00:00 GMT-0500 (EST)
-- Tue Jan 7 2025 21:00:00 GMT+0000 (UTC)
+- Mon Jan 20 2025 00:00:00 GMT-0500 (EST)
+- Mon Jan 20 2025 05:00:00 GMT+0000 (UTC)
 
 ### Finish collecting gen_txs, build, and share `genesis.json`
 
-- Wed Jan 28 2025 11:00:00 GMT-0500 (EST)
-- Wed Jan 28 2025 16:00:00 GMT+0000 (UTC)
+- Mon Jan 27 2025 11:00:00 GMT-0500 (EST)
+- Mon Jan 27 2025 16:00:00 GMT+0000 (UTC)
 
 ### Launch xion-testnet-2 network
 
-- Wed Jan 29 2025 11:00:00 GMT-0500 (EST)
-- Wed Jan 29 2025 16:00:00 GMT+0000 (UTC)
+- Tue Jan 28 2025 11:00:00 GMT-0500 (EST)
+- Tue Jan 28 2025 16:00:00 GMT+0000 (UTC)
 
 ## Set Up a Validator
 
@@ -75,7 +75,7 @@ Complete the following steps on your new validator's machine.
 
     ```sh
     MONIKER="<preffered_moniker>"
-    xiond genesis gentx validator 1000000uxion \
+    xiond genesis gentx <account> 1000000uxion \
         --chain-id="xion-testnet-2" \
         --pubkey=$(xiond comet show-validator) \
         --min-self-delegation=1 \

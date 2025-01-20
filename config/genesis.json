@@ -1,7 +1,7 @@
 {
   "app_name": "xiond",
   "app_version": "v14.1.1",
-  "genesis_time": "2025-01-28T00:00:00.000000Z",
+  "genesis_time": "2025-01-28T16:00:00.000000Z",
   "chain_id": "xion-testnet-2",
   "initial_height": 1,
   "app_hash": null,
