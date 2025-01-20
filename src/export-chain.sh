@@ -16,18 +16,9 @@ if [[ -z "$1" ]]; then
   exit 1
 fi
 
-CHAIN_ID="$1"
-DAEMON_NAME="xiond"  # Replace with your chain's DAEMON_NAME binary (e.g., gaiad)
-RPC_URL="https://rpc.xion-mainnet-1.burnt.com:443"
-CODE_IDS=("1" "")
-GENESIS_TIME="2025-01-28T00:00:00.000000Z"
+SCRIPTS_DIR=$(dirname "$0")
 
-ACCOUNTS=(
-  "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv"
-  "xion1xrqz2wpt4rw8rtdvrc4n4yn5h54jm0nn4evn2x"
-)
-
-SUPPLY="2000000000000000"  # Total supply in uXION
+source "$SCRIPTS_DIR/$1.env"
 
 CONFIG_DIR="config"
 GENTX_DIR="$CONFIG_DIR/gentx"
@@ -100,7 +91,7 @@ create_genesis_file() {
   rm $CONFIG_DIR/node_key.json $CONFIG_DIR/priv_validator_key.json
 }
 
- add_code_ids(){
+add_code_ids(){
   local code_id=1
   for code_id in "${CODE_IDS[@]}"; do
     params="$($DAEMON_NAME query wasm list-code --node $RPC_URL --output json)"
@@ -118,49 +109,41 @@ validate_genesis_file() {
 add_genesis_account() {
   local account_number=$1
   local addr=$2
-
-  local jq_script='.app_state["auth"]["accounts"] += [{"@type": "/cosmos.auth.v1beta1.BaseAccount", "address": $addr, "pub_key": null, "account_number": $account_number, "sequence": "0"}]'
-
-  jq --arg addr "$addr" --arg account_number "$account_number" \
-    "$jq_script" "$CONFIG_DIR/genesis.json" > "$TMP_DIR/genesis.json"
-
-  cp $TMP_DIR/genesis.json $CONFIG_DIR/genesis.json
+  modify_genesis_jq --arg execute add_genesis_account --argjson vars "{\"account_number\": $account_number, \"addr\": \"$addr\"}"
 }
 
 add_genesis_balance() {
   local addr=$1
   local coins=$2
-
-  local jq_script='.app_state["bank"]["balances"] += [{"address": $addr, "coins": $coins}]'
-
-  jq --arg addr "$addr" --argjson coins "$coins" \
-    "$jq_script" "$CONFIG_DIR/genesis.json" > "$TMP_DIR/genesis.json"
-
-  cp $TMP_DIR/genesis.json $CONFIG_DIR/genesis.json
+  modify_genesis_jq --arg execute add_genesis_balance --argjson vars "{\"addr\": \"$addr\", \"coins\": $coins}"
 }
 
 add_genesis_accounts() {
-  set -x
-  for account_number in $(seq 0 $((${#ACCOUNTS[@]} - 1))); do
-    addr=${ACCOUNTS[$account_number]}
+  local account_number=0
+  for addr in ${ACCOUNTS[@]}; do
     add_genesis_account $account_number $addr
-    add_genesis_balance $addr '[{"denom": "uxion", "amount": "100000000000000"}]'
+    add_genesis_balance $addr "[{\"denom\": \"${DEFAULT_DENOM}\", \"amount\": \"${ACCOUNT_TOKENS}\"}]"
+    ((account_number++))
   done
+  for addr in ${VALIDATORS[@]}; do
+    add_genesis_account $account_number $addr
+    add_genesis_balance $addr "[{\"denom\": \"${DEFAULT_DENOM}\", \"amount\": \"${VALIDATOR_TOKENS}\"}]"
+    ((account_number++))
+  done  
+}
+
+modify_genesis_jq() {
+  $SCRIPTS_DIR/modify-genesis.jq "$@" -f $CONFIG_DIR/genesis.json > $TMP_DIR/genesis.json &&
+  mv $TMP_DIR/genesis.json $CONFIG_DIR/genesis.json
 }
 
 modify_genesis_file() {
-  echo "Modifying genesis file..."
-  jq ".genesis_time = \"$GENESIS_TIME\" |
-      .app_state.abstractaccount.params.allow_all_code_ids = false |
-      .app_state.abstractaccount.params.allowed_code_ids = [\"1\"] |
-      .app_state.feeabs.params.native_ibced_in_osmosis = \"\" |
-      .app_state.feeabs.params.chain_name = \"\" |
-      .app_state.feeabs.epochs = [] |
-      .app_state.gov.params.expedited_voting_period = \"3600s\" |
-      .app_state.staking.params.unbonding_time = \"21600s\" |
-      .app_state.staking.params.min_commission_rate = \"0.050000000000000000\"" \
-      $CONFIG_DIR/genesis.json > $TMP_DIR/genesis.json
-  mv $TMP_DIR/genesis.json "$CONFIG_DIR/genesis.json"
+  if [[ ${SOURCE_CHAIN_ID} == "xion-testnet-1" ]]; then
+    echo "Modifying genesis file..."
+    modify_genesis_jq --arg execute modify_genesis_xion_testnet_1 --argjson vars "{}"
+  else
+    modify_genesis_jq --arg execute modify_genesis --argjson vars "{}"
+  fi
 }
 
 modify_app_toml() {

@@ -43,6 +43,34 @@
           "pub_key": null,
           "account_number": "1",
           "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "xion140l6y2gp3gxvay6qtn70re7z2s0gn57zwsfxs2",
+          "pub_key": null,
+          "account_number": "2",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "xion1dzwqegk4wnff04l5sa0w892l6a7sg08zd0h3va",
+          "pub_key": null,
+          "account_number": "3",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "xion10g3fdhq3c2ev2enrhh7z9xyzphal3audsaghsx",
+          "pub_key": null,
+          "account_number": "4",
+          "sequence": "0"
+        },
+        {
+          "@type": "/cosmos.auth.v1beta1.BaseAccount",
+          "address": "xion15vdz44lyndpn0lf7vqqe0rkprnamwxx2a4hsjd",
+          "pub_key": null,
+          "account_number": "5",
+          "sequence": "0"
         }
       ]
     },
@@ -60,7 +88,7 @@
           "coins": [
             {
               "denom": "uxion",
-              "amount": "100000000000000"
+              "amount": "99999996000000"
             }
           ]
         },
@@ -69,7 +97,43 @@
           "coins": [
             {
               "denom": "uxion",
-              "amount": "100000000000000"
+              "amount": "99999996000000"
+            }
+          ]
+        },
+        {
+          "address": "xion140l6y2gp3gxvay6qtn70re7z2s0gn57zwsfxs2",
+          "coins": [
+            {
+              "denom": "uxion",
+              "amount": "2000000"
+            }
+          ]
+        },
+        {
+          "address": "xion1dzwqegk4wnff04l5sa0w892l6a7sg08zd0h3va",
+          "coins": [
+            {
+              "denom": "uxion",
+              "amount": "2000000"
+            }
+          ]
+        },
+        {
+          "address": "xion10g3fdhq3c2ev2enrhh7z9xyzphal3audsaghsx",
+          "coins": [
+            {
+              "denom": "uxion",
+              "amount": "2000000"
+            }
+          ]
+        },
+        {
+          "address": "xion15vdz44lyndpn0lf7vqqe0rkprnamwxx2a4hsjd",
+          "coins": [
+            {
+              "denom": "uxion",
+              "amount": "2000000"
             }
           ]
         }
@@ -86,7 +150,6 @@
           "denom_units": [
             {
               "denom": "uxion",
-              "exponent": 0,
               "aliases": [
                 "microxion"
               ]
@@ -109,9 +172,7 @@
           "base": "uxion",
           "display": "XION",
           "name": "xion",
-          "symbol": "XION",
-          "uri": "",
-          "uri_hash": ""
+          "symbol": "XION"
         }
       ],
       "send_enabled": []
