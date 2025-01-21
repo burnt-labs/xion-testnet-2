@@ -46,28 +46,28 @@
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "xion140l6y2gp3gxvay6qtn70re7z2s0gn57zwsfxs2",
+          "address": "xion14qekdkj2nmmwea4ufg9n002a3pud23y88t6f8m",
           "pub_key": null,
           "account_number": "2",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "xion1dzwqegk4wnff04l5sa0w892l6a7sg08zd0h3va",
+          "address": "xion1jt9w26mpxxjsk63mvd4m2ynj0af09cslpgyyl6",
           "pub_key": null,
           "account_number": "3",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "xion10g3fdhq3c2ev2enrhh7z9xyzphal3audsaghsx",
+          "address": "xion19w2488ntfgpduzqq3sk4j5x387zynwkn3c2nhx",
           "pub_key": null,
           "account_number": "4",
           "sequence": "0"
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "xion15vdz44lyndpn0lf7vqqe0rkprnamwxx2a4hsjd",
+          "address": "xion199fjq4rnfvz24cktl8cervx8h8e90rukl2pns7",
           "pub_key": null,
           "account_number": "5",
           "sequence": "0"
@@ -102,7 +102,7 @@
           ]
         },
         {
-          "address": "xion140l6y2gp3gxvay6qtn70re7z2s0gn57zwsfxs2",
+          "address": "xion14qekdkj2nmmwea4ufg9n002a3pud23y88t6f8m",
           "coins": [
             {
               "denom": "uxion",
@@ -111,7 +111,7 @@
           ]
         },
         {
-          "address": "xion1dzwqegk4wnff04l5sa0w892l6a7sg08zd0h3va",
+          "address": "xion1jt9w26mpxxjsk63mvd4m2ynj0af09cslpgyyl6",
           "coins": [
             {
               "denom": "uxion",
@@ -120,7 +120,7 @@
           ]
         },
         {
-          "address": "xion10g3fdhq3c2ev2enrhh7z9xyzphal3audsaghsx",
+          "address": "xion19w2488ntfgpduzqq3sk4j5x387zynwkn3c2nhx",
           "coins": [
             {
               "denom": "uxion",
@@ -129,7 +129,7 @@
           ]
         },
         {
-          "address": "xion15vdz44lyndpn0lf7vqqe0rkprnamwxx2a4hsjd",
+          "address": "xion199fjq4rnfvz24cktl8cervx8h8e90rukl2pns7",
           "coins": [
             {
               "denom": "uxion",
