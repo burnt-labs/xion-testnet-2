@@ -1,7 +1,7 @@
 {
   "app_name": "xiond",
   "app_version": "v14.1.1",
-  "genesis_time": "2025-01-28T16:00:00.000000Z",
+  "genesis_time": "2025-01-28T16:00:00Z",
   "chain_id": "xion-testnet-2",
   "initial_height": 1,
   "app_hash": null,
@@ -60,16 +60,9 @@
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "xion19w2488ntfgpduzqq3sk4j5x387zynwkn3c2nhx",
-          "pub_key": null,
-          "account_number": "4",
-          "sequence": "0"
-        },
-        {
-          "@type": "/cosmos.auth.v1beta1.BaseAccount",
           "address": "xion18n4phjmx4d690p6qklmy6eaxsun8qmtd6lrzdv",
           "pub_key": null,
-          "account_number": "5",
+          "account_number": "4",
           "sequence": "0"
         }
       ]
@@ -88,7 +81,7 @@
           "coins": [
             {
               "denom": "uxion",
-              "amount": "99999996000000"
+              "amount": "99999997000000"
             }
           ]
         },
@@ -97,7 +90,7 @@
           "coins": [
             {
               "denom": "uxion",
-              "amount": "99999996000000"
+              "amount": "99999997000000"
             }
           ]
         },
@@ -112,15 +105,6 @@
         },
         {
           "address": "xion1jt9w26mpxxjsk63mvd4m2ynj0af09cslpgyyl6",
-          "coins": [
-            {
-              "denom": "uxion",
-              "amount": "2000000"
-            }
-          ]
-        },
-        {
-          "address": "xion19w2488ntfgpduzqq3sk4j5x387zynwkn3c2nhx",
           "coins": [
             {
               "denom": "uxion",
@@ -233,7 +217,194 @@
       "forward_relayers": []
     },
     "genutil": {
-      "gen_txs": []
+      "gen_txs": [
+        {
+          "body": {
+            "messages": [
+              {
+                "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+                "description": {
+                  "moniker": "✅ CryptoCrew Validators",
+                  "identity": "",
+                  "website": "https://ccvalidators.com",
+                  "security_contact": "support@ccvalidators.com",
+                  "details": "We power the interchain | ccvalidators.com"
+                },
+                "commission": {
+                  "rate": "0.050000000000000000",
+                  "max_rate": "0.200000000000000000",
+                  "max_change_rate": "0.010000000000000000"
+                },
+                "min_self_delegation": "1",
+                "delegator_address": "",
+                "validator_address": "xionvaloper18n4phjmx4d690p6qklmy6eaxsun8qmtd3ugy9l",
+                "pubkey": {
+                  "@type": "/cosmos.crypto.ed25519.PubKey",
+                  "key": "J9ExO8XqfDmjdc8HtxgVr8jiJ9GGXhNsF72V/rSha7w="
+                },
+                "value": {
+                  "denom": "uxion",
+                  "amount": "1000000"
+                }
+              }
+            ],
+            "memo": "826c5a69711e00079d0f3a1ec89f329d4e6888ba@127.0.0.1:26656",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+          },
+          "auth_info": {
+            "signer_infos": [
+              {
+                "public_key": {
+                  "@type": "/cosmos.crypto.secp256k1.PubKey",
+                  "key": "AvZta8noe7MQWriAf16YpxGzgelcxDhOtJppVQcpVfWm"
+                },
+                "mode_info": {
+                  "single": {
+                    "mode": "SIGN_MODE_DIRECT"
+                  }
+                },
+                "sequence": "0"
+              }
+            ],
+            "fee": {
+              "amount": [],
+              "gas_limit": "200000",
+              "payer": "",
+              "granter": ""
+            },
+            "tip": null
+          },
+          "signatures": [
+            "VisaKV6Z/VAPYmcxWJvWcu3UTf45GVhkko7toupDC1ts0FBIFCStNZEaNLECyxml4/3tnS3tlE3u0th3TjTJnA=="
+          ]
+        },
+        {
+          "body": {
+            "messages": [
+              {
+                "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+                "description": {
+                  "moniker": "polkachu.com",
+                  "identity": "0A6AF02D1557E5B4",
+                  "website": "https://polkachu.com",
+                  "security_contact": "hello@polkachu.com",
+                  "details": "Polkachu is the trusted staking service provider for blockchain projects. 100% refund for downtime slash. Contact us at hello@polkachu.com"
+                },
+                "commission": {
+                  "rate": "0.050000000000000000",
+                  "max_rate": "0.200000000000000000",
+                  "max_change_rate": "0.010000000000000000"
+                },
+                "min_self_delegation": "1",
+                "delegator_address": "",
+                "validator_address": "xionvaloper1jt9w26mpxxjsk63mvd4m2ynj0af09csl2t0zhf",
+                "pubkey": {
+                  "@type": "/cosmos.crypto.ed25519.PubKey",
+                  "key": "vwNECPjmgTI66zSlfuc8wyW2X2UMvyg1J8i4ffYCBHI="
+                },
+                "value": {
+                  "denom": "uxion",
+                  "amount": "1000000"
+                }
+              }
+            ],
+            "memo": "b803e7fe11624475f99c72ee10f50d2de183b0d3@65.109.113.219:26656",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+          },
+          "auth_info": {
+            "signer_infos": [
+              {
+                "public_key": {
+                  "@type": "/cosmos.crypto.secp256k1.PubKey",
+                  "key": "As1WcJsvf1NQgRlS8a2PHuueKhHlCYrFe3VooMxQdflR"
+                },
+                "mode_info": {
+                  "single": {
+                    "mode": "SIGN_MODE_DIRECT"
+                  }
+                },
+                "sequence": "0"
+              }
+            ],
+            "fee": {
+              "amount": [],
+              "gas_limit": "200000",
+              "payer": "",
+              "granter": ""
+            },
+            "tip": null
+          },
+          "signatures": [
+            "agVU71uEBwF3kvMt/g73Iz/Xs3FkwWshc1JghAWGFVNIAMGXVR7ZYwtYGh0DQT/9/t5mvCZquHjLk//jlb50Cw=="
+          ]
+        },
+        {
+          "body": {
+            "messages": [
+              {
+                "@type": "/cosmos.staking.v1beta1.MsgCreateValidator",
+                "description": {
+                  "moniker": " Lavender.Five Nodes 🐝",
+                  "identity": "F87ADDB700C0CC94",
+                  "website": "https://www.lavenderfive.com/",
+                  "security_contact": "security@lavenderfive.com",
+                  "details": "Fortifying crypto networks with Horcrux security, slash insurance, and open source contributions. Connect with us at https://linktr.ee/lavenderfive."
+                },
+                "commission": {
+                  "rate": "0.050000000000000000",
+                  "max_rate": "0.100000000000000000",
+                  "max_change_rate": "0.050000000000000000"
+                },
+                "min_self_delegation": "1",
+                "delegator_address": "xion14qekdkj2nmmwea4ufg9n002a3pud23y88t6f8m",
+                "validator_address": "xionvaloper14qekdkj2nmmwea4ufg9n002a3pud23y8vg300g",
+                "pubkey": {
+                  "@type": "/cosmos.crypto.ed25519.PubKey",
+                  "key": "S6yUcsDgEJByRr02R9v+mEWF1YHG6hy26MBoGAxdpbk="
+                },
+                "value": {
+                  "denom": "uxion",
+                  "amount": "1000000"
+                }
+              }
+            ],
+            "memo": "7a8ed0181e7f3318807a1e2bdbbcaf9e2560f52c@5.0.1.0:26656",
+            "timeout_height": "0",
+            "extension_options": [],
+            "non_critical_extension_options": []
+          },
+          "auth_info": {
+            "signer_infos": [
+              {
+                "public_key": {
+                  "@type": "/cosmos.crypto.secp256k1.PubKey",
+                  "key": "AgDrjXJ1+/lwJdf+fekEXKwLpA30N7F/Z3ESi/Sn7Rw4"
+                },
+                "mode_info": {
+                  "single": {
+                    "mode": "SIGN_MODE_DIRECT"
+                  }
+                },
+                "sequence": "0"
+              }
+            ],
+            "fee": {
+              "amount": [],
+              "gas_limit": "200000",
+              "payer": "",
+              "granter": ""
+            },
+            "tip": null
+          },
+          "signatures": [
+            "lWK6YdazSFmyv098jaK9YLC4D2uzdZeAQ1HwQ6idz6wVC/6kffRZD/rhRHQHux3FwjpdJP7hosL4IDHnXwwTOw=="
+          ]
+        }
+      ]
     },
     "globalfee": {
       "params": {
