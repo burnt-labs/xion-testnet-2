@@ -67,7 +67,7 @@
         },
         {
           "@type": "/cosmos.auth.v1beta1.BaseAccount",
-          "address": "xion199fjq4rnfvz24cktl8cervx8h8e90rukl2pns7",
+          "address": "xion18n4phjmx4d690p6qklmy6eaxsun8qmtd6lrzdv",
           "pub_key": null,
           "account_number": "5",
           "sequence": "0"
@@ -129,7 +129,7 @@
           ]
         },
         {
-          "address": "xion199fjq4rnfvz24cktl8cervx8h8e90rukl2pns7",
+          "address": "xion18n4phjmx4d690p6qklmy6eaxsun8qmtd6lrzdv",
           "coins": [
             {
               "denom": "uxion",
