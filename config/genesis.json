@@ -360,11 +360,11 @@
                   "max_change_rate": "0.050000000000000000"
                 },
                 "min_self_delegation": "1",
-                "delegator_address": "xion14qekdkj2nmmwea4ufg9n002a3pud23y88t6f8m",
+                "delegator_address": "",
                 "validator_address": "xionvaloper14qekdkj2nmmwea4ufg9n002a3pud23y8vg300g",
                 "pubkey": {
                   "@type": "/cosmos.crypto.ed25519.PubKey",
-                  "key": "S6yUcsDgEJByRr02R9v+mEWF1YHG6hy26MBoGAxdpbk="
+                  "key": "c/GhKfh2szPhWZgYjHYlSXwxrgJCaIuVuAmt2CPw+n8="
                 },
                 "value": {
                   "denom": "uxion",
@@ -401,7 +401,7 @@
             "tip": null
           },
           "signatures": [
-            "lWK6YdazSFmyv098jaK9YLC4D2uzdZeAQ1HwQ6idz6wVC/6kffRZD/rhRHQHux3FwjpdJP7hosL4IDHnXwwTOw=="
+            "su8bxXqYtsILRCK9qZGRub5hEuL7/zPyTnUpZcKLaD8Fc9U9X4wC0YkqsR28aSgSswE89NhektYFnCg+BDFQGA=="
           ]
         }
       ]
