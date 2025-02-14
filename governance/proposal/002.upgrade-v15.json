@@ -2,7 +2,7 @@
   "messages": [
     {
       "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-      "authority": "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
       "plan": {
         "name": "v15",
         "height": "300000",
