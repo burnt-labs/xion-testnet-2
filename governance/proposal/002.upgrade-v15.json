@@ -2,17 +2,17 @@
   "messages": [
     {
       "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-      "authority": "",
+      "authority": "xion1egp7k30mskfxmhy2awk677tnqdl6lfkfxhrwsv",
       "plan": {
         "name": "v15",
-        "height": "",
+        "height": "300000",
         "info": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/refs/heads/main/releases/v15.json",
         "upgraded_client_state": null
       }
     }
   ],
   "metadata": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/refs/heads/main/governance/metadata/002.upgrade-v15.json",
-  "deposit": "1000000000uxion",
+  "deposit": "5000000000uxion",
   "title": "Software Upgrade v15",
   "summary": "Software Upgrade v15",
   "expedited": true
