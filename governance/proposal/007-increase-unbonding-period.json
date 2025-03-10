@@ -1,0 +1,21 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.staking.v1beta1.MsgUpdateParams",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "params": {
+        "bond_denom": "uxion",
+        "historical_entries": 10000,
+        "max_entries": 7,
+        "max_validators": 35,
+        "min_commission_rate": "0.050000000000000000",
+        "unbonding_time": "50h24m0s"
+      }
+    }
+  ],
+  "metadata": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/main/governance/proposal/007-increase-unbonding-period.json",
+  "deposit": "5000000000uxion",
+  "title": "Increase Unbonding Period",
+  "summary": "Increase Unbonding Period to testnet-1 value (50h24m0s)",
+  "expedited": true
+}
