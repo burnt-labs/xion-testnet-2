@@ -1,0 +1,30 @@
+{
+    "messages": [
+        {
+            "@type": "/abstractaccount.v1.MsgUpdateParams",
+            "sender": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "params": {
+                "allow_all_code_ids": false,
+                "allowed_code_ids": [
+                    1,
+                    21
+                ],
+                "max_gas_before": "5000000",
+                "max_gas_after": "5000000"
+            }
+        },
+        {
+            "@type": "/cosmwasm.wasm.v1.MsgPinCodes",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "code_ids": [
+                1,
+                21
+            ]
+        }
+    ],
+    "metadata": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/governance/metadata/010-aa-code-ids.json",
+    "deposit": "1000000000uxion",
+    "title": "Update and pin account code ids to 1 and 21",
+    "summary": "Add new account code id 21, remove 28",
+    "expedited": false
+}
