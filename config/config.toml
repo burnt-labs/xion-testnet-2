@@ -211,10 +211,10 @@ laddr = "tcp://0.0.0.0:26656"
 external_address = ""
 
 # Comma separated list of seed nodes to connect to
-seeds = "20e1000e88125698264454a884812746c2eb4807@testnet-seeds.lavenderfive.com:22356"
+seeds = "ade4d8bc8cbe014af6ebdf3cb7b1e9ad36f412c0@testnet-seeds.polkachu.com:22356"
 
 # Comma separated list of nodes to keep persistent connections to
-persistent_peers = "244de62d65f4247308e2621b524eddc1b734a0a2@160.250.106.105:26656,7a8ed0181e7f3318807a1e2bdbbcaf9e2560f52c@5.0.1.0:26656,5166bcee9d5db28dfede2a936f2a60e07778fa89@65.109.113.219:23656"
+persistent_peers = "36a85158fe89f309de1792a538783a7026807eb3@65.108.105.48:22356,402164c86e49d8dcea50790418879c018505d3f4@159.223.189.191:26656,169e89744028cde0597f2961a082e95a502a3c6e@65.109.28.165:5000,0f1c8ed0d4c4a52ecb8fb6c6b2c6f7d1856326d5@65.21.10.115:22356,b323bbc5df68012fcf4567e4d38c5c34cff4948f@135.181.246.31:22356"
 
 # Path to address book
 addr_book_file = "config/addrbook.json"
