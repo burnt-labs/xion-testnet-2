@@ -1,0 +1,21 @@
+{
+    "messages": [
+        {
+            "@type": "/feeabstraction.feeabs.v1beta1.MsgUpdateParams",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "params": {
+                "native_ibced_in_osmosis": "ibc/C34D578ABDA051E1CB3AC2C24834E7E43E0F7FA37DB8EE114FB5F263AF545622",
+                "osmosis_query_twap_path": "/osmosis.twap.v1beta1.Query/ArithmeticTwapToNow",
+                "chain_name": "xion",
+                "ibc_transfer_channel": "channel-2",
+                "ibc_query_icq_channel": "channel-10",
+                "osmosis_crosschain_swap_address": "osmo15ny0qhmtrzvz2mu3tgzezlge65f8lmxvaf9ylqhhyrsgwehw88kq6pfkmd"
+            }
+        }
+    ],
+    "title": "Setup fee abstraction using osmo",
+    "summary": "Setup fee abstraction using osmo",
+    "deposit": "5000000000uxion",
+    "expedited": true,
+    "metadata": ""
+}
