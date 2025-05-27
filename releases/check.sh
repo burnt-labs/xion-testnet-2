@@ -15,7 +15,7 @@ verify_checksum() {
   local filename=$(echo "$url" | cut -d'?' -f1 | awk -F'/' '{print $NF}')
   
   echo "Downloading $filename..."
-  curl -L -O "${url%\?*}" 
+  curl -sSL -O "${url%\?*}" 
   
   # Calculate actual checksum
   local actual_checksum=$(sha256sum "$filename" | cut -d' ' -f1)
