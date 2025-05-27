@@ -1,0 +1,32 @@
+{
+  "messages": [
+    {
+      "@type": "/abstractaccount.v1.MsgUpdateParams",
+      "sender": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "params": {
+        "allow_all_code_ids": false,
+        "allowed_code_ids": [
+          1,
+          21,
+          95
+        ],
+        "max_gas_before": "5000000",
+        "max_gas_after": "5000000"
+      }
+    },
+    {
+      "@type": "/cosmwasm.wasm.v1.MsgPinCodes",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "code_ids": [
+        1,
+        21,
+        95
+      ]
+    }
+  ],
+  "metadata": "",
+  "deposit": "5000000000uxion",
+  "title": "Update and pin account code ids to 1, 21 and 95",
+  "summary": "Add new account code id 95",
+  "expedited": true
+}
