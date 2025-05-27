@@ -68,7 +68,7 @@ Complete the following steps on your new validator's machine.
     wget https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/refs/tags/prelaunch/config/genesis.json
 
     # Move the genesis file to the config location
-    mv ./genesis.json ~/.xion/config/genesis.json
+    mv ./genesis.json ~/.xiond/config/genesis.json
     ```
 
 3. Execute GenTx:
@@ -90,7 +90,7 @@ Complete the following steps on your new validator's machine.
 4. Upload the generated GenTx file to this repository's [gentx](https://github.com/burnt-labs/xion-testnet-2/tree/prelaunch/config) folder via a Pull Request (PR):
 
     ```sh
-    cp ~/.xion/config/gentx/*.json ./gentx/
+    cp ~/.xiond/config/gentx/*.json ./gentx/
     git add ./gentx/*.json
     git commit -m "Add gentx for <your-moniker>"
     git push origin <your-branch>
