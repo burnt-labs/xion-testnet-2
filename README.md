@@ -1,105 +1,66 @@
-# Validator Guide
+# Xion Testnet-2 Full Node Setup Guide
 
-Follow this guide to become a genesis validator on the xion-testnet-2 chain. This guide walks you through creating a `gentx` file that will be added to the validator chain. A `gentx` is a special transaction included in the genesis file that accomplishes three things:
-
-1. Registers your validator account as a validator operator account.
-2. Self-delegates the specified amount of XION tokens for staking.
-3. Links the validator operator account with a node pubkey used to sign blocks.
-
-All validators that wish to be included in the new Xion testnet chain can follow the steps below.
-
-## Networks
-
-- New Xion testnet: `xion-testnet-2`
+This guide will help you set up a full node for the Xion testnet-2 network using `xiond`
 
 ## Prerequisites
 
-- [Xion Core Repository](https://github.com/xion-money/core)
-- [Go 1.22+](https://go.dev/dl/)
+- **Linux/macOS** (instructions are for Unix-like systems)
+- **At least 2 CPU cores, 4GB RAM, 100GB+ disk space**
 
-## Timeline (Expected)
+## 1. Install xiond Binary
 
-### Share [genesis.json](https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/refs/heads/main/config/genesis.json) and start collecting gen_txs from the validators
+Download the latest release and install:
+<https://github.com/burnt-labs/xion/releases>
 
-- Mon Jan 20 2025 00:00:00 GMT-0500 (EST)
-- Mon Jan 20 2025 05:00:00 GMT+0000 (UTC)
+## 2. Initialize Node
 
-### Finish collecting gen_txs, build, and share `genesis.json`
+Replace `<moniker>` with your node name:
 
-- Mon Jan 27 2025 11:00:00 GMT-0500 (EST)
-- Mon Jan 27 2025 16:00:00 GMT+0000 (UTC)
+```sh
+xiond init <moniker> --chain-id xion-testnet-2
+```
 
-### Launch xion-testnet-2 network
+## 3. Download Genesis File
 
-- Tue Jan 28 2025 11:00:00 GMT-0500 (EST)
-- Tue Jan 28 2025 16:00:00 GMT+0000 (UTC)
+```sh
+wget -O ~/.xion/config/genesis.json https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/main/config/genesis.json
+```
 
-## Set Up a Validator
+## 4. Configure Peers
 
-Set up a new validator on a new machine by following the steps outlined in [Run a Node](https://docs.burnt.com/xion/nodes-and-validators/run-a-node).
+Edit `~/.xiond/config/config.toml` and set persistent peers. Example:
 
-After [configuring your general settings](https://docs.burnt.com/xion/nodes-and-validators/run-a-node/configure-the-xion-daemon), continue to the next section.
+```sh
+persistent_peers = "<peer1>,<peer2>,..."
+```
 
-## GenTx
+You can find up-to-date peer addresses in the [official Discord](https://discord.gg/burnt) or community channels.
 
-Complete the following steps on your new validator's machine.
+## 5. Configure Minimum Gas Price
 
-1. Download and install the Xion release [v14.1.1](https://github.com/burnt-labs/xion/releases/tag/v14.1.1):
+Edit `~/.xiond/config/app.toml`:
 
-    ```sh
-    # Set environment variable for the xiond binary name
-    export XIOND_BINARY=xiond-$(uname -s | awk '{print tolower($0)}')-$(uname -m | sed 's/aarch/amd/')
+```sh
+minimum-gas-prices = "0.001uxion"
+```
 
-    # Download the binary
-    wget https://github.com/burnt-labs/xion/releases/download/v14.1.1/$XIOND_BINARY
+## 6. Start the Node
 
-    # Verify the checksum
-    wget https://github.com/burnt-labs/xion/releases/download/v14.1.1/checksum.txt
-    grep $XIOND_BINARY checksum.txt | sha256sum -c -
+```sh
+xiond start
+```
 
-    # Move the binary to a directory in your PATH
-    sudo mv $XIOND_BINARY /usr/local/bin/xiond
-    ```
+## 7. Monitor Logs
 
-2. Prepare your environment:
+```sh
+tail -f ~/.xiond/logs/xiond.log
+```
 
-    ```sh
-    # Download the genesis.json genesis file
-    wget https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/refs/tags/prelaunch/config/genesis.json
+## Troubleshooting
 
-    # Move the genesis file to the config location
-    mv ./genesis.json ~/.xiond/config/genesis.json
-    ```
+- Ensure ports `26656` (P2P) and `26657` (RPC) are open.
+- If you encounter issues, check the logs and reach out on [Discord](https://discord.gg/burnt).
 
-3. Execute GenTx:
+---
 
-    ```sh
-    MONIKER="<preffered_moniker>"
-    xiond genesis gentx <account> 1000000uxion \
-        --chain-id="xion-testnet-2" \
-        --pubkey=$(xiond comet show-validator) \
-        --min-self-delegation=1 \
-        --moniker="$MONIKER" \
-        --details="Trusted security provider for Xion Network and projects building on Xion." \
-        --commission-rate="0.1" \
-        --commission-max-rate="0.2" \
-        --commission-max-change-rate="0.01" \
-        --ip="0.0.0.0"
-    ```
-
-4. Upload the generated GenTx file to this repository's [gentx](https://github.com/burnt-labs/xion-testnet-2/tree/prelaunch/config) folder via a Pull Request (PR):
-
-    ```sh
-    cp ~/.xiond/config/gentx/*.json ./gentx/
-    git add ./gentx/*.json
-    git commit -m "Add gentx for <your-moniker>"
-    git push origin <your-branch>
-    ```
-
-5. Create a Pull Request to merge your branch into the main repository.
-
-## Additional Notes
-
-- Ensure your node is properly configured and running before submitting your GenTx.
-- Double-check all the details in your GenTx command to avoid any errors.
-- If you encounter any issues, refer to the [Xion documentation](https://docs.xion.burnt.com/) or reach out to the community for support.
+For more details, see the [Xion documentation](https://docs.burnt.com/xion/).
