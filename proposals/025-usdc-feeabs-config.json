@@ -1,0 +1,19 @@
+{
+    "messages": [
+        {
+            "@type": "/feeabstraction.feeabs.v1beta1.MsgAddHostZone",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "host_chain_config": {
+                "ibc_denom": "ibc/6490A7EAB61059BFC1CDDEB05917DD70BDF3A611654162A1A47DB930D40D8AF4",
+                "osmosis_pool_token_denom_in": "ibc/DE6792CF9E521F6AD6E9A4BDF6225C9571A3B74ACC0A529F92BC5122A39D2E58",
+                "pool_id": "962",
+                "status": "UPDATED"
+            }
+        }
+    ],
+    "title": "Add $USDC IBC denomination to Host Zone",
+    "summary": "This proposal updates the fee abstraction module by configuring support for $USDC from the Noble testnet chain.",
+    "deposit": "5000000000uxion",
+    "expedited": true,
+    "metadata": ""
+}
