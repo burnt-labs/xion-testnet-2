@@ -1,0 +1,14 @@
+{
+    "messages": [
+        {
+            "@type": "/feeabstraction.feeabs.v1beta1.MsgRemoveHostZone",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "ibc_denom": "ibc/DE6792CF9E521F6AD6E9A4BDF6225C9571A3B74ACC0A529F92BC5122A39D2E58"
+        }
+    ],
+    "title": "Remove $USDC IBC denomination to Host Zone",
+    "summary": "This proposal updates the fee abstraction module by removing support for $USDC from the Noble chain.",
+    "deposit": "5000000000uxion",
+    "expedited": true,
+    "metadata": ""
+}

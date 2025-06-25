@@ -1,0 +1,22 @@
+{
+    "title": "Add Noble to globalfee module",
+    "description": "Add Noble to globalfee module",
+    "changes": [
+        {
+            "subspace": "globalfee",
+            "key": "MinimumGasPricesParam",
+            "value": [
+                {
+                    "denom": "ibc/6490A7EAB61059BFC1CDDEB05917DD70BDF3A611654162A1A47DB930D40D8AF4",
+                    "amount": "0.005000000000000000"
+                },
+                {
+                    "denom": "uxion",
+                    "amount": "0.001000000000000000"
+                }
+            ]
+        }
+    ],
+    "deposit": "5000000000uxion",
+    "expedited": true
+}
