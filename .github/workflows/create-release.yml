@@ -1,0 +1,119 @@
+name: Create Upgrade Proposal
+
+on:
+  workflow_dispatch:
+    inputs:
+      height:
+        description: 'Upgrade height'
+        required: true
+        type: string
+      deposit:
+        description: 'Deposit amount (default: 1000000000uxion)'
+        required: false
+        default: '1000000000uxion'
+        type: string
+      expedited:
+        description: 'Expedited proposal'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # Placeholder values for binary checksums
+  PLACEHOLDER_CHECKSUM_DARWIN_AMD64: "--ADD-HERE-YOUR-VALUE--"
+  PLACEHOLDER_CHECKSUM_DARWIN_ARM64: "--ADD-HERE-YOUR-VALUE--"
+  PLACEHOLDER_CHECKSUM_LINUX_AMD64: "--ADD-HERE-YOUR-VALUE--"
+  PLACEHOLDER_CHECKSUM_LINUX_ARM64: "--ADD-HERE-YOUR-VALUE--"
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup environment variables for script
+      run: |
+        echo "PLACEHOLDER_CHECKSUM_DARWIN_AMD64=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_AMD64 }}" >> $GITHUB_ENV
+        echo "PLACEHOLDER_CHECKSUM_DARWIN_ARM64=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_ARM64 }}" >> $GITHUB_ENV
+        echo "PLACEHOLDER_CHECKSUM_LINUX_AMD64=${{ env.PLACEHOLDER_CHECKSUM_LINUX_AMD64 }}" >> $GITHUB_ENV
+        echo "PLACEHOLDER_CHECKSUM_LINUX_ARM64=${{ env.PLACEHOLDER_CHECKSUM_LINUX_ARM64 }}" >> $GITHUB_ENV
+        
+    - name: Run create release script
+      run: |
+        ./scripts/create-release-pr.sh "${{ github.event.inputs.height }}" "${{ github.event.inputs.deposit }}" "${{ github.event.inputs.expedited }}"
+        
+    - name: Set environment variables from script output
+      run: |
+        # Extract information from the created files for later steps
+        LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
+        LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
+        NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
+        VERSION="v${NEXT_VERSION_NUM}"
+        
+        BRANCH_NAME="release/$VERSION.0.0"
+        
+        echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
+        echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        
+    - name: Create feature branch and commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Create and switch to feature branch
+        git checkout -b "${{ env.BRANCH_NAME }}"
+        
+        # Add all changes
+        git add .
+        
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+          exit 1
+        else
+          git commit -m "Added release ${{ env.VERSION }}
+          
+          - Created ${{ env.PROPOSAL_FILE }}
+          - Created ${{ env.RELEASE_FILE }}
+          - Created ${{ env.RELEASE_NOTES_FILE }}
+          
+          Upgrade height: ${{ github.event.inputs.height }}
+          Deposit: ${{ github.event.inputs.deposit }}
+          Expedited: ${{ github.event.inputs.expedited }}"
+          
+          # Push the feature branch
+          git push origin "${{ env.BRANCH_NAME }}"
+        fi
+        
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
+        base: main                      # Target: main
+        title: "Added release ${{ env.VERSION }}"
+        body: |
+          ## Upgrade to release ${{ env.VERSION }}
+          
+          This PR upgrades to release ${{ env.VERSION }}.
+          
+          ### Files created/modified:
+          - `${{ env.PROPOSAL_FILE }}`
+          - `${{ env.RELEASE_FILE }}`
+          - `${{ env.RELEASE_NOTES_FILE }}`
+          
+          ### Configuration:
+          - **Upgrade Height**: ${{ github.event.inputs.height }}
+          - **Deposit**: ${{ github.event.inputs.deposit }}
+          - **Expedited**: ${{ github.event.inputs.expedited }}
+          
+          ### Next Steps:
+          1. Update the checksums in `${{ env.RELEASE_FILE }}` with actual release binary checksums
+          2. Fill in the release notes in `${{ env.RELEASE_NOTES_FILE }}` with actual changes and contributors
+          3. Review the proposal details
+          4. Submit the proposal on-chain when ready
+        delete-branch: false
