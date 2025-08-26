@@ -1,24 +1,35 @@
-name: Create Upgrade Proposal
+name: Create Release PR 
 
 on:
-  workflow_dispatch:
-    inputs:
-      height:
-        description: 'Upgrade height'
-        required: true
-        type: string
-      deposit:
-        description: 'Deposit amount (default: 1000000000uxion)'
-        required: false
-        default: '1000000000uxion'
-        type: string
-      expedited:
-        description: 'Expedited proposal'
-        required: false
-        default: false
-        type: boolean
+  push:
+    branches:
+      # - main
+      # - master
+      - feat/do-85-generate-upgrade-proposals-n-release-binaries
+
+  # workflow_dispatch:
+  #   inputs:
+  #     height:
+  #       description: 'Upgrade height'
+  #       required: true
+  #       type: string
+  #     deposit:
+  #       description: 'Deposit amount (default: 1000000000uxion)'
+  #       required: false
+  #       default: '1000000000uxion'
+  #       type: string
+  #     expedited:
+  #       description: 'Expedited proposal'
+  #       required: false
+  #       default: false
+  #       type: boolean
 
 env:
+  # Test values for the workflow
+  TEST_HEIGHT: "7500000"
+  TEST_DEPOSIT: "1000000000uxion"
+  TEST_EXPEDITED: "false"
+  
   # Placeholder values for binary checksums
   PLACEHOLDER_CHECKSUM_DARWIN_AMD64: "--ADD-HERE-YOUR-VALUE--"
   PLACEHOLDER_CHECKSUM_DARWIN_ARM64: "--ADD-HERE-YOUR-VALUE--"
@@ -42,7 +53,7 @@ jobs:
         
     - name: Run create release script
       run: |
-        ./scripts/create-release-pr.sh "${{ github.event.inputs.height }}" "${{ github.event.inputs.deposit }}" "${{ github.event.inputs.expedited }}"
+        ./scripts/create-release-pr.sh "${{ env.HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}"
         
     - name: Set environment variables from script output
       run: |
@@ -81,9 +92,9 @@ jobs:
           - Created ${{ env.RELEASE_FILE }}
           - Created ${{ env.RELEASE_NOTES_FILE }}
           
-          Upgrade height: ${{ github.event.inputs.height }}
-          Deposit: ${{ github.event.inputs.deposit }}
-          Expedited: ${{ github.event.inputs.expedited }}"
+          Upgrade height: ${{ env.HEIGHT }}
+          Deposit: ${{ env.DEPOSIT }}
+          Expedited: ${{ env.EXPEDITED }}"
           
           # Push the feature branch
           git push origin "${{ env.BRANCH_NAME }}"
@@ -107,9 +118,9 @@ jobs:
           - `${{ env.RELEASE_NOTES_FILE }}`
           
           ### Configuration:
-          - **Upgrade Height**: ${{ github.event.inputs.height }}
-          - **Deposit**: ${{ github.event.inputs.deposit }}
-          - **Expedited**: ${{ github.event.inputs.expedited }}
+          - **Upgrade Height**: ${{ env.HEIGHT }}
+          - **Deposit**: ${{ env.DEPOSIT }}
+          - **Expedited**: ${{ env.EXPEDITED }}
           
           ### Next Steps:
           1. Update the checksums in `${{ env.RELEASE_FILE }}` with actual release binary checksums
