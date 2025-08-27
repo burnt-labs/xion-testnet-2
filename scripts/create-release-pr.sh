@@ -57,10 +57,12 @@ if [ -n "$RELEASE_TAG" ]; then
         exit 1
     fi
     
-    # Use RELEASE_TAG from argument
-    VERSION="$RELEASE_TAG"
-    VERSION_NUM=$(echo "$VERSION" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-    echo "Using specified version: $VERSION"
+    # Use RELEASE_TAG from argument (full version for content)
+    VERSION_FULL="$RELEASE_TAG"
+    VERSION_NUM=$(echo "$VERSION_FULL" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+    # Create short version for filenames (v22 instead of v22.0.0)
+    VERSION="v${VERSION_NUM}"
+    echo "Using specified version: $VERSION_FULL (files will use: $VERSION)"
 else
     # Find the latest release version (auto-calculate mode)
     LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
@@ -73,7 +75,8 @@ else
     NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
     VERSION="v${NEXT_VERSION_NUM}"
     VERSION_NUM="$NEXT_VERSION_NUM"
-    echo "Calculated next version: $VERSION (after v$LATEST_RELEASE)"
+    VERSION_FULL="${VERSION}.0.0"
+    echo "Calculated next version: $VERSION_FULL (files will use: $VERSION)"
 fi
 
 echo "Version to create: $VERSION"
@@ -126,10 +129,10 @@ if [ ! -f "$RELEASE_FILE" ]; then
     cat > "$RELEASE_FILE" << EOF
 {
     "binaries": {
-        "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_darwin_amd64.tar.gz?checksum=sha256:${DARWIN_AMD64_CHECKSUM}",
-        "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_darwin_arm64.tar.gz?checksum=sha256:${DARWIN_ARM64_CHECKSUM}",
-        "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_linux_amd64.tar.gz?checksum=sha256:${LINUX_AMD64_CHECKSUM}",
-        "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_linux_arm64.tar.gz?checksum=sha256:${LINUX_ARM64_CHECKSUM}"
+        "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_darwin_amd64.tar.gz?checksum=sha256:${DARWIN_AMD64_CHECKSUM}",
+        "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_darwin_arm64.tar.gz?checksum=sha256:${DARWIN_ARM64_CHECKSUM}",
+        "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_linux_amd64.tar.gz?checksum=sha256:${LINUX_AMD64_CHECKSUM}",
+        "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_linux_arm64.tar.gz?checksum=sha256:${LINUX_ARM64_CHECKSUM}"
     }
 }
 EOF
@@ -149,15 +152,15 @@ if [ ! -f "$RELEASE_NOTES_FILE" ]; then
     else
         echo "Using default release notes template"
         cat > "$RELEASE_NOTES_FILE" << EOF
-# Xion ${VERSION} Release Notes
+# Xion ${VERSION_FULL} Release Notes
 
 ## Overview
 
-Xion ${VERSION}.0.0 includes [--ADD-HERE-YOUR-DESCRIPTION--]. This is the initial release with only ${VERSION}.0.0 available.
+Xion ${VERSION_FULL} includes [--ADD-HERE-YOUR-DESCRIPTION--]. This is the initial release with only ${VERSION_FULL} available.
 
 ## What's Changed
 
-### ${VERSION}.0.0 (Only Version)
+### ${VERSION_FULL} (Only Version)
 
 #### Major Changes
 
@@ -180,7 +183,7 @@ Xion ${VERSION}.0.0 includes [--ADD-HERE-YOUR-DESCRIPTION--]. This is the initia
 
 ## Release Links
 
-- **${VERSION}.0.0**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${VERSION}.0.0)
+- **${VERSION_FULL}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${VERSION_FULL})
 
 ## Contributors
 
@@ -191,7 +194,7 @@ Special thanks to the following contributors who made this release possible:
 
 ## Full Changelog
 
-[Previous version...${VERSION}.0.0](https://github.com/burnt-labs/xion/compare/--ADD-HERE-PREVIOUS-VERSION--...${VERSION}.0.0)
+[Previous version...${VERSION_FULL}](https://github.com/burnt-labs/xion/compare/--ADD-HERE-PREVIOUS-VERSION--...${VERSION_FULL})
 
 ---
 
