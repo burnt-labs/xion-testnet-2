@@ -304,52 +304,52 @@ jobs:
         echo "-> Release notes file"
         cat release_notes/v22.md
 
-#     - name: Set environment variables from script output
-#       run: |
-#         # Extract information from the created files for later steps
-#         LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
-#         LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
-#         NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
-#         VERSION="v${NEXT_VERSION_NUM}"
+    - name: Set environment variables from script output
+      run: |
+        # Extract information from the created files for later steps
+        LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
+        LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
+        NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
+        VERSION="v${NEXT_VERSION_NUM}"
         
-#         BRANCH_NAME="release/$VERSION.0.0"
+        BRANCH_NAME="release/$VERSION.0.0"
         
-#         echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
-#         echo "VERSION=$VERSION" >> $GITHUB_ENV
-#         echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
-#         echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
-#         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
+        echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         
-#     - name: Create feature branch and commit changes
-#       run: |
-#         git config --local user.email "action@github.com"
-#         git config --local user.name "GitHub Action"
+    - name: Create feature branch and commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
         
-#         # Create and switch to feature branch
-#         git checkout -b "${{ env.BRANCH_NAME }}"
+        # Create and switch to feature branch
+        git checkout -b "${{ env.BRANCH_NAME }}"
         
-#         # Add all changes
-#         git add .
+        # Add all changes
+        git add .
         
-#         if git diff --staged --quiet; then
-#           echo "No changes to commit"
-#           exit 1
-#         else
-#           git commit -m "Added release ${{ env.VERSION }}
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+          exit 1
+        else
+          git commit -m "Added release ${{ env.VERSION }}
           
-#           - Created ${{ env.PROPOSAL_FILE }}
-#           - Created ${{ env.RELEASE_FILE }}
-#           - Created ${{ env.RELEASE_NOTES_FILE }}
+          - Created ${{ env.PROPOSAL_FILE }}
+          - Created ${{ env.RELEASE_FILE }}
+          - Created ${{ env.RELEASE_NOTES_FILE }}
           
-#           Release Tag: ${{ env.RELEASE_TAG }}
-#           Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-#           Deposit: ${{ env.DEPOSIT }}
-#           Expedited: ${{ env.EXPEDITED }}"
+          Release Tag: ${{ env.RELEASE_TAG }}
+          Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
+          Deposit: ${{ env.DEPOSIT }}
+          Expedited: ${{ env.EXPEDITED }}"
           
-#           # Push the feature branch
+          # Push the feature branch
           
-#         fi
-# #git push origin "${{ env.BRANCH_NAME }}"
+        fi
+#git push origin "${{ env.BRANCH_NAME }}"
         
 
     # - name: Create Pull Request
