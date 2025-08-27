@@ -1,13 +1,13 @@
 name: Create Release PR 
 
 on:
-  # push:
-  #   branches:
-  #     # - main
-  #     # - master
-  #     - feat/do-85-generate-upgrade-proposals-n-release-binaries
+  push:
+    branches:
+      # - main
+      # - master
+      - feat/do-85-generate-upgrade-proposals-n-release-binaries
 
-  workflow_dispatch:
+  workflow_dispatch: # NOTICE: To trigger the workflow_dispatch event, the workflow must be in the default branch.
     inputs:
       release_tag:
         description: 'Release tag to update the chain registry with'
