@@ -295,13 +295,14 @@ jobs:
         
     - name: debug - Echo release files
       run: |
-        echo "Release files:"
         echo "-> Proposal file"
-        echo "  - ${{ env.PROPOSAL_FILE }}"
+        echo proposals/038-upgrade-v22.json
+        
         echo "-> Release file"
-        echo "  - ${{ env.RELEASE_FILE }}"
+        echo releases/v22.json
+        
         echo "-> Release notes file"
-        echo "  - ${{ env.RELEASE_NOTES_FILE }}"
+        echo release_notes/v22.md
 
 #     - name: Set environment variables from script output
 #       run: |
