@@ -140,7 +140,11 @@ jobs:
       run: |
         # Extract version number from release tag
         CURRENT_VERSION="${{ env.RELEASE_TAG }}"
-        PREVIOUS_VERSION=$(echo "$CURRENT_VERSION" | sed 's/v\([0-9]*\)\.0\.0/v\1.0.0/' | awk -F. '{print $1"."$2-1".0"}')
+        # Extract major version number and calculate previous version
+        CURRENT_MAJOR=$(echo "$CURRENT_VERSION" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        PREVIOUS_MAJOR=$((CURRENT_MAJOR - 1))
+        
+        PREVIOUS_VERSION="v${PREVIOUS_MAJOR}.0.0"
         
         echo "Current version: $CURRENT_VERSION"
         echo "Previous version: $PREVIOUS_VERSION"
@@ -167,154 +171,154 @@ jobs:
         echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV
         echo "FILES_CHANGED=$FILES_CHANGED" >> $GITHUB_ENV
         
-    - name: Generate release notes with Claude API
-      run: |
-        # Prepare the prompt for Claude API
-        PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive release notes document for version ${{ env.RELEASE_TAG }}.
+#     - name: Generate release notes with Claude API
+#       run: |
+#         # Prepare the prompt for Claude API
+#         PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive release notes document for version ${{ env.RELEASE_TAG }}.
         
-        Format the release notes as a markdown document with the following structure:
+#         Format the release notes as a markdown document with the following structure:
         
-        # Xion ${{ env.RELEASE_TAG }} Release Notes
+#         # Xion ${{ env.RELEASE_TAG }} Release Notes
         
-        ## Overview
-        [Brief overview of the release]
+#         ## Overview
+#         [Brief overview of the release]
         
-        ## What's Changed
-        ### ${{ env.RELEASE_TAG }} (Only Version)
+#         ## What's Changed
+#         ### ${{ env.RELEASE_TAG }} (Only Version)
         
-        #### Major Changes
-        [List major features/changes with PR links]
+#         #### Major Changes
+#         [List major features/changes with PR links]
         
-        #### Bug Fixes & Improvements
-        [List bug fixes and improvements with PR links]
+#         #### Bug Fixes & Improvements
+#         [List bug fixes and improvements with PR links]
         
-        #### Testing & Code Quality
-        [List testing improvements and code quality changes]
+#         #### Testing & Code Quality
+#         [List testing improvements and code quality changes]
         
-        ## Upgrade Information
-        - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
-        - **Proposal Number**: [will be filled by script]
+#         ## Upgrade Information
+#         - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
+#         - **Proposal Number**: [will be filled by script]
         
-        ## Release Links
-        - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
+#         ## Release Links
+#         - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
         
-        ## Contributors
-        [List contributors based on the commits]
+#         ## Contributors
+#         [List contributors based on the commits]
         
-        ## Full Changelog
-        [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
+#         ## Full Changelog
+#         [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
         
-        ---
+#         ---
         
-        For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/[proposal-number]-upgrade-${{ env.RELEASE_TAG }}.json).
+#         For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/[proposal-number]-upgrade-${{ env.RELEASE_TAG }}.json).
         
-        Analyze the comparison data and create professional, detailed release notes. Focus on user-facing changes, technical improvements, and security updates."
+#         Analyze the comparison data and create professional, detailed release notes. Focus on user-facing changes, technical improvements, and security updates."
         
-        # Call Claude API
-        CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
-          -H "Content-Type: application/json" \
-          -H "x-api-key: ${{ secrets.CLAUDE_API_KEY }}" \
-          -H "anthropic-version: 2023-06-01" \
-          -d '{
-            "model": "claude-3-sonnet-20240229",
-            "max_tokens": 4000,
-            "messages": [
-              {
-                "role": "user",
-                "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
-              }
-            ]
-          }')
+#         # Call Claude API
+#         CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+#           -H "Content-Type: application/json" \
+#           -H "x-api-key: ${{ secrets.CLAUDE_API_KEY }}" \
+#           -H "anthropic-version: 2023-06-01" \
+#           -d '{
+#             "model": "claude-3-sonnet-20240229",
+#             "max_tokens": 4000,
+#             "messages": [
+#               {
+#                 "role": "user",
+#                 "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
+#               }
+#             ]
+#           }')
         
-        # Extract the response content
-        RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
+#         # Extract the response content
+#         RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
         
-        # Save the generated release notes
-        echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
+#         # Save the generated release notes
+#         echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
         
-        echo "Generated release notes saved to generated_release_notes.md"
+#         echo "Generated release notes saved to generated_release_notes.md"
          
-    - name: Run release files creation script
-      run: |
-        # Use the generated release notes if available, otherwise use template
-        if [ -f "generated_release_notes.md" ]; then
-          echo "Using AI-generated release notes"
-          cp generated_release_notes.md release_notes_template.md
-        else
-          echo "Using fallback template (Claude API may have failed)"
-          # Create a basic template as fallback
-          cat > release_notes_template.md << EOF
-        # Xion ${{ env.RELEASE_TAG }} Release Notes
+#     - name: Run release files creation script
+#       run: |
+#         # Use the generated release notes if available, otherwise use template
+#         if [ -f "generated_release_notes.md" ]; then
+#           echo "Using AI-generated release notes"
+#           cp generated_release_notes.md release_notes_template.md
+#         else
+#           echo "Using fallback template (Claude API may have failed)"
+#           # Create a basic template as fallback
+#           cat > release_notes_template.md << EOF
+#         # Xion ${{ env.RELEASE_TAG }} Release Notes
         
-        ## Overview
-        Xion ${{ env.RELEASE_TAG }} includes various improvements and bug fixes.
+#         ## Overview
+#         Xion ${{ env.RELEASE_TAG }} includes various improvements and bug fixes.
         
-        ## What's Changed
-        ### ${{ env.RELEASE_TAG }} (Only Version)
+#         ## What's Changed
+#         ### ${{ env.RELEASE_TAG }} (Only Version)
         
-        #### Major Changes
-        - [Changes will be filled by AI generation]
+#         #### Major Changes
+#         - [Changes will be filled by AI generation]
         
-        ## Upgrade Information
-        - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
-        - **Proposal Number**: [will be filled by script]
+#         ## Upgrade Information
+#         - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
+#         - **Proposal Number**: [will be filled by script]
         
-        ## Release Links
-        - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
+#         ## Release Links
+#         - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
         
-        ## Full Changelog
-        [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
-        EOF
-        fi
+#         ## Full Changelog
+#         [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
+#         EOF
+#         fi
         
-        ./scripts/create-release-pr.sh "${{ env.RELEASE_TAG }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}"
+#         ./scripts/create-release-pr.sh "${{ env.RELEASE_TAG }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}"
         
-    - name: Set environment variables from script output
-      run: |
-        # Extract information from the created files for later steps
-        LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
-        LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
-        NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
-        VERSION="v${NEXT_VERSION_NUM}"
+#     - name: Set environment variables from script output
+#       run: |
+#         # Extract information from the created files for later steps
+#         LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
+#         LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
+#         NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
+#         VERSION="v${NEXT_VERSION_NUM}"
         
-        BRANCH_NAME="release/$VERSION.0.0"
+#         BRANCH_NAME="release/$VERSION.0.0"
         
-        echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
-        echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+#         echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
+#         echo "VERSION=$VERSION" >> $GITHUB_ENV
+#         echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
+#         echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
+#         echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         
-    - name: Create feature branch and commit changes
-      run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
+#     - name: Create feature branch and commit changes
+#       run: |
+#         git config --local user.email "action@github.com"
+#         git config --local user.name "GitHub Action"
         
-        # Create and switch to feature branch
-        git checkout -b "${{ env.BRANCH_NAME }}"
+#         # Create and switch to feature branch
+#         git checkout -b "${{ env.BRANCH_NAME }}"
         
-        # Add all changes
-        git add .
+#         # Add all changes
+#         git add .
         
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-          exit 1
-        else
-          git commit -m "Added release ${{ env.VERSION }}
+#         if git diff --staged --quiet; then
+#           echo "No changes to commit"
+#           exit 1
+#         else
+#           git commit -m "Added release ${{ env.VERSION }}
           
-          - Created ${{ env.PROPOSAL_FILE }}
-          - Created ${{ env.RELEASE_FILE }}
-          - Created ${{ env.RELEASE_NOTES_FILE }}
+#           - Created ${{ env.PROPOSAL_FILE }}
+#           - Created ${{ env.RELEASE_FILE }}
+#           - Created ${{ env.RELEASE_NOTES_FILE }}
           
-          Release Tag: ${{ env.RELEASE_TAG }}
-          Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-          Deposit: ${{ env.DEPOSIT }}
-          Expedited: ${{ env.EXPEDITED }}"
+#           Release Tag: ${{ env.RELEASE_TAG }}
+#           Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
+#           Deposit: ${{ env.DEPOSIT }}
+#           Expedited: ${{ env.EXPEDITED }}"
           
-          # Push the feature branch
+#           # Push the feature branch
           
-        fi
-#git push origin "${{ env.BRANCH_NAME }}"
+#         fi
+# #git push origin "${{ env.BRANCH_NAME }}"
         
 
     # - name: Create Pull Request
