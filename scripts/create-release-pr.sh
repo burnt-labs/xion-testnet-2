@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Script to create upgrade proposal files
-# Usage: ./scripts/create-proposal.sh <height> [deposit] [expedited]
-# Example: ./scripts/create-proposal.sh 7500000 1000000000uxion false
-# The version is automatically determined from the latest release
+# Usage: ./scripts/create-release-pr.sh <height> [deposit] [expedited] [release_tag]
+# Example: ./scripts/create-release-pr.sh 7500000 1000000000uxion false v22.0.0
+# Note: If no release_tag is provided, version is automatically determined from the latest release
 
 set -e
 
@@ -28,38 +28,55 @@ echo "  LINUX_ARM64_CHECKSUM: '$LINUX_ARM64_CHECKSUM'"
 
 # Check if required arguments are provided
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 <height> [deposit] [expedited]"
-    echo "Example: $0 7500000 1000000000uxion false"
-    echo "Note: Version is automatically determined from the latest release"
+    echo "Usage: $0 <height> [deposit] [expedited] [release_tag]"
+    echo "Example: $0 7500000 1000000000uxion false v22.0.0"
+    echo "Note: If no release_tag is provided, version is automatically determined from the latest release"
     exit 1
 fi
 
 HEIGHT="$1"
 DEPOSIT="${2:-1000000000uxion}"
 EXPEDITED="${3:-false}"
+RELEASE_TAG="$4"
 
 echo "Debug - Script arguments:"
 echo "  HEIGHT: '$HEIGHT'"
 echo "  DEPOSIT: '$DEPOSIT'"
 echo "  EXPEDITED: '$EXPEDITED'"
+echo "  RELEASE_TAG: '$RELEASE_TAG'"
 
 # Ensure we're in the right directory
 cd "$(dirname "$0")/.."
 
-# Find the latest release version
-LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
-if [ -z "$LATEST_RELEASE" ]; then
-    echo "No release files found in releases/ directory"
-    exit 1
+# Determine version from argument or calculate from latest release
+if [ -n "$RELEASE_TAG" ]; then
+    # Validate RELEASE_TAG format (should be like v22.0.0)
+    if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.0\.0$ ]]; then
+        echo "Error: RELEASE_TAG must be in format vX.0.0 (e.g., v22.0.0)"
+        echo "Provided: '$RELEASE_TAG'"
+        exit 1
+    fi
+    
+    # Use RELEASE_TAG from argument
+    VERSION="$RELEASE_TAG"
+    VERSION_NUM=$(echo "$VERSION" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+    echo "Using specified version: $VERSION"
+else
+    # Find the latest release version (auto-calculate mode)
+    LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
+    if [ -z "$LATEST_RELEASE" ]; then
+        echo "No release files found in releases/ directory"
+        exit 1
+    fi
+    
+    # Calculate next version
+    NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
+    VERSION="v${NEXT_VERSION_NUM}"
+    VERSION_NUM="$NEXT_VERSION_NUM"
+    echo "Calculated next version: $VERSION (after v$LATEST_RELEASE)"
 fi
 
-# Calculate next version
-NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
-VERSION="v${NEXT_VERSION_NUM}"
-VERSION_NUM="$NEXT_VERSION_NUM"
-
-echo "Latest release: v${LATEST_RELEASE}"
-echo "Next version: $VERSION"
+echo "Version to create: $VERSION"
 
 # Find the next proposal number by checking existing files
 LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
@@ -221,7 +238,11 @@ echo "  - $PROPOSAL_FILE"
 [ -f "$RELEASE_FILE" ] && echo "  - $RELEASE_FILE"
 [ -f "$RELEASE_NOTES_FILE" ] && echo "  - $RELEASE_NOTES_FILE"
 echo ""
-echo "Version automatically determined: $VERSION (next after v$LATEST_RELEASE)"
+if [ -n "$RELEASE_TAG" ]; then
+    echo "Version from argument: $VERSION"
+else
+    echo "Version automatically calculated: $VERSION (next after v$LATEST_RELEASE)"
+fi
 echo ""
 # Check if real checksums were used
 if [[ "$DARWIN_AMD64_CHECKSUM" != *"--ADD-HERE-YOUR-VALUE--"* ]]; then

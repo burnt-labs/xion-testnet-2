@@ -49,7 +49,7 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-        
+      
     - name: Calculate block height
       run: |
         # Get current block height and timestamp
@@ -291,7 +291,7 @@ jobs:
         EOF
         fi
         
-        ./scripts/create-release-pr.sh "${{ env.RELEASE_TAG }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}"
+        ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
         
     - name: debug - Echo release files
       run: |
