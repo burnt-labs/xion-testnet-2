@@ -296,13 +296,13 @@ jobs:
     - name: debug - Echo release files
       run: |
         echo "-> Proposal file"
-        ls -la proposals/
+        cat proposals/038-upgrade-v22.json
         
         echo "-> Release file"
-        ls -la releases/
+        cat releases/v22.json
         
         echo "-> Release notes file"
-        ls -la release_notes/
+        cat release_notes/v22.md
 
 #     - name: Set environment variables from script output
 #       run: |

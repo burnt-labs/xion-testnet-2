@@ -14,6 +14,18 @@ DARWIN_ARM64_CHECKSUM="${DARWIN_ARM64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_DARWIN_AR
 LINUX_AMD64_CHECKSUM="${LINUX_AMD64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_LINUX_AMD64:---ADD-HERE-YOUR-VALUE--}}"
 LINUX_ARM64_CHECKSUM="${LINUX_ARM64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_LINUX_ARM64:---ADD-HERE-YOUR-VALUE--}}"
 
+# Validate checksums are not empty (fallback to placeholder if empty)
+DARWIN_AMD64_CHECKSUM="${DARWIN_AMD64_CHECKSUM:-"--ADD-HERE-YOUR-VALUE--"}"
+DARWIN_ARM64_CHECKSUM="${DARWIN_ARM64_CHECKSUM:-"--ADD-HERE-YOUR-VALUE--"}"
+LINUX_AMD64_CHECKSUM="${LINUX_AMD64_CHECKSUM:-"--ADD-HERE-YOUR-VALUE--"}"
+LINUX_ARM64_CHECKSUM="${LINUX_ARM64_CHECKSUM:-"--ADD-HERE-YOUR-VALUE--"}"
+
+echo "Debug - Checksums being used:"
+echo "  DARWIN_AMD64_CHECKSUM: '$DARWIN_AMD64_CHECKSUM'"
+echo "  DARWIN_ARM64_CHECKSUM: '$DARWIN_ARM64_CHECKSUM'"
+echo "  LINUX_AMD64_CHECKSUM: '$LINUX_AMD64_CHECKSUM'"
+echo "  LINUX_ARM64_CHECKSUM: '$LINUX_ARM64_CHECKSUM'"
+
 # Check if required arguments are provided
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <height> [deposit] [expedited]"
@@ -25,6 +37,11 @@ fi
 HEIGHT="$1"
 DEPOSIT="${2:-1000000000uxion}"
 EXPEDITED="${3:-false}"
+
+echo "Debug - Script arguments:"
+echo "  HEIGHT: '$HEIGHT'"
+echo "  DEPOSIT: '$DEPOSIT'"
+echo "  EXPEDITED: '$EXPEDITED'"
 
 # Ensure we're in the right directory
 cd "$(dirname "$0")/.."
@@ -171,9 +188,29 @@ fi
 # Format JSON files if jq is available
 if command -v jq >/dev/null 2>&1; then
     echo "Formatting JSON files..."
-    jq . "$PROPOSAL_FILE" > temp.json && mv temp.json "$PROPOSAL_FILE"
+    
+    # Validate and format proposal file
+    echo "Validating proposal file: $PROPOSAL_FILE"
+    if jq . "$PROPOSAL_FILE" > /dev/null 2>&1; then
+        echo "✅ Proposal file is valid JSON"
+        jq . "$PROPOSAL_FILE" > temp.json && mv temp.json "$PROPOSAL_FILE"
+    else
+        echo "❌ Proposal file has invalid JSON, showing content:"
+        cat "$PROPOSAL_FILE"
+        echo "--- End of proposal file ---"
+    fi
+    
+    # Validate and format release file
     if [ -f "$RELEASE_FILE" ]; then
-        jq . "$RELEASE_FILE" > temp.json && mv temp.json "$RELEASE_FILE"
+        echo "Validating release file: $RELEASE_FILE"
+        if jq . "$RELEASE_FILE" > /dev/null 2>&1; then
+            echo "✅ Release file is valid JSON"
+            jq . "$RELEASE_FILE" > temp.json && mv temp.json "$RELEASE_FILE"
+        else
+            echo "❌ Release file has invalid JSON, showing content:"
+            cat "$RELEASE_FILE"
+            echo "--- End of release file ---"
+        fi
     fi
 else
     echo "jq not found, skipping JSON formatting"
