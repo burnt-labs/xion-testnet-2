@@ -196,6 +196,56 @@ jobs:
         
         echo "Generated release notes saved to generated_release_notes.md"
         
+    - name: Fetch release checksums
+      run: |
+        # Construct the checksums URL for the release
+        CHECKSUMS_URL="https://github.com/burnt-labs/xion/releases/download/${{ env.RELEASE_TAG }}/xiond-${{ env.RELEASE_TAG }}-checksums.txt"
+        echo "Fetching checksums from: $CHECKSUMS_URL"
+        
+        # Try to fetch the checksums file
+        CHECKSUMS_RESPONSE=$(curl -s -w "%{http_code}" "$CHECKSUMS_URL" -o checksums_temp.txt)
+        HTTP_CODE="${CHECKSUMS_RESPONSE: -3}"
+        
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "✅ Successfully fetched checksums for ${{ env.RELEASE_TAG }}"
+          
+          # Parse the checksums file and extract values
+          CHECKS_FILE="checksums_temp.txt"
+          
+          # Extract checksums for different platforms
+          DARWIN_AMD64_CHECKSUM=$(grep "darwin_amd64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          DARWIN_ARM64_CHECKSUM=$(grep "darwin_arm64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          LINUX_AMD64_CHECKSUM=$(grep "linux_amd64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          LINUX_ARM64_CHECKSUM=$(grep "linux_arm64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          
+          # Set environment variables with real checksums
+          echo "DARWIN_AMD64_CHECKSUM=$DARWIN_AMD64_CHECKSUM" >> $GITHUB_ENV
+          echo "DARWIN_ARM64_CHECKSUM=$DARWIN_ARM64_CHECKSUM" >> $GITHUB_ENV
+          echo "LINUX_AMD64_CHECKSUM=$LINUX_AMD64_CHECKSUM" >> $GITHUB_ENV
+          echo "LINUX_ARM64_CHECKSUM=$LINUX_ARM64_CHECKSUM" >> $GITHUB_ENV
+          
+          echo "✅ Using real checksums:"
+          echo "  Darwin AMD64: $DARWIN_AMD64_CHECKSUM"
+          echo "  Darwin ARM64: $DARWIN_ARM64_CHECKSUM"
+          echo "  Linux AMD64: $LINUX_AMD64_CHECKSUM"
+          echo "  Linux ARM64: $LINUX_ARM64_CHECKSUM"
+          
+        else
+          echo "⚠️  Checksums file not found for ${{ env.RELEASE_TAG }} (HTTP $HTTP_CODE)"
+          echo "📝 Using placeholder values"
+          
+          # Set environment variables with placeholder values
+          echo "DARWIN_AMD64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_AMD64 }}" >> $GITHUB_ENV
+          echo "DARWIN_ARM64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_ARM64 }}" >> $GITHUB_ENV
+          echo "LINUX_AMD64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_LINUX_AMD64 }}" >> $GITHUB_ENV
+          echo "LINUX_ARM64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_LINUX_ARM64 }}" >> $GITHUB_ENV
+          
+          echo "📝 Using placeholder checksums"
+        fi
+        
+        # Clean up temporary file
+        rm -f checksums_temp.txt
+        
     - name: Run create release script
       run: |
         # Use the generated release notes if available, otherwise use template

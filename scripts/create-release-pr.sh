@@ -7,11 +7,12 @@
 
 set -e
 
-# Environment variables for placeholder values
-PLACEHOLDER_CHECKSUM_DARWIN_AMD64="${PLACEHOLDER_CHECKSUM_DARWIN_AMD64:---ADD-HERE-YOUR-VALUE--}"
-PLACEHOLDER_CHECKSUM_DARWIN_ARM64="${PLACEHOLDER_CHECKSUM_DARWIN_ARM64:---ADD-HERE-YOUR-VALUE--}"
-PLACEHOLDER_CHECKSUM_LINUX_AMD64="${PLACEHOLDER_CHECKSUM_LINUX_AMD64:---ADD-HERE-YOUR-VALUE--}"
-PLACEHOLDER_CHECKSUM_LINUX_ARM64="${PLACEHOLDER_CHECKSUM_LINUX_ARM64:---ADD-HERE-YOUR-VALUE--}"
+# Environment variables for checksums (set by workflow)
+# Use real checksums if available, otherwise fallback to placeholders
+DARWIN_AMD64_CHECKSUM="${DARWIN_AMD64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_DARWIN_AMD64:---ADD-HERE-YOUR-VALUE--}}"
+DARWIN_ARM64_CHECKSUM="${DARWIN_ARM64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_DARWIN_ARM64:---ADD-HERE-YOUR-VALUE--}}"
+LINUX_AMD64_CHECKSUM="${LINUX_AMD64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_LINUX_AMD64:---ADD-HERE-YOUR-VALUE--}}"
+LINUX_ARM64_CHECKSUM="${LINUX_ARM64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_LINUX_ARM64:---ADD-HERE-YOUR-VALUE--}}"
 
 # Check if required arguments are provided
 if [ $# -lt 1 ]; then
@@ -91,10 +92,10 @@ if [ ! -f "$RELEASE_FILE" ]; then
     cat > "$RELEASE_FILE" << EOF
 {
     "binaries": {
-        "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_darwin_amd64.tar.gz?checksum=sha256:${PLACEHOLDER_CHECKSUM_DARWIN_AMD64}",
-        "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_darwin_arm64.tar.gz?checksum=sha256:${PLACEHOLDER_CHECKSUM_DARWIN_ARM64}",
-        "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_linux_amd64.tar.gz?checksum=sha256:${PLACEHOLDER_CHECKSUM_LINUX_AMD64}",
-        "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_linux_arm64.tar.gz?checksum=sha256:${PLACEHOLDER_CHECKSUM_LINUX_ARM64}"
+        "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_darwin_amd64.tar.gz?checksum=sha256:${DARWIN_AMD64_CHECKSUM}",
+        "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_darwin_arm64.tar.gz?checksum=sha256:${DARWIN_ARM64_CHECKSUM}",
+        "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_linux_amd64.tar.gz?checksum=sha256:${LINUX_AMD64_CHECKSUM}",
+        "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION}.0.0/xiond_${VERSION_NUM}.0.0_linux_arm64.tar.gz?checksum=sha256:${LINUX_ARM64_CHECKSUM}"
     }
 }
 EOF
@@ -106,7 +107,14 @@ fi
 RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
 if [ ! -f "$RELEASE_NOTES_FILE" ]; then
     echo "Creating release notes file: $RELEASE_NOTES_FILE"
-    cat > "$RELEASE_NOTES_FILE" << EOF
+    
+    # Check if AI-generated template exists
+    if [ -f "release_notes_template.md" ]; then
+        echo "Using AI-generated release notes template"
+        cp release_notes_template.md "$RELEASE_NOTES_FILE"
+    else
+        echo "Using default release notes template"
+        cat > "$RELEASE_NOTES_FILE" << EOF
 # Xion ${VERSION} Release Notes
 
 ## Overview
@@ -155,6 +163,7 @@ Special thanks to the following contributors who made this release possible:
 
 For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/${NEXT_NUM}-upgrade-${VERSION}.json).
 EOF
+    fi
 else
     echo "Release notes file already exists: $RELEASE_NOTES_FILE"
 fi
@@ -177,9 +186,17 @@ echo "  - $PROPOSAL_FILE"
 echo ""
 echo "Version automatically determined: $VERSION (next after v$LATEST_RELEASE)"
 echo ""
+# Check if real checksums were used
+if [[ "$DARWIN_AMD64_CHECKSUM" != *"--ADD-HERE-YOUR-VALUE--"* ]]; then
+    echo "✅ Real checksums automatically fetched from GitHub release"
+else
+    echo "📝 Placeholder checksums used (release not found or checksums unavailable)"
+fi
+echo ""
 echo "Next steps:"
-echo "1. Update the checksums in $RELEASE_FILE with actual release binary checksums"
-echo "2. Fill in the release notes in $RELEASE_NOTES_FILE with actual changes and contributors"
-echo "3. Review the proposal details"
-echo "4. Commit and push the changes"
-echo "5. Submit the proposal on-chain when ready"
+if [[ "$DARWIN_AMD64_CHECKSUM" == *"--ADD-HERE-YOUR-VALUE--"* ]]; then
+    echo "1. Update the checksums in $RELEASE_FILE with actual release binary checksums"
+fi
+echo "2. Review the proposal details"
+echo "3. Commit and push the changes"
+echo "4. Submit the proposal on-chain when ready"
