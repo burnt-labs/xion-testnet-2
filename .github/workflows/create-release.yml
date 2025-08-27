@@ -191,72 +191,72 @@ jobs:
         echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV
         echo "FILES_CHANGED=$FILES_CHANGED" >> $GITHUB_ENV
         
-#     - name: Generate release notes with Claude API
-#       run: |
-#         # Prepare the prompt for Claude API
-#         PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive release notes document for version ${{ env.RELEASE_TAG }}.
+    - name: Generate release notes with Claude API
+      run: |
+        # Prepare the prompt for Claude API
+        PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive release notes document for version ${{ env.RELEASE_TAG }}.
         
-#         Format the release notes as a markdown document with the following structure:
+        Format the release notes as a markdown document with the following structure:
         
-#         # Xion ${{ env.RELEASE_TAG }} Release Notes
+        # Xion ${{ env.RELEASE_TAG }} Release Notes
         
-#         ## Overview
-#         [Brief overview of the release]
+        ## Overview
+        [Brief overview of the release]
         
-#         ## What's Changed
-#         ### ${{ env.RELEASE_TAG }} (Only Version)
+        ## What's Changed
+        ### ${{ env.RELEASE_TAG }} (Only Version)
         
-#         #### Major Changes
-#         [List major features/changes with PR links]
+        #### Major Changes
+        [List major features/changes with PR links]
         
-#         #### Bug Fixes & Improvements
-#         [List bug fixes and improvements with PR links]
+        #### Bug Fixes & Improvements
+        [List bug fixes and improvements with PR links]
         
-#         #### Testing & Code Quality
-#         [List testing improvements and code quality changes]
+        #### Testing & Code Quality
+        [List testing improvements and code quality changes]
         
-#         ## Upgrade Information
-#         - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
-#         - **Proposal Number**: [will be filled by script]
+        ## Upgrade Information
+        - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
+        - **Proposal Number**: [will be filled by script]
         
-#         ## Release Links
-#         - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
+        ## Release Links
+        - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
         
-#         ## Contributors
-#         [List contributors based on the commits]
+        ## Contributors
+        [List contributors based on the commits]
         
-#         ## Full Changelog
-#         [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
+        ## Full Changelog
+        [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
         
-#         ---
+        ---
         
-#         For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/[proposal-number]-upgrade-${{ env.RELEASE_TAG }}.json).
+        For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/[proposal-number]-upgrade-${{ env.RELEASE_TAG }}.json).
         
-#         Analyze the comparison data and create professional, detailed release notes. Focus on user-facing changes, technical improvements, and security updates."
+        Analyze the comparison data and create professional, detailed release notes. Focus on user-facing changes, technical improvements, and security updates."
         
-#         # Call Claude API
-#         CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
-#           -H "Content-Type: application/json" \
-#           -H "x-api-key: ${{ secrets.CLAUDE_API_KEY }}" \
-#           -H "anthropic-version: 2023-06-01" \
-#           -d '{
-#             "model": "claude-3-sonnet-20240229",
-#             "max_tokens": 4000,
-#             "messages": [
-#               {
-#                 "role": "user",
-#                 "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
-#               }
-#             ]
-#           }')
+        # Call Claude API
+        CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+          -H "Content-Type: application/json" \
+          -H "x-api-key: ${{ secrets.CLAUDE_API_KEY }}" \
+          -H "anthropic-version: 2023-06-01" \
+          -d '{
+            "model": "claude-3-sonnet-20240229",
+            "max_tokens": 4000,
+            "messages": [
+              {
+                "role": "user",
+                "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
+              }
+            ]
+          }')
         
-#         # Extract the response content
-#         RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
+        # Extract the response content
+        RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
         
-#         # Save the generated release notes
-#         echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
+        # Save the generated release notes
+        echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
         
-#         echo "Generated release notes saved to generated_release_notes.md"
+        echo "Generated release notes saved to generated_release_notes.md"
          
 #     - name: Run release files creation script
 #       run: |
