@@ -258,41 +258,51 @@ jobs:
         
         echo "Generated release notes saved to generated_release_notes.md"
          
-#     - name: Run release files creation script
-#       run: |
-#         # Use the generated release notes if available, otherwise use template
-#         if [ -f "generated_release_notes.md" ]; then
-#           echo "Using AI-generated release notes"
-#           cp generated_release_notes.md release_notes_template.md
-#         else
-#           echo "Using fallback template (Claude API may have failed)"
-#           # Create a basic template as fallback
-#           cat > release_notes_template.md << EOF
-#         # Xion ${{ env.RELEASE_TAG }} Release Notes
+    - name: Run release files creation script
+      run: |
+        # Use the generated release notes if available, otherwise use template
+        if [ -f "generated_release_notes.md" ]; then
+          echo "Using AI-generated release notes"
+          cp generated_release_notes.md release_notes_template.md
+        else
+          echo "Using fallback template (Claude API may have failed)"
+          # Create a basic template as fallback
+          cat > release_notes_template.md << EOF
+        # Xion ${{ env.RELEASE_TAG }} Release Notes
         
-#         ## Overview
-#         Xion ${{ env.RELEASE_TAG }} includes various improvements and bug fixes.
+        ## Overview
+        Xion ${{ env.RELEASE_TAG }} includes various improvements and bug fixes.
         
-#         ## What's Changed
-#         ### ${{ env.RELEASE_TAG }} (Only Version)
+        ## What's Changed
+        ### ${{ env.RELEASE_TAG }} (Only Version)
         
-#         #### Major Changes
-#         - [Changes will be filled by AI generation]
+        #### Major Changes
+        - [Changes will be filled by AI generation]
         
-#         ## Upgrade Information
-#         - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
-#         - **Proposal Number**: [will be filled by script]
+        ## Upgrade Information
+        - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
+        - **Proposal Number**: [will be filled by script]
         
-#         ## Release Links
-#         - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
+        ## Release Links
+        - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
         
-#         ## Full Changelog
-#         [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
-#         EOF
-#         fi
+        ## Full Changelog
+        [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
+        EOF
+        fi
         
-#         ./scripts/create-release-pr.sh "${{ env.RELEASE_TAG }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}"
+        ./scripts/create-release-pr.sh "${{ env.RELEASE_TAG }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}"
         
+    - name: debug - Echo release files
+      run: |
+        echo "Release files:"
+        echo "-> Proposal file"
+        echo "  - ${{ env.PROPOSAL_FILE }}"
+        echo "-> Release file"
+        echo "  - ${{ env.RELEASE_FILE }}"
+        echo "-> Release notes file"
+        echo "  - ${{ env.RELEASE_NOTES_FILE }}"
+
 #     - name: Set environment variables from script output
 #       run: |
 #         # Extract information from the created files for later steps
