@@ -230,45 +230,108 @@ jobs:
     - name: Generate release notes with Claude API
       run: |
         # Prepare the prompt for Claude API
-        PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive release notes document for version ${{ env.RELEASE_TAG }}.
+        PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive upgrade guide document for version ${{ env.RELEASE_TAG }}, similar to professional blockchain upgrade documentation.
         
-        Format the release notes as a markdown document with the following structure:
+        Format the document as a detailed upgrade guide with the following structure:
         
-        # Xion ${{ env.RELEASE_TAG }} Release Notes
+        # Xion ${{ env.RELEASE_TAG }} Upgrade Guide
         
         ## Overview
-        [Brief overview of the release]
+        - **Chain upgrade point**: [Calculate estimated date based on height ${{ env.CALCULATED_HEIGHT }}], at height \`${{ env.CALCULATED_HEIGHT }}\`
+        - **Go version**: [Extract from release or specify recommended version]
+        - **Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
         
-        ## What's Changed
-        ### ${{ env.RELEASE_TAG }} (Only Version)
+        This document describes the steps for validators and full node operators to upgrade successfully to the Xion ${{ env.RELEASE_TAG }} release.
         
-        #### Major Changes
-        [List major features/changes with PR links]
+        ## Upgrade Details
+        The upgrade will take place at height \`${{ env.CALCULATED_HEIGHT }}\` on the Xion testnet.
         
-        #### Bug Fixes & Improvements
-        [List bug fixes and improvements with PR links]
+        ## Chain-id
+        The chain-id of the network will remain the same, \`xion-testnet-2\`. This is an in-place migration of state.
         
-        #### Testing & Code Quality
-        [List testing improvements and code quality changes]
+        ## System Requirements
+        - **RAM**: 16GB RAM is recommended to ensure a smooth upgrade
+        - **Disk Space**: Ensure sufficient disk space as state can grow during upgrade
+        - **Go Version**: [Specify required Go version]
         
-        ## Upgrade Information
-        - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
-        - **Proposal Number**: [will be filled by script]
+        ## Backups
+        Prior to the upgrade, validators are encouraged to take a full data snapshot. Generally this can be done by backing up the \`.xiond\` directory.
+        
+        **Critical**: Back up the \`.xiond/data/priv_validator_state.json\` file after stopping the xiond process. This file is updated every block and is critical to prevent double-signing.
+        
+        ## Current Runtime
+        The Xion testnet network, \`xion-testnet-2\`, is currently running [Xion ${{ env.PREVIOUS_VERSION }}](https://github.com/burnt-labs/xion/releases/tag/${{ env.PREVIOUS_VERSION }}).
+        
+        ## Target Runtime
+        The Xion testnet network will run [Xion ${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}). Operators **MUST** use this version post-upgrade to remain connected to the network.
+        
+        ## What's Changed in ${{ env.RELEASE_TAG }}
+        
+        ### Major Changes
+        [List major features/changes with PR links based on analysis]
+        
+        ### Bug Fixes & Improvements  
+        [List bug fixes and improvements with PR links based on analysis]
+        
+        ### Technical Improvements
+        [List technical improvements, performance enhancements, etc.]
+        
+        ## Upgrade Steps
+        
+        ### Method I: Manual Upgrade
+        
+        1. **Build/Download the new binary**:
+           ```bash
+           git clone https://github.com/burnt-labs/xion.git
+           cd xion
+           git checkout ${{ env.RELEASE_TAG }}
+           make install
+           ```
+        
+        2. **Verify the version**:
+           ```bash
+           xiond version --long
+           # Should show version: ${{ env.RELEASE_TAG }}
+           ```
+        
+        3. **Wait for upgrade height**: Run Xion ${{ env.PREVIOUS_VERSION }} until upgrade height ${{ env.CALCULATED_HEIGHT }}, the node will panic with upgrade message.
+        
+        4. **Switch binary**: Stop the node, switch to **Xion ${{ env.RELEASE_TAG }}** binary and restart with \`xiond start\`.
+        
+        ### Method II: Upgrade using Cosmovisor
+        
+        [Include Cosmovisor setup instructions if applicable]
+        
+        ## Expected Upgrade Result
+        When the upgrade block height is reached, Xion will panic and stop. The chain will continue when validators with >2/3 voting power complete their upgrades.
+        
+        ## Upgrade Duration
+        Most likely a few minutes to complete.
+        
+        ## Rollback Plan
+        In case of unexpected issues, the upgrade can be skipped by resuming with the previous binary:
+        ```bash
+        xiond start --unsafe-skip-upgrade ${{ env.CALCULATED_HEIGHT }}
+        ```
+        
+        ## Risks
+        - Double-signing risk during upgrade procedure
+        - Verify software version before starting validator
+        - If mistakes are discovered, wait for network to start before correcting
         
         ## Release Links
-        - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
+        - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
+        - **Upgrade Proposal**: [Link to governance proposal]
+        - **Full Changelog**: [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
         
         ## Contributors
         [List contributors based on the commits]
         
-        ## Full Changelog
-        [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
-        
         ---
         
-        For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/[proposal-number]-upgrade-${{ env.RELEASE_TAG }}.json).
+        For technical support during the upgrade, join the Xion Discord or Telegram channels.
         
-        Analyze the comparison data and create professional, detailed release notes. Focus on user-facing changes, technical improvements, and security updates."
+        Analyze the comparison data and create a professional, comprehensive upgrade guide. Focus on technical accuracy, operational procedures, and safety measures for validators."
         
         # Call Claude API
         CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
@@ -294,7 +357,7 @@ jobs:
         
         echo "Generated release notes saved to generated_release_notes.md"
          
-    - name: Run release files creation script
+    - name: Use fallback template if Claude API fails
       run: |
         # Use the generated release notes if available, otherwise use template
         if [ -f "generated_release_notes.md" ]; then
@@ -302,28 +365,81 @@ jobs:
           cp generated_release_notes.md release_notes_template.md
         else
           echo "Using fallback template (Claude API may have failed)"
-          # Create a basic template as fallback
+          # Create a comprehensive upgrade guide template as fallback
           cat > release_notes_template.md << EOF
-        # Xion ${{ env.RELEASE_TAG }} Release Notes
+        # Xion ${{ env.RELEASE_TAG }} Upgrade Guide
         
         ## Overview
-        Xion ${{ env.RELEASE_TAG }} includes various improvements and bug fixes.
+        - **Chain upgrade point**: TBD, at height \`${{ env.CALCULATED_HEIGHT }}\`
+        - **Go version**: [To be determined]
+        - **Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
         
-        ## What's Changed
-        ### ${{ env.RELEASE_TAG }} (Only Version)
+        This document describes the steps for validators and full node operators to upgrade successfully to the Xion ${{ env.RELEASE_TAG }} release.
         
-        #### Major Changes
-        - [Changes will be filled by AI generation]
+        ## Upgrade Details
+        The upgrade will take place at height \`${{ env.CALCULATED_HEIGHT }}\` on the Xion testnet.
         
-        ## Upgrade Information
-        - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (testnet)
-        - **Proposal Number**: [will be filled by script]
+        ## Chain-id
+        The chain-id of the network will remain the same, \`xion-testnet-2\`. This is an in-place migration of state.
+        
+        ## System Requirements
+        - **RAM**: 16GB RAM is recommended to ensure a smooth upgrade
+        - **Disk Space**: Ensure sufficient disk space as state can grow during upgrade
+        - **Go Version**: [To be determined based on release]
+        
+        ## Backups
+        Prior to the upgrade, validators are encouraged to take a full data snapshot. Generally this can be done by backing up the \`.xiond\` directory.
+        
+        **Critical**: Back up the \`.xiond/data/priv_validator_state.json\` file after stopping the xiond process.
+        
+        ## Current Runtime
+        The Xion testnet network, \`xion-testnet-2\`, is currently running [Xion ${{ env.PREVIOUS_VERSION }}](https://github.com/burnt-labs/xion/releases/tag/${{ env.PREVIOUS_VERSION }}).
+        
+        ## Target Runtime
+        The Xion testnet network will run [Xion ${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}).
+        
+        ## What's Changed in ${{ env.RELEASE_TAG }}
+        
+        ### Major Changes
+        - [Changes will be filled by AI generation or manual review]
+        
+        ### Bug Fixes & Improvements
+        - [To be filled based on release analysis]
+        
+        ## Upgrade Steps
+        
+        ### Method I: Manual Upgrade
+        
+        1. **Build the new binary**:
+           \`\`\`bash
+           git clone https://github.com/burnt-labs/xion.git
+           cd xion
+           git checkout ${{ env.RELEASE_TAG }}
+           make install
+           \`\`\`
+        
+        2. **Verify the version**:
+           \`\`\`bash
+           xiond version --long
+           # Should show version: ${{ env.RELEASE_TAG }}
+           \`\`\`
+        
+        3. **Wait for upgrade height**: Run until upgrade height ${{ env.CALCULATED_HEIGHT }}, the node will panic.
+        
+        4. **Switch binary**: Stop the node, switch to **Xion ${{ env.RELEASE_TAG }}** and restart.
+        
+        ## Expected Upgrade Result
+        When the upgrade block height is reached, Xion will panic and stop. The chain will continue when validators with >2/3 voting power complete their upgrades.
+        
+        ## Rollback Plan
+        In case of unexpected issues, the upgrade can be skipped:
+        \`\`\`bash
+        xiond start --unsafe-skip-upgrade ${{ env.CALCULATED_HEIGHT }}
+        \`\`\`
         
         ## Release Links
-        - **${{ env.RELEASE_TAG }}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }})
-        
-        ## Full Changelog
-        [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
+        - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
+        - **Full Changelog**: [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
         EOF
         fi
         
@@ -395,12 +511,13 @@ jobs:
         fi
         
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
+      uses: peter-evans/create-pull-request@v5 # https://github.com/peter-evans/create-pull-request?tab=readme-ov-file
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
-        base: feat/do-85-generate-upgrade-proposals-n-release-binaries                      # TODO Target: main
+        base: feat/do-85-generate-upgrade-proposals-n-release-binaries   # TODO Target: main
         title: "Added release ${{ env.VERSION }}"
+        reviewers: wehappyfew,2xburnt
         body: |
           ## Upgrade to release ${{ env.VERSION }}
           
@@ -416,10 +533,4 @@ jobs:
           - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
           - **Deposit**: ${{ env.DEPOSIT }}
           - **Expedited**: ${{ env.EXPEDITED }}
-          
-          ### Next Steps:
-          1. Update the checksums in `${{ env.RELEASE_FILE }}` with actual release binary checksums
-          2. Fill in the release notes in `${{ env.RELEASE_NOTES_FILE }}` with actual changes and contributors
-          3. Review the proposal details
-          4. Submit the proposal on-chain when ready
         delete-branch: false
