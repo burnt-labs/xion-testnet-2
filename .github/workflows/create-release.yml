@@ -289,6 +289,46 @@ jobs:
         EOF
         fi
         
+    - name: Prepare branch variables and checkout
+      run: |
+        # Extract version from RELEASE_TAG and set branch name
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        BRANCH_NAME="release/${{ env.RELEASE_TAG }}"
+        
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        
+        # Set up git config
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Fetch all remote branches to ensure we have latest refs
+        git fetch origin
+        
+        # Check if remote branch exists and handle accordingly
+        if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+          echo "Remote branch $BRANCH_NAME exists, checking out and pulling latest changes"
+          
+          # Check if local branch exists
+          if git show-ref --verify --quiet refs/heads/"$BRANCH_NAME"; then
+            echo "Local branch exists, switching to it"
+            git checkout "$BRANCH_NAME"
+          else
+            echo "Local branch doesn't exist, creating from remote"
+            git checkout -b "$BRANCH_NAME" origin/"$BRANCH_NAME"
+          fi
+          
+          # Pull latest changes from remote to avoid conflicts
+          git pull origin "$BRANCH_NAME"
+          
+        else
+          echo "Remote branch $BRANCH_NAME doesn't exist, creating new branch"
+          git checkout -b "$BRANCH_NAME"
+        fi
+        
+    - name: Run release files creation script
+      run: |
         ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
         
     - name: debug - Echo release files
@@ -304,50 +344,17 @@ jobs:
         
     - name: Set environment variables from script output
       run: |
-        # Extract version from RELEASE_TAG (use the version that was just created)
+        # Find the actual files that were created (after script runs)
         VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
         VERSION="v${VERSION_NUM}"
         
-        # Find the actual files that were created
-        LATEST_PROPOSAL=$(ls proposals/ | grep -E "^[0-9]{3}-upgrade-${VERSION}\.json$" | sort -V | tail -1)
-        
-        BRANCH_NAME="release/${{ env.RELEASE_TAG }}"
-        
-        echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        # These will be set after the script creates the files
+        echo "PROPOSAL_FILE=proposals/038-upgrade-$VERSION.json" >> $GITHUB_ENV
         echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
         echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
         
-    - name: Create feature branch and commit changes
+    - name: Commit and push changes
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        # Fetch all remote branches to ensure we have latest refs
-        git fetch origin
-        
-        # Check if remote branch exists and handle accordingly
-        if git ls-remote --heads origin "${{ env.BRANCH_NAME }}" | grep -q "${{ env.BRANCH_NAME }}"; then
-          echo "Remote branch ${{ env.BRANCH_NAME }} exists, checking out and pulling latest changes"
-          
-          # Check if local branch exists
-          if git show-ref --verify --quiet refs/heads/"${{ env.BRANCH_NAME }}"; then
-            echo "Local branch exists, switching to it"
-            git checkout "${{ env.BRANCH_NAME }}"
-          else
-            echo "Local branch doesn't exist, creating from remote"
-            git checkout -b "${{ env.BRANCH_NAME }}" origin/"${{ env.BRANCH_NAME }}"
-          fi
-          
-          # Pull latest changes from remote to avoid conflicts
-          git pull origin "${{ env.BRANCH_NAME }}"
-          
-        else
-          echo "Remote branch ${{ env.BRANCH_NAME }} doesn't exist, creating new branch"
-          git checkout -b "${{ env.BRANCH_NAME }}"
-        fi
-        
         # Check if any of the created files have changes
         CHANGES_DETECTED=false
         
