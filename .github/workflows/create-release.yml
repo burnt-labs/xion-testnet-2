@@ -248,7 +248,7 @@ jobs:
       run: |
         pwd
         ls -la
-        ls -la .github/
+        ls -la .github/workflows
         # Load and prepare the prompt from external file
         PROMPT=$(cat .github/workflows/prompts/claude-api-prompt.md)
         
