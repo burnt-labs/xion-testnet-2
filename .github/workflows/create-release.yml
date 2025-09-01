@@ -48,6 +48,44 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Prepare branch variables and checkout
+      run: |
+        # Extract version from RELEASE_TAG and set branch name
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        BRANCH_NAME="release/${{ env.RELEASE_TAG }}"
+        
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        
+        # Set up git config
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Fetch all remote branches to ensure we have latest refs
+        git fetch origin
+        
+        # Check if remote branch exists and handle accordingly
+        if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+          echo "Remote branch $BRANCH_NAME exists, checking out and pulling latest changes"
+          
+          # Check if local branch exists
+          if git show-ref --verify --quiet refs/heads/"$BRANCH_NAME"; then
+            echo "Local branch exists, switching to it"
+            git checkout "$BRANCH_NAME"
+          else
+            echo "Local branch doesn't exist, creating from remote"
+            git checkout -b "$BRANCH_NAME" origin/"$BRANCH_NAME"
+          fi
+          
+          # Pull latest changes from remote to avoid conflicts
+          git pull origin "$BRANCH_NAME"
+          
+        else
+          echo "Remote branch $BRANCH_NAME doesn't exist, creating new branch"
+          git checkout -b "$BRANCH_NAME"
+        fi
+        
     - name: Calculate block height
       run: |
         # Get current block height and timestamp
@@ -287,44 +325,6 @@ jobs:
         ## Full Changelog
         [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
         EOF
-        fi
-        
-    - name: Prepare branch variables and checkout
-      run: |
-        # Extract version from RELEASE_TAG and set branch name
-        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-        VERSION="v${VERSION_NUM}"
-        BRANCH_NAME="release/${{ env.RELEASE_TAG }}"
-        
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
-        
-        # Set up git config
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
-        # Fetch all remote branches to ensure we have latest refs
-        git fetch origin
-        
-        # Check if remote branch exists and handle accordingly
-        if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
-          echo "Remote branch $BRANCH_NAME exists, checking out and pulling latest changes"
-          
-          # Check if local branch exists
-          if git show-ref --verify --quiet refs/heads/"$BRANCH_NAME"; then
-            echo "Local branch exists, switching to it"
-            git checkout "$BRANCH_NAME"
-          else
-            echo "Local branch doesn't exist, creating from remote"
-            git checkout -b "$BRANCH_NAME" origin/"$BRANCH_NAME"
-          fi
-          
-          # Pull latest changes from remote to avoid conflicts
-          git pull origin "$BRANCH_NAME"
-          
-        else
-          echo "Remote branch $BRANCH_NAME doesn't exist, creating new branch"
-          git checkout -b "$BRANCH_NAME"
         fi
         
     - name: Run release files creation script
