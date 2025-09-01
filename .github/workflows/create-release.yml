@@ -394,35 +394,32 @@ jobs:
           echo "ℹ️  No changes detected in created files - skipping commit and push"
         fi
         
-
-
-        
-    # - name: Create Pull Request
-    #   uses: peter-evans/create-pull-request@v5
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
-    #     base: main                      # Target: main
-    #     title: "Added release ${{ env.VERSION }}"
-    #     body: |
-    #       ## Upgrade to release ${{ env.VERSION }}
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
+        base: feat/do-85-generate-upgrade-proposals-n-release-binaries                      # TODO Target: main
+        title: "Added release ${{ env.VERSION }}"
+        body: |
+          ## Upgrade to release ${{ env.VERSION }}
           
-    #       This PR upgrades to release ${{ env.VERSION }}.
+          This PR upgrades to release ${{ env.VERSION }}.
           
-    #       ### Files created/modified:
-    #       - `${{ env.PROPOSAL_FILE }}`
-    #       - `${{ env.RELEASE_FILE }}`
-    #       - `${{ env.RELEASE_NOTES_FILE }}`
+          ### Files created/modified:
+          - `${{ env.PROPOSAL_FILE }}`
+          - `${{ env.RELEASE_FILE }}`
+          - `${{ env.RELEASE_NOTES_FILE }}`
           
-    #       ### Configuration:
-    #       - **Release Tag**: ${{ env.RELEASE_TAG }}
-    #       - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-    #       - **Deposit**: ${{ env.DEPOSIT }}
-    #       - **Expedited**: ${{ env.EXPEDITED }}
+          ### Configuration:
+          - **Release Tag**: ${{ env.RELEASE_TAG }}
+          - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
+          - **Deposit**: ${{ env.DEPOSIT }}
+          - **Expedited**: ${{ env.EXPEDITED }}
           
-    #       ### Next Steps:
-    #       1. Update the checksums in `${{ env.RELEASE_FILE }}` with actual release binary checksums
-    #       2. Fill in the release notes in `${{ env.RELEASE_NOTES_FILE }}` with actual changes and contributors
-    #       3. Review the proposal details
-    #       4. Submit the proposal on-chain when ready
-    #     delete-branch: false
+          ### Next Steps:
+          1. Update the checksums in `${{ env.RELEASE_FILE }}` with actual release binary checksums
+          2. Fill in the release notes in `${{ env.RELEASE_NOTES_FILE }}` with actual changes and contributors
+          3. Review the proposal details
+          4. Submit the proposal on-chain when ready
+        delete-branch: false
