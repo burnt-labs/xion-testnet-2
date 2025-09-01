@@ -1,6 +1,6 @@
 # Release Documentation Prompts
 
-This directory contains the prompt templates used by the automated release documentation workflow.
+This directory contains the prompt templates used by the automated release documentation workflow in `.github/workflows/create-release.yml`.
 
 ## Files
 
@@ -17,6 +17,22 @@ Both templates use placeholder variables that are automatically replaced by the 
 - `{{RELEASE_TAG}}` - The full release tag (e.g., `v22.0.0`)
 - `{{CALCULATED_HEIGHT}}` - The calculated upgrade block height
 - `{{PREVIOUS_VERSION}}` - The previous release version for comparison
+
+## Usage
+
+These templates are automatically loaded by the GitHub Actions workflow:
+
+```bash
+# Load and process the Claude API prompt
+PROMPT=$(cat ./prompts/claude-api-prompt.md)
+PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/$RELEASE_TAG}"
+PROMPT="${PROMPT//\{\{CALCULATED_HEIGHT\}\}/$CALCULATED_HEIGHT}"
+PROMPT="${PROMPT//\{\{PREVIOUS_VERSION\}\}/$PREVIOUS_VERSION}"
+
+# Load and process the fallback template
+FALLBACK_TEMPLATE=$(cat ./prompts/fallback-template.md)
+# ... similar variable substitution
+```
 
 ## Editing Guidelines
 
@@ -36,25 +52,7 @@ Both templates use placeholder variables that are automatically replaced by the 
 
 - Use `{{VARIABLE_NAME}}` for placeholders that will be replaced by the workflow
 - Use proper markdown syntax for code blocks: ` ```bash ` 
-- Escape special characters that might interfere with shell processing
 - Keep line lengths reasonable for readability
-
-## Workflow Integration
-
-The templates are loaded and processed by the GitHub Actions workflow:
-
-1. The workflow reads the template file using `cat`
-2. Placeholder variables are replaced using bash string substitution
-3. The processed content is used either as a Claude API prompt or as direct template output
-
-## Maintenance
-
-When updating templates:
-
-1. **Test locally first**: Verify that placeholder substitution works correctly
-2. **Check formatting**: Ensure markdown syntax is preserved after variable substitution  
-3. **Validate shell escaping**: Make sure special characters don't break the workflow
-4. **Review output**: Test with both successful and failed Claude API scenarios
 
 ## Future Releases Support
 
