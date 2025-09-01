@@ -303,16 +303,17 @@ jobs:
         
         echo "-> Release notes file"
         cat release_notes/v22.md
-
+        
     - name: Set environment variables from script output
       run: |
-        # Extract information from the created files for later steps
-        LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
-        LATEST_RELEASE=$(ls releases/ | grep -E '^v[0-9]+\.json$' | sed 's/v\([0-9]*\)\.json/\1/' | sort -n | tail -1)
-        NEXT_VERSION_NUM=$((LATEST_RELEASE + 1))
-        VERSION="v${NEXT_VERSION_NUM}"
+        # Extract version from RELEASE_TAG (use the version that was just created)
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
         
-        BRANCH_NAME="release/$VERSION.0.0"
+        # Find the actual files that were created
+        LATEST_PROPOSAL=$(ls proposals/ | grep -E "^[0-9]{3}-upgrade-${VERSION}\.json$" | sort -V | tail -1)
+        
+        BRANCH_NAME="release/${{ env.RELEASE_TAG }}"
         
         echo "PROPOSAL_FILE=proposals/$LATEST_PROPOSAL" >> $GITHUB_ENV
         echo "VERSION=$VERSION" >> $GITHUB_ENV
