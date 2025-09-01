@@ -304,7 +304,7 @@ jobs:
         
     - name: Run release files creation script
       run: |
-        ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
+        .github/workflows/scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
         
     - name: debug - Echo release files
       run: |
