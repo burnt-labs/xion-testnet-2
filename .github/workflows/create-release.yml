@@ -158,7 +158,10 @@ jobs:
           
         else
           echo "⚠️  Checksums file not found for ${{ env.RELEASE_TAG }} (HTTP $HTTP_CODE)"
-          echo "📝 Using placeholder values"
+          if [ "$HTTP_CODE" = "404" ]; then
+            echo "📝 This appears to be a future release - checksums will be available when the release is published"
+          fi
+          echo "📝 Using placeholder values for now"
           
           # Set environment variables with placeholder values
           echo "DARWIN_AMD64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_AMD64 }}" >> $GITHUB_ENV
@@ -166,7 +169,7 @@ jobs:
           echo "LINUX_AMD64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_LINUX_AMD64 }}" >> $GITHUB_ENV
           echo "LINUX_ARM64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_LINUX_ARM64 }}" >> $GITHUB_ENV
           
-          echo "📝 Using placeholder checksums"
+          echo "📝 Using placeholder checksums (will be updated when release is available)"
         fi
         
         # Clean up temporary file
@@ -185,41 +188,55 @@ jobs:
         echo "Current version: $CURRENT_VERSION"
         echo "Previous version: $PREVIOUS_VERSION"
         
-        # Get GitHub comparison data
-        COMPARISON_URL="https://api.github.com/repos/burnt-labs/xion/compare/$PREVIOUS_VERSION...$CURRENT_VERSION"
-        echo "Fetching comparison from: $COMPARISON_URL"
+        # Check if current version (future release) exists in the repository
+        CURRENT_TAG_EXISTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/burnt-labs/xion/git/refs/tags/$CURRENT_VERSION" | \
+          jq -r '.ref // "not_found"')
         
-        # Fetch the comparison data
-        COMPARISON_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$COMPARISON_URL")
-        
-        # Check if the API response contains an error
-        ERROR_MESSAGE=$(echo "$COMPARISON_DATA" | jq -r '.message // empty')
-        
-        if [[ "$ERROR_MESSAGE" == "Not Found" ]]; then
-          echo "⚠️  Previous version $PREVIOUS_VERSION not found in GitHub"
-          echo "📝 One of two versions doesn't exist"
+        if [[ "$CURRENT_TAG_EXISTS" == "not_found" ]]; then
+          echo "⚠️  Current version $CURRENT_VERSION doesn't exist yet (future release)"
+          echo "📝 Creating placeholder comparison data for future release documentation"
           
-          # Create empty comparison data
-          COMPARISON_DATA='{"total_commits": 0, "files": [], "commits": []}'
-          COMMIT_COUNT=0
-          FILES_CHANGED=0
+          # Create placeholder comparison data for future release
+          COMPARISON_DATA='{"total_commits": "TBD", "files": [], "commits": [], "ahead_by": "TBD", "message": "Future release - comparison will be available when release is published"}'
+          COMMIT_COUNT="TBD"
+          FILES_CHANGED="TBD"
           
-          echo "-- Using empty comparison data --"
+          echo "-- Using placeholder data for future release --"
         else
-          echo "✅ Successfully fetched comparison data"
+          # Get GitHub comparison data for existing releases
+          COMPARISON_URL="https://api.github.com/repos/burnt-labs/xion/compare/$PREVIOUS_VERSION...$CURRENT_VERSION"
+          echo "Fetching comparison from: $COMPARISON_URL"
           
-          # Save comparison data to file for Claude API
-          echo "$COMPARISON_DATA" > comparison_data.json
+          # Fetch the comparison data
+          COMPARISON_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$COMPARISON_URL")
           
-          # Extract key information
-          COMMIT_COUNT=$(echo "$COMPARISON_DATA" | jq -r '.total_commits // 0')
-          FILES_CHANGED=$(echo "$COMPARISON_DATA" | jq -r '.files | length // 0')
+          # Check if the API response contains an error
+          ERROR_MESSAGE=$(echo "$COMPARISON_DATA" | jq -r '.message // empty')
+          
+          if [[ "$ERROR_MESSAGE" == "Not Found" ]]; then
+            echo "⚠️  Previous version $PREVIOUS_VERSION not found in GitHub"
+            echo "📝 One of two versions doesn't exist"
+            
+            # Create empty comparison data
+            COMPARISON_DATA='{"total_commits": 0, "files": [], "commits": []}'
+            COMMIT_COUNT=0
+            FILES_CHANGED=0
+            
+            echo "-- Using empty comparison data --"
+          else
+            echo "✅ Successfully fetched comparison data"
+            
+            # Extract key information
+            COMMIT_COUNT=$(echo "$COMPARISON_DATA" | jq -r '.total_commits // 0')
+            FILES_CHANGED=$(echo "$COMPARISON_DATA" | jq -r '.files | length // 0')
+          fi
         fi
         
         echo "Commits: $COMMIT_COUNT"
         echo "Files changed: $FILES_CHANGED"
         
-        # Save comparison data to file for Claude API (even if empty)
+        # Save comparison data to file for Claude API (even if placeholder)
         echo "$COMPARISON_DATA" > comparison_data.json
         
         # Set environment variables
@@ -232,16 +249,20 @@ jobs:
         # Prepare the prompt for Claude API
         PROMPT="You are a technical writer for the Xion blockchain project. Please analyze the GitHub comparison data and create a comprehensive upgrade guide document for version ${{ env.RELEASE_TAG }}, similar to professional blockchain upgrade documentation.
         
+        **Important**: This may be a future release where the binary doesn't exist yet. If the comparison data shows \"TBD\" values or mentions it's a future release, create documentation that acknowledges this and provides appropriate placeholders and preparation instructions.
+        
         Format the document as a detailed upgrade guide with the following structure:
         
         # Xion ${{ env.RELEASE_TAG }} Upgrade Guide
         
         ## Overview
         - **Chain upgrade point**: [Calculate estimated date based on height ${{ env.CALCULATED_HEIGHT }}], at height \`${{ env.CALCULATED_HEIGHT }}\`
-        - **Go version**: [Extract from release or specify recommended version]
+        - **Go version**: [Extract from release or specify recommended version, or mark as TBD for future releases]
         - **Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
         
         This document describes the steps for validators and full node operators to upgrade successfully to the Xion ${{ env.RELEASE_TAG }} release.
+        
+        **Note**: If this is a future release (not yet published), some details may be marked as \"To Be Determined (TBD)\" and will be updated when the release is available.
         
         ## Upgrade Details
         The upgrade will take place at height \`${{ env.CALCULATED_HEIGHT }}\` on the Xion testnet.
@@ -252,7 +273,7 @@ jobs:
         ## System Requirements
         - **RAM**: 16GB RAM is recommended to ensure a smooth upgrade
         - **Disk Space**: Ensure sufficient disk space as state can grow during upgrade
-        - **Go Version**: [Specify required Go version]
+        - **Go Version**: [Specify required Go version, or TBD if release not available]
         
         ## Backups
         Prior to the upgrade, validators are encouraged to take a full data snapshot. Generally this can be done by backing up the \`.xiond\` directory.
@@ -268,13 +289,13 @@ jobs:
         ## What's Changed in ${{ env.RELEASE_TAG }}
         
         ### Major Changes
-        [List major features/changes with PR links based on analysis]
+        [If comparison data shows \"TBD\" or this is a future release, note that detailed changes will be available when the release is published. Otherwise, list major features/changes with PR links based on analysis]
         
         ### Bug Fixes & Improvements  
-        [List bug fixes and improvements with PR links based on analysis]
+        [List bug fixes and improvements with PR links based on analysis, or note TBD for future releases]
         
         ### Technical Improvements
-        [List technical improvements, performance enhancements, etc.]
+        [List technical improvements, performance enhancements, etc., or note TBD for future releases]
         
         ## Upgrade Steps
         
@@ -282,11 +303,15 @@ jobs:
         
         1. **Build/Download the new binary**:
            ```bash
+           # For future releases, wait until the release is published
+           # Then use these commands:
            git clone https://github.com/burnt-labs/xion.git
            cd xion
            git checkout ${{ env.RELEASE_TAG }}
            make install
            ```
+           
+           **Note**: If this is a future release, the git checkout command will fail until the tag is published. Monitor the [releases page](https://github.com/burnt-labs/xion/releases) for availability.
         
         2. **Verify the version**:
            ```bash
@@ -300,7 +325,7 @@ jobs:
         
         ### Method II: Upgrade using Cosmovisor
         
-        [Include Cosmovisor setup instructions if applicable]
+        [Include Cosmovisor setup instructions if applicable, noting any TBD elements for future releases]
         
         ## Expected Upgrade Result
         When the upgrade block height is reached, Xion will panic and stop. The chain will continue when validators with >2/3 voting power complete their upgrades.
@@ -318,25 +343,32 @@ jobs:
         - Double-signing risk during upgrade procedure
         - Verify software version before starting validator
         - If mistakes are discovered, wait for network to start before correcting
+        - **For future releases**: Ensure the release is actually published before attempting upgrade
         
         ## Release Links
-        - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
+        - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }} (may not be available yet for future releases)
         - **Upgrade Proposal**: [Link to governance proposal]
-        - **Full Changelog**: [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }})
+        - **Full Changelog**: [${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}](https://github.com/burnt-labs/xion/compare/${{ env.PREVIOUS_VERSION }}...${{ env.RELEASE_TAG }}) (will be available when release is published)
         
         ## Contributors
-        [List contributors based on the commits]
+        [List contributors based on the commits, or note TBD for future releases]
         
         ---
         
         For technical support during the upgrade, join the Xion Discord or Telegram channels.
         
-        Analyze the comparison data and create a professional, comprehensive upgrade guide. Focus on technical accuracy, operational procedures, and safety measures for validators."
+        **Additional Notes for Future Releases**: 
+        - Monitor the GitHub releases page for ${{ env.RELEASE_TAG }} availability
+        - This guide will be updated with specific details once the release is published
+        - Validate all checksums and binary versions before upgrade
+        
+        Analyze the comparison data and create a professional, comprehensive upgrade guide. If this is a future release with TBD values, acknowledge this appropriately and provide preparation guidance.
+        "
         
         # Call Claude API
         CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
           -H "Content-Type: application/json" \
-          -H "x-api-key: ${{ secrets.CLAUDE_API_KEY }}" \
+          -H "x-api-key: ${{ secrets.BURNT_CLAUDE_API_KEY }}" \
           -H "anthropic-version: 2023-06-01" \
           -d '{
             "model": "claude-3-sonnet-20240229",
@@ -376,6 +408,8 @@ jobs:
         
         This document describes the steps for validators and full node operators to upgrade successfully to the Xion ${{ env.RELEASE_TAG }} release.
         
+        **Note**: This may be documentation for a future release. Some details will be updated when the release is published.
+        
         ## Upgrade Details
         The upgrade will take place at height \`${{ env.CALCULATED_HEIGHT }}\` on the Xion testnet.
         
@@ -412,11 +446,15 @@ jobs:
         
         1. **Build the new binary**:
            \`\`\`bash
+           # For future releases, wait until the release is published
+           # Then use these commands:
            git clone https://github.com/burnt-labs/xion.git
            cd xion
            git checkout ${{ env.RELEASE_TAG }}
            make install
            \`\`\`
+           
+           **Note**: If this is a future release, the git checkout command will fail until the tag is published.
         
         2. **Verify the version**:
            \`\`\`bash
