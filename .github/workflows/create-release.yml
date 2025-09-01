@@ -324,8 +324,26 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
-        # Create and switch to feature branch
-        git checkout -b "${{ env.BRANCH_NAME }}"
+        # Check if remote branch exists
+        if git ls-remote --heads origin "${{ env.BRANCH_NAME }}" | grep -q "${{ env.BRANCH_NAME }}"; then
+          echo "Remote branch ${{ env.BRANCH_NAME }} exists, checking it out and pulling latest changes"
+          
+          # Check if local branch exists
+          if git branch | grep -q "^  ${{ env.BRANCH_NAME }}$"; then
+            echo "Local branch exists, switching to it"
+            git checkout "${{ env.BRANCH_NAME }}"
+          else
+            echo "Local branch doesn't exist, checking out from remote"
+            git checkout -b "${{ env.BRANCH_NAME }}" origin/"${{ env.BRANCH_NAME }}"
+          fi
+          
+          # Pull latest changes
+          git pull origin "${{ env.BRANCH_NAME }}"
+        else
+          echo "Remote branch ${{ env.BRANCH_NAME }} doesn't exist, creating new branch"
+          # Create and switch to new feature branch
+          git checkout -b "${{ env.BRANCH_NAME }}"
+        fi
         
         # Add all changes
         git add .
