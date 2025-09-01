@@ -250,7 +250,7 @@ jobs:
         ls -la
         ls -la .github/
         # Load and prepare the prompt from external file
-        PROMPT=$(cat /prompts/claude-api-prompt.md)
+        PROMPT=$(cat ./prompts/claude-api-prompt.md)
         
         # Replace placeholders with environment variables
         PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
@@ -293,7 +293,7 @@ jobs:
           echo "Using fallback template (Claude API may have failed)"
           
           # Load fallback template from external file
-          FALLBACK_TEMPLATE=$(cat /prompts/fallback-template.md)
+          FALLBACK_TEMPLATE=$(cat ./prompts/fallback-template.md)
           
           # Replace placeholders with environment variables
           FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
