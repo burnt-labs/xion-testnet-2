@@ -246,6 +246,8 @@ jobs:
         
     - name: Generate release notes with Claude API
       run: |
+        pwd
+        ls -la
         # Load and prepare the prompt from external file
         PROMPT=$(cat /prompts/claude-api-prompt.md)
         
