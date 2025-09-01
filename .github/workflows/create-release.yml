@@ -324,6 +324,9 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
+        # Fetch all remote branches to ensure we have latest refs
+        git fetch origin
+        
         # Check if remote branch exists
         if git ls-remote --heads origin "${{ env.BRANCH_NAME }}" | grep -q "${{ env.BRANCH_NAME }}"; then
           echo "Remote branch ${{ env.BRANCH_NAME }} exists, checking it out and pulling latest changes"
