@@ -329,32 +329,45 @@ jobs:
         
         # Check if remote branch exists
         if git ls-remote --heads origin "${{ env.BRANCH_NAME }}" | grep -q "${{ env.BRANCH_NAME }}"; then
-          echo "Remote branch ${{ env.BRANCH_NAME }} exists, checking it out and pulling latest changes"
+          echo "Remote branch ${{ env.BRANCH_NAME }} exists"
           
-          # Check if local branch exists
-          if git branch | grep -q "^  ${{ env.BRANCH_NAME }}$"; then
-            echo "Local branch exists, switching to it"
-            git checkout "${{ env.BRANCH_NAME }}"
+          # Store the current generated files temporarily
+          mkdir -p temp_files
+          cp -r proposals releases release_notes temp_files/ 2>/dev/null || true
+          cp comparison_data.json generated_release_notes.md release_notes_template.md temp_files/ 2>/dev/null || true
+          
+          # Switch to remote branch to compare
+          git checkout -b temp_branch origin/"${{ env.BRANCH_NAME }}"
+          
+          # Copy back the generated files
+          cp -r temp_files/* . 2>/dev/null || true
+          
+          # Check if there are any differences
+          git add .
+          if git diff --staged --quiet; then
+            echo "✅ No differences found between generated files and remote branch"
+            echo "The files are identical to what's already in the remote branch"
+            echo "Exiting gracefully - no update needed"
+            exit 0
           else
-            echo "Local branch doesn't exist, checking out from remote"
-            git checkout -b "${{ env.BRANCH_NAME }}" origin/"${{ env.BRANCH_NAME }}"
+            echo "📝 Differences found, proceeding with update"
+            # Switch to the actual branch name
+            git checkout -b "${{ env.BRANCH_NAME }}"
+            git add .
           fi
           
-          # Pull latest changes
-          git pull origin "${{ env.BRANCH_NAME }}"
+          # Clean up temp files and branch
+          rm -rf temp_files
+          git branch -D temp_branch 2>/dev/null || true
+          
         else
           echo "Remote branch ${{ env.BRANCH_NAME }} doesn't exist, creating new branch"
-          # Create and switch to new feature branch
           git checkout -b "${{ env.BRANCH_NAME }}"
+          git add .
         fi
         
-        # Add all changes
-        git add .
-        
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-          exit 1
-        else
+        # Commit if we have changes
+        if ! git diff --staged --quiet; then
           git commit -m "Added release ${{ env.VERSION }}
           
           - Created ${{ env.PROPOSAL_FILE }}
@@ -367,9 +380,11 @@ jobs:
           Expedited: ${{ env.EXPEDITED }}"
           
           # Push the feature branch
-          
+          git push origin "${{ env.BRANCH_NAME }}"
+          echo "✅ Changes committed and pushed"
+        else
+          echo "ℹ️  No changes to commit"
         fi
-        git push origin "${{ env.BRANCH_NAME }}"
         
 
 
