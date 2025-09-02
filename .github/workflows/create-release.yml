@@ -28,6 +28,9 @@ env:
   # API endpoints
   XION_TESTNET_API: "https://api.xion-testnet-2.burnt.com/cosmos/base/tendermint/v1beta1"
   
+  # Target branch for PRs (TODO: change to 'main' when ready)
+  TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
+  
   # Input values from workflow_dispatch
   # RELEASE_TAG: ${{ github.event.inputs.release_tag }}
   RELEASE_TAG: v22.0.0 # TODO : delete this
@@ -440,7 +443,7 @@ jobs:
         git push origin "${{ env.BRANCH_NAME }}"
         
         # Check if PR already exists
-        EXISTING_PR=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base feat/do-85-generate-upgrade-proposals-n-release-binaries --json number --jq '.[0].number' 2>/dev/null || echo "")
+        EXISTING_PR=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.TARGET_BRANCH }}" --json number --jq '.[0].number' 2>/dev/null || echo "")
         
         if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
           echo "Updating existing PR #$EXISTING_PR"
@@ -449,16 +452,13 @@ jobs:
           echo "✅ Updated existing PR #$EXISTING_PR"
         else
           echo "Creating new PR"
-          # Create new PR
-          PR_NUMBER=$(gh pr create \
-            --base feat/do-85-generate-upgrade-proposals-n-release-binaries \
+          gh pr create \
+            --base "${{ env.TARGET_BRANCH }}" \
             --head "${{ env.BRANCH_NAME }}" \
             --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
             --body-file pr_body.md \
-            --reviewer wehappyfew,2xburnt \
-            --draft=false \
-            --json number --jq '.number')
-          echo "✅ Created new PR #$PR_NUMBER"
+            --reviewer wehappyfew,2xburnt
+          echo "✅ PR created successfully"
         fi
         
     - name: Workflow Summary
