@@ -48,15 +48,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Load prompts into environment variables before switching branches  
-      run: |
-        # Load prompts using base64 to avoid delimiter issues
-        CLAUDE_PROMPT_B64=$(cat .github/workflows/prompts/claude-api-prompt.md | base64 -w 0)
-        echo "CLAUDE_PROMPT_B64=$CLAUDE_PROMPT_B64" >> $GITHUB_ENV
-        
-        FALLBACK_PROMPT_B64=$(cat .github/workflows/prompts/fallback-template.md | base64 -w 0)
-        echo "FALLBACK_PROMPT_B64=$FALLBACK_PROMPT_B64" >> $GITHUB_ENV
-
     - name: Prepare branch variables and checkout
       run: |
         # Extract version from RELEASE_TAG and set branch name
@@ -255,15 +246,15 @@ jobs:
 
     - name: Generate release notes with Claude API
       run: |
-        # Decode the prompt from base64
-        PROMPT=$(echo "$CLAUDE_PROMPT_B64" | base64 -d)
+        # Load prompt directly from file
+        PROMPT=$(cat .github/workflows/prompts/claude-api-prompt.md)
         
         # Replace placeholders with environment variables
         PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
         PROMPT="${PROMPT//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
         PROMPT="${PROMPT//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
         
-        echo "Loaded Claude API prompt from external file"
+        echo "Loaded Claude API prompt directly from file"
         
         # Call Claude API
         CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
@@ -429,7 +420,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
         base: feat/do-85-generate-upgrade-proposals-n-release-binaries   # TODO Target: main
-        title: "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }} (Height: ${{ env.CALCULATED_HEIGHT }})"
+        title: "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}"
         reviewers: wehappyfew,2xburnt
         body-path: pr_body.md
         delete-branch: false
