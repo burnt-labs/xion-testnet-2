@@ -244,11 +244,3 @@ if [[ "$DARWIN_AMD64_CHECKSUM" != *"--ADD-HERE-YOUR-VALUE--"* ]]; then
 else
     echo "📝 Placeholder checksums used (release not found or checksums unavailable)"
 fi
-echo ""
-echo "Next steps:"
-if [[ "$DARWIN_AMD64_CHECKSUM" == *"--ADD-HERE-YOUR-VALUE--"* ]]; then
-    echo "1. Update the checksums in $RELEASE_FILE with actual release binary checksums"
-fi
-echo "2. Review the proposal details"
-echo "3. Commit and push the changes"
-echo "4. Submit the proposal on-chain when ready"
