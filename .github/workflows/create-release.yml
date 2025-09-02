@@ -381,7 +381,7 @@ jobs:
           fi
         done
         
-        # Commit and push only if we have changes in the created files
+        # Always push branch to ensure PR can be created/updated
         if [ "$CHANGES_DETECTED" = true ]; then
           # Build commit message from actual changes
           COMMIT_MSG="Release ${{ env.VERSION }} update
@@ -395,17 +395,24 @@ jobs:
           - Expedited: ${{ env.EXPEDITED }}"
 
           git commit -m "$COMMIT_MSG"
-          
-          # Push the feature branch
-          git push origin "${{ env.BRANCH_NAME }}"
-          echo "✅ Changes committed and pushed"
+          echo "✅ File changes committed"
         else
-          echo "ℹ️  No changes detected - all files already exist with identical content"
-          echo "ℹ️  Skipping commit and push as no updates are needed"
-          
-          # Set environment variable to skip PR creation
-          echo "SKIP_PR_CREATION=true" >> $GITHUB_ENV
+          echo "ℹ️  No file changes detected - all files already exist with identical content"
+          # Create empty commit to trigger PR update
+          git commit --allow-empty -m "Update PR: Refresh upgrade parameters for ${{ env.VERSION }}
+
+Configuration refresh:
+- Release Tag: ${{ env.RELEASE_TAG }}
+- Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)  
+- Deposit: ${{ env.DEPOSIT }}
+- Expedited: ${{ env.EXPEDITED }}
+- Run: ${{ github.run_number }}"
+          echo "✅ Empty commit created to update PR"
         fi
+        
+        # Always push the branch  
+        git push origin "${{ env.BRANCH_NAME }}"
+        echo "✅ Branch pushed - PR will be created/updated"
         
     - name: Prepare comprehensive PR body
     # if: env.SKIP_PR_CREATION != 'true'
@@ -413,18 +420,18 @@ jobs:
         # Extract proposal number from filename
         PROPOSAL_NUM=$(basename "${{ env.PROPOSAL_FILE }}" | cut -d'-' -f1)
         
-        # Create comprehensive PR body
-        cat > pr_body.md << 'EOF'
+        # Create comprehensive PR body with placeholders
+        cat > pr_body.md << EOF
         # 🚀 Xion ${{ env.RELEASE_TAG }} Upgrade
         
         This pull request implements the upgrade to **Xion ${{ env.RELEASE_TAG }}** for the Xion testnet.
         
         ## 📋 Overview
         
-        - **Upgrade Height**: `${{ env.CALCULATED_HEIGHT }}` (estimated: ~2 days from current block)
-        - **Chain ID**: `xion-testnet-2` (in-place migration)
+        - **Upgrade Height**: \`${{ env.CALCULATED_HEIGHT }}\` (estimated: ~2 days from current block)
+        - **Chain ID**: \`xion-testnet-2\` (in-place migration)
         - **Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
-        - **Proposal**: `${{ env.PROPOSAL_FILE }}`
+        - **Proposal**: \`${{ env.PROPOSAL_FILE }}\`
         - **Governance Deposit**: ${{ env.DEPOSIT }}
         - **Expedited**: ${{ env.EXPEDITED }}
         
@@ -448,20 +455,20 @@ jobs:
         EOF
         fi
         
-        cat >> pr_body.md << 'EOF'
+        cat >> pr_body.md << EOF
         ## 📁 Files Modified
         
         ### Governance & Upgrade Files
-        - **Proposal**: `${{ env.PROPOSAL_FILE }}`
-          - Upgrade height: `${{ env.CALCULATED_HEIGHT }}`
+        - **Proposal**: \`${{ env.PROPOSAL_FILE }}\`
+          - Upgrade height: \`${{ env.CALCULATED_HEIGHT }}\`
           - Chain upgrade to ${{ env.RELEASE_TAG }}
-          - Points to release config: `${{ env.RELEASE_FILE }}`
+          - Points to release config: \`${{ env.RELEASE_FILE }}\`
         
-        - **Release Config**: `${{ env.RELEASE_FILE }}`
+        - **Release Config**: \`${{ env.RELEASE_FILE }}\`
           - Binary URLs for all platforms (darwin/linux, amd64/arm64)
           - SHA256 checksums for security verification
         
-        - **Release Notes**: `${{ env.RELEASE_NOTES_FILE }}`
+        - **Release Notes**: \`${{ env.RELEASE_NOTES_FILE }}\`
           - Detailed changelog and upgrade information
           - Generated using AI analysis of GitHub comparison data
         
@@ -489,13 +496,13 @@ jobs:
         EOF
         fi
         
-        cat >> pr_body.md << 'EOF'
+        cat >> pr_body.md << EOF
         
         ## ⚠️ Important Notes for Validators
         
         ### Pre-Upgrade Checklist
-        - [ ] **Backup**: Full snapshot of `.xiond` directory
-        - [ ] **Critical**: Backup `.xiond/data/priv_validator_state.json` after stopping node
+        - [ ] **Backup**: Full snapshot of \`.xiond\` directory
+        - [ ] **Critical**: Backup \`.xiond/data/priv_validator_state.json\` after stopping node
         - [ ] **Verify**: Binary version before starting post-upgrade
         - [ ] **Monitor**: Network upgrade progress
         
@@ -505,23 +512,23 @@ jobs:
         - **Network**: Stable connection during upgrade window
         
         ### Upgrade Process
-        1. **Wait** for upgrade height `${{ env.CALCULATED_HEIGHT }}`
+        1. **Wait** for upgrade height \`${{ env.CALCULATED_HEIGHT }}\`
         2. **Node will panic** with upgrade message at target height
         3. **Stop node** and switch to ${{ env.RELEASE_TAG }} binary
-        4. **Restart** with `xiond start`
+        4. **Restart** with \`xiond start\`
         5. **Monitor** for successful chain continuation
         
         ### Emergency Procedures
-        ```bash
+        \`\`\`bash
         # Skip upgrade if issues occur
         xiond start --unsafe-skip-upgrade ${{ env.CALCULATED_HEIGHT }}
-        ```
+        \`\`\`
         
         ## 🔗 Resources
         
         - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/${{ env.RELEASE_TAG }}
-        - **Upgrade Proposal**: `${{ env.PROPOSAL_FILE }}`
-        - **Technical Documentation**: `${{ env.RELEASE_NOTES_FILE }}`
+        - **Upgrade Proposal**: \`${{ env.PROPOSAL_FILE }}\`
+        - **Technical Documentation**: \`${{ env.RELEASE_NOTES_FILE }}\`
         - **Support**: Join Xion Discord/Telegram for upgrade assistance
         
         ## 🧪 Testing Status
@@ -535,6 +542,14 @@ jobs:
         ---
         
         **⚡ Automation Notes**: This PR was automatically generated with intelligent duplicate detection. Files are only updated when content changes, and identical configurations reuse existing proposals to prevent iteration spam.
+        
+        **🔄 Run Details**: 
+        - Workflow run: ${{ github.run_number }}
+        - Commit: \`${{ github.sha }}\`
+        - Timestamp: \`$(date -u '+%Y-%m-%d %H:%M:%S UTC')\`
+        - Trigger: ${{ github.event_name }}
+        
+        **🔄 Latest Update**: This PR is automatically updated each time the workflow runs to reflect current blockchain state and calculated values.
         
         EOF
         
@@ -554,8 +569,8 @@ jobs:
         
         echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
         
-    - name: Create Pull Request
-      if: env.SKIP_PR_CREATION != 'true'
+    - name: Create or Update Pull Request
+      # if: env.SKIP_PR_CREATION != 'true'
       uses: peter-evans/create-pull-request@v5 # https://github.com/peter-evans/create-pull-request?tab=readme-ov-file
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
@@ -565,20 +580,21 @@ jobs:
         reviewers: wehappyfew,2xburnt
         body-path: pr_body.md
         delete-branch: false
+        # Force update the PR description even if no file changes
+        force: true
         
-    - name: Summary of no changes
-      if: env.SKIP_PR_CREATION == 'true'
+    - name: Workflow Summary
       run: |
-        echo "## 📋 Workflow Summary - No Changes Needed"
+        echo "## 📋 Workflow Summary"
         echo ""
-        echo "✅ All release files already exist with identical content:"
+        echo "✅ PR has been created/updated for release ${{ env.RELEASE_TAG }}"
         echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
         echo "   - Release config: ${{ env.RELEASE_FILE }}"
         echo "   - Release notes: ${{ env.RELEASE_NOTES_FILE }}"
         echo ""
-        echo "ℹ️  No pull request was created as no file updates were necessary."
-        echo "ℹ️  The existing files already contain the correct configuration for:"
+        echo "🔄 Configuration for this run:"
         echo "   - Release Tag: ${{ env.RELEASE_TAG }}"
         echo "   - Upgrade Height: ${{ env.CALCULATED_HEIGHT }}"
         echo "   - Deposit: ${{ env.DEPOSIT }}"
         echo "   - Expedited: ${{ env.EXPEDITED }}"
+        echo "   - Run Number: ${{ github.run_number }}"
