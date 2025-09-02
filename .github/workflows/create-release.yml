@@ -350,9 +350,9 @@ jobs:
         echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
         echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
         
-    - name: Commit and push changes
+    - name: Stage changes for PR creation
       run: |
-        # Check if any of the created files have changes
+        # Check if any of the created files have changes and stage them
         CHANGES_DETECTED=false
         COMMIT_MESSAGE_PARTS=()
         
@@ -381,39 +381,36 @@ jobs:
           fi
         done
         
-        # Always commit and push to ensure PR can be updated
+        # Build commit message for peter-evans action to use
         if [ "$CHANGES_DETECTED" = true ]; then
-          # Build commit message from actual changes
-          COMMIT_MSG="Release ${{ env.VERSION }} update
-          
-          $(printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}")
-          
-          Configuration:
-          - Release Tag: ${{ env.RELEASE_TAG }}
-          - Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-          - Deposit: ${{ env.DEPOSIT }}
-          - Expedited: ${{ env.EXPEDITED }}"
-
-          git commit -m "$COMMIT_MSG"
-          echo "✅ File changes committed"
+          {
+            echo "Release ${{ env.VERSION }} update"
+            echo ""
+            printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}"
+            echo ""
+            echo "Configuration:"
+            echo "- Release Tag: ${{ env.RELEASE_TAG }}"
+            echo "- Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)"
+            echo "- Deposit: ${{ env.DEPOSIT }}"
+            echo "- Expedited: ${{ env.EXPEDITED }}"
+          } > pr_commit_message.txt
+          echo "✅ File changes staged for PR creation"
         else
-          echo "ℹ️  No file changes detected - all files already exist with identical content"
-          # Create empty commit to trigger PR update
-          EMPTY_COMMIT_MSG="Update PR: Refresh upgrade parameters for ${{ env.VERSION }}
-
-          Configuration refresh:
-          - Release Tag: ${{ env.RELEASE_TAG }}
-          - Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated 2 days from current block)
-          - Deposit: ${{ env.DEPOSIT }}
-          - Expedited: ${{ env.EXPEDITED }}
-          - Run: ${{ github.run_number }}"
-          git commit --allow-empty -m "$EMPTY_COMMIT_MSG"
-          echo "✅ Empty commit created to update PR"
+          {
+            echo "Update PR: Refresh upgrade parameters for ${{ env.VERSION }}"
+            echo ""
+            echo "Configuration refresh:"
+            echo "- Release Tag: ${{ env.RELEASE_TAG }}"
+            echo "- Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated 2 days from current block)"
+            echo "- Deposit: ${{ env.DEPOSIT }}"
+            echo "- Expedited: ${{ env.EXPEDITED }}"
+            echo "- Run: ${{ github.run_number }}"
+          } > pr_commit_message.txt
+          echo "ℹ️  No file changes detected - peter-evans action will handle empty commit if needed"
         fi
         
-        # Always push the branch
-        git push origin "${{ env.BRANCH_NAME }}"
-        echo "✅ Branch pushed - PR will be created/updated"
+        # Set environment variable for peter-evans action
+        echo "COMMIT_MESSAGE_FILE=pr_commit_message.txt" >> $GITHUB_ENV
         
     - name: Prepare comprehensive PR body
       run: |
@@ -430,9 +427,16 @@ jobs:
         branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
         base: feat/do-85-generate-upgrade-proposals-n-release-binaries   # TODO Target: main
         title: "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}"
+        commit-message-path: ${{ env.COMMIT_MESSAGE_FILE }}
+        committer: GitHub Action <action@github.com>
+        author: GitHub Action <action@github.com>
         reviewers: wehappyfew,2xburnt
         body-path: pr_body.md
         delete-branch: false
+        add-paths: |
+          ${{ env.PROPOSAL_FILE }}
+          ${{ env.RELEASE_FILE }}
+          ${{ env.RELEASE_NOTES_FILE }}
         
     - name: Workflow Summary
       run: |
