@@ -48,16 +48,14 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Load prompts before branch operations
+    - name: Load prompts into environment variables before switching branches  
       run: |
-        # Load prompts into environment variables before switching branches
-        echo "CLAUDE_PROMPT<<EOF" >> $GITHUB_ENV
-        cat .github/workflows/prompts/claude-api-prompt.md >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
+        # Load prompts using base64 to avoid delimiter issues
+        CLAUDE_PROMPT_B64=$(cat .github/workflows/prompts/claude-api-prompt.md | base64 -w 0)
+        echo "CLAUDE_PROMPT_B64=$CLAUDE_PROMPT_B64" >> $GITHUB_ENV
         
-        echo "FALLBACK_PROMPT<<EOF" >> $GITHUB_ENV
-        cat .github/workflows/prompts/fallback-template.md >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
+        FALLBACK_PROMPT_B64=$(cat .github/workflows/prompts/fallback-template.md | base64 -w 0)
+        echo "FALLBACK_PROMPT_B64=$FALLBACK_PROMPT_B64" >> $GITHUB_ENV
 
     - name: Prepare branch variables and checkout
       run: |
@@ -257,8 +255,8 @@ jobs:
 
     - name: Generate release notes with Claude API
       run: |
-        # Load and prepare the prompt from external file
-        PROMPT=$(cat .github/workflows/prompts/claude-api-prompt.md)
+        # Decode the prompt from base64
+        PROMPT=$(echo "$CLAUDE_PROMPT_B64" | base64 -d)
         
         # Replace placeholders with environment variables
         PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
