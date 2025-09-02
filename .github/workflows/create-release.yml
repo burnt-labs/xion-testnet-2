@@ -332,8 +332,21 @@ jobs:
         VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
         VERSION="v${VERSION_NUM}"
         
-        # These will be set after the script creates the files
-        echo "PROPOSAL_FILE=proposals/038-upgrade-$VERSION.json" >> $GITHUB_ENV
+        # Find the actual proposal file that was created/used by the script
+        ACTUAL_PROPOSAL_FILE=$(find proposals/ -name "*-upgrade-${VERSION}.json" | head -1)
+        if [ -z "$ACTUAL_PROPOSAL_FILE" ]; then
+          # Fallback: predict the next number if no file found yet
+          LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
+          if [ -z "$LATEST_PROPOSAL" ]; then
+            NEXT_NUM="001"
+          else
+            CURRENT_NUM=$(echo $LATEST_PROPOSAL | cut -d'-' -f1)
+            NEXT_NUM=$(printf "%03d" $((10#$CURRENT_NUM + 1)))
+          fi
+          ACTUAL_PROPOSAL_FILE="proposals/${NEXT_NUM}-upgrade-${VERSION}.json"
+        fi
+        
+        echo "PROPOSAL_FILE=$ACTUAL_PROPOSAL_FILE" >> $GITHUB_ENV
         echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
         echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
         
@@ -341,17 +354,27 @@ jobs:
       run: |
         # Check if any of the created files have changes
         CHANGES_DETECTED=false
+        COMMIT_MESSAGE_PARTS=()
         
         # Check each file individually and add only if changed
         for file in "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}"; do
           if [ -f "$file" ]; then
             # Check if file has changes (new file or modified)
             if git diff --quiet "$file" 2>/dev/null; then
-              echo "ℹ️  No changes in $file"
+              echo "ℹ️  No changes in $file (reused existing file)"
             else
               echo "📝 Changes detected in $file"
               git add "$file"
               CHANGES_DETECTED=true
+              
+              # Add appropriate message based on file type
+              if [[ "$file" == *"proposal"* ]]; then
+                COMMIT_MESSAGE_PARTS+=("- Updated proposal: $file")
+              elif [[ "$file" == *"release"* && "$file" == *".json" ]]; then
+                COMMIT_MESSAGE_PARTS+=("- Updated release config: $file")
+              elif [[ "$file" == *"release_notes"* ]]; then
+                COMMIT_MESSAGE_PARTS+=("- Updated release notes: $file")
+              fi
             fi
           else
             echo "⚠️  File $file does not exist"
@@ -360,41 +383,50 @@ jobs:
         
         # Commit and push only if we have changes in the created files
         if [ "$CHANGES_DETECTED" = true ]; then
-          git commit -m "Added release ${{ env.VERSION }}
+          # Build commit message from actual changes
+          COMMIT_MSG="Release ${{ env.VERSION }} update
           
-          - Created ${{ env.PROPOSAL_FILE }}
-          - Created ${{ env.RELEASE_FILE }}
-          - Created ${{ env.RELEASE_NOTES_FILE }}
+          $(printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}")
           
-          Release Tag: ${{ env.RELEASE_TAG }}
-          Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-          Deposit: ${{ env.DEPOSIT }}
-          Expedited: ${{ env.EXPEDITED }}"
+          Configuration:
+          - Release Tag: ${{ env.RELEASE_TAG }}
+          - Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
+          - Deposit: ${{ env.DEPOSIT }}
+          - Expedited: ${{ env.EXPEDITED }}"
+
+          git commit -m "$COMMIT_MSG"
           
           # Push the feature branch
           git push origin "${{ env.BRANCH_NAME }}"
           echo "✅ Changes committed and pushed"
         else
-          echo "ℹ️  No changes detected in created files - skipping commit and push"
+          echo "ℹ️  No changes detected - all files already exist with identical content"
+          echo "ℹ️  Skipping commit and push as no updates are needed"
+          
+          # Set environment variable to skip PR creation
+          echo "SKIP_PR_CREATION=true" >> $GITHUB_ENV
         fi
         
     - name: Create Pull Request
+      if: env.SKIP_PR_CREATION != 'true'
       uses: peter-evans/create-pull-request@v5 # https://github.com/peter-evans/create-pull-request?tab=readme-ov-file
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
         base: feat/do-85-generate-upgrade-proposals-n-release-binaries   # TODO Target: main
-        title: "Added release ${{ env.VERSION }}"
+        title: "Release ${{ env.VERSION }} update"
         reviewers: wehappyfew,2xburnt
         body: |
           ## Upgrade to release ${{ env.VERSION }}
           
-          This PR upgrades to release ${{ env.VERSION }}.
+          This PR contains updates for release ${{ env.VERSION }}.
           
-          ### Files created/modified:
+          ### Files involved:
           - `${{ env.PROPOSAL_FILE }}`
           - `${{ env.RELEASE_FILE }}`
           - `${{ env.RELEASE_NOTES_FILE }}`
+          
+          **Note**: Only files that were actually modified are included in this PR. Files with identical content were automatically reused.
           
           ### Configuration:
           - **Release Tag**: ${{ env.RELEASE_TAG }}
@@ -402,3 +434,20 @@ jobs:
           - **Deposit**: ${{ env.DEPOSIT }}
           - **Expedited**: ${{ env.EXPEDITED }}
         delete-branch: false
+        
+    - name: Summary of no changes
+      if: env.SKIP_PR_CREATION == 'true'
+      run: |
+        echo "## 📋 Workflow Summary - No Changes Needed"
+        echo ""
+        echo "✅ All release files already exist with identical content:"
+        echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
+        echo "   - Release config: ${{ env.RELEASE_FILE }}"
+        echo "   - Release notes: ${{ env.RELEASE_NOTES_FILE }}"
+        echo ""
+        echo "ℹ️  No pull request was created as no file updates were necessary."
+        echo "ℹ️  The existing files already contain the correct configuration for:"
+        echo "   - Release Tag: ${{ env.RELEASE_TAG }}"
+        echo "   - Upgrade Height: ${{ env.CALCULATED_HEIGHT }}"
+        echo "   - Deposit: ${{ env.DEPOSIT }}"
+        echo "   - Expedited: ${{ env.EXPEDITED }}"
