@@ -98,9 +98,8 @@ done
 PROPOSAL_FILE="proposals/${NEXT_NUM}-upgrade-${VERSION}.json"
 AUTHORITY="xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc"
 
-echo "Creating proposal file: $PROPOSAL_FILE"
-
-# Create the proposal JSON
+# Create/update the proposal JSON
+echo "Creating/updating proposal file: $PROPOSAL_FILE"
 cat > "$PROPOSAL_FILE" << EOF
 {
   "messages": [
@@ -122,11 +121,10 @@ cat > "$PROPOSAL_FILE" << EOF
 }
 EOF
 
-# Create release file placeholder if it doesn't exist
+# Create/update release file
 RELEASE_FILE="releases/${VERSION}.json"
-if [ ! -f "$RELEASE_FILE" ]; then
-    echo "Creating release file: $RELEASE_FILE"
-    cat > "$RELEASE_FILE" << EOF
+echo "Creating/updating release file: $RELEASE_FILE"
+cat > "$RELEASE_FILE" << EOF
 {
     "binaries": {
         "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_darwin_amd64.tar.gz?checksum=sha256:${DARWIN_AMD64_CHECKSUM}",
@@ -136,22 +134,18 @@ if [ ! -f "$RELEASE_FILE" ]; then
     }
 }
 EOF
-else
-    echo "Release file already exists: $RELEASE_FILE"
-fi
 
-# Create release notes markdown file if it doesn't exist
+# Create/update release notes markdown file
 RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
-if [ ! -f "$RELEASE_NOTES_FILE" ]; then
-    echo "Creating release notes file: $RELEASE_NOTES_FILE"
-    
-    # Check if AI-generated template exists
-    if [ -f "release_notes_template.md" ]; then
-        echo "Using AI-generated release notes template"
-        cp release_notes_template.md "$RELEASE_NOTES_FILE"
-    else
-        echo "Using default release notes template"
-        cat > "$RELEASE_NOTES_FILE" << EOF
+echo "Creating/updating release notes file: $RELEASE_NOTES_FILE"
+
+# Check if AI-generated template exists
+if [ -f "release_notes_template.md" ]; then
+    echo "Using AI-generated release notes template"
+    cp release_notes_template.md "$RELEASE_NOTES_FILE"
+else
+    echo "Using default release notes template"
+    cat > "$RELEASE_NOTES_FILE" << EOF
 # Xion ${VERSION_FULL} Release Notes
 
 ## Overview
@@ -200,9 +194,6 @@ Special thanks to the following contributors who made this release possible:
 
 For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/${NEXT_NUM}-upgrade-${VERSION}.json).
 EOF
-    fi
-else
-    echo "Release notes file already exists: $RELEASE_NOTES_FILE"
 fi
 
 # Format JSON files if jq is available
@@ -236,7 +227,7 @@ else
     echo "jq not found, skipping JSON formatting"
 fi
 
-echo "Successfully created:"
+echo "Successfully created/updated:"
 echo "  - $PROPOSAL_FILE"
 [ -f "$RELEASE_FILE" ] && echo "  - $RELEASE_FILE"
 [ -f "$RELEASE_NOTES_FILE" ] && echo "  - $RELEASE_NOTES_FILE"
