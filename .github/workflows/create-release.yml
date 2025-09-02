@@ -48,6 +48,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Load prompts before branch operations
+      run: |
+        # Load prompts into environment variables before switching branches
+        echo "CLAUDE_PROMPT<<EOF" >> $GITHUB_ENV
+        cat .github/workflows/prompts/claude-api-prompt.md >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+        
+        echo "FALLBACK_PROMPT<<EOF" >> $GITHUB_ENV
+        cat .github/workflows/prompts/fallback-template.md >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
     - name: Prepare branch variables and checkout
       run: |
         # Extract version from RELEASE_TAG and set branch name
@@ -243,173 +254,153 @@ jobs:
         echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
         echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV
         echo "FILES_CHANGED=$FILES_CHANGED" >> $GITHUB_ENV
-      
-    - name: Debug - Check file system
-      run: |
-        pwd
-        echo "=== Root directory ==="
-        ls -la
-        echo "=== .github directory ==="
-        ls -la .github/
-        echo "=== workflows directory ==="
-        ls -la .github/workflows/
-        echo "=== Check if prompts directory exists ==="
-        if [ -d ".github/workflows/prompts" ]; then
-          echo "Prompts directory exists!"
-          ls -la .github/workflows/prompts/
-        else
-          echo "Prompts directory does NOT exist"
-        fi
-        echo "=== Git branch info ==="
-        git branch -v
-        git log --oneline -3
 
-    # - name: Generate release notes with Claude API
-    #   run: |
-    #     # Load and prepare the prompt from external file
-    #     PROMPT=$(cat .github/workflows/prompts/claude-api-prompt.md)
+    - name: Generate release notes with Claude API
+      run: |
+        # Load and prepare the prompt from external file
+        PROMPT=$(cat .github/workflows/prompts/claude-api-prompt.md)
         
-    #     # Replace placeholders with environment variables
-    #     PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
-    #     PROMPT="${PROMPT//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
-    #     PROMPT="${PROMPT//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
+        # Replace placeholders with environment variables
+        PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
+        PROMPT="${PROMPT//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
+        PROMPT="${PROMPT//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
         
-    #     echo "Loaded Claude API prompt from external file"
+        echo "Loaded Claude API prompt from external file"
         
-    #     # Call Claude API
-    #     CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
-    #       -H "Content-Type: application/json" \
-    #       -H "x-api-key: ${{ secrets.BURNT_CLAUDE_API_KEY }}" \
-    #       -H "anthropic-version: 2023-06-01" \
-    #       -d '{
-    #         "model": "claude-3-sonnet-20240229",
-    #         "max_tokens": 4000,
-    #         "messages": [
-    #           {
-    #             "role": "user",
-    #             "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
-    #           }
-    #         ]
-    #       }')
+        # Call Claude API
+        CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+          -H "Content-Type: application/json" \
+          -H "x-api-key: ${{ secrets.BURNT_CLAUDE_API_KEY }}" \
+          -H "anthropic-version: 2023-06-01" \
+          -d '{
+            "model": "claude-3-sonnet-20240229",
+            "max_tokens": 4000,
+            "messages": [
+              {
+                "role": "user",
+                "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
+              }
+            ]
+          }')
         
-    #     # Extract the response content
-    #     RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
+        # Extract the response content
+        RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
         
-    #     # Save the generated release notes
-    #     echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
+        # Save the generated release notes
+        echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
         
-    #     echo "Generated release notes saved to generated_release_notes.md"
+        echo "Generated release notes saved to generated_release_notes.md"
          
-    # - name: Use fallback template if Claude API fails
-    #   run: |
-    #     # Use the generated release notes if available, otherwise use template
-    #     if [ -f "generated_release_notes.md" ]; then
-    #       echo "Using AI-generated release notes"
-    #       cp generated_release_notes.md release_notes_template.md
-    #     else
-    #       echo "Using fallback template (Claude API may have failed)"
+    - name: Use fallback template if Claude API fails
+      run: |
+        # Use the generated release notes if available, otherwise use template
+        if [ -f "generated_release_notes.md" ]; then
+          echo "Using AI-generated release notes"
+          cp generated_release_notes.md release_notes_template.md
+        else
+          echo "Using fallback template (Claude API may have failed)"
           
-    #       # Load fallback template from external file
-    #       FALLBACK_TEMPLATE=$(cat .github/workflows/prompts/fallback-template.md)
+          # Load fallback template from external file
+          FALLBACK_TEMPLATE=$(cat .github/workflows/prompts/fallback-template.md)
           
-    #       # Replace placeholders with environment variables
-    #       FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
-    #       FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
-    #       FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
+          # Replace placeholders with environment variables
+          FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
+          FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
+          FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
           
-    #       # Save the processed template
-    #       echo "$FALLBACK_TEMPLATE" > release_notes_template.md
-    #       echo "Created fallback template from external file"
-    #     fi
+          # Save the processed template
+          echo "$FALLBACK_TEMPLATE" > release_notes_template.md
+          echo "Created fallback template from external file"
+        fi
         
-    # - name: Run release files creation script
-    #   run: |
-    #     ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
+    - name: Run release files creation script
+      run: |
+        ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
         
-    # - name: debug - Echo release files
-    #   run: |
-    #     echo "-> Proposal file"
-    #     cat proposals/038-upgrade-v22.json
+    - name: debug - Echo release files
+      run: |
+        echo "-> Proposal file"
+        cat proposals/038-upgrade-v22.json
         
-    #     echo "-> Release file"
-    #     cat releases/v22.json
+        echo "-> Release file"
+        cat releases/v22.json
         
-    #     echo "-> Release notes file"
-    #     cat release_notes/v22.md
+        echo "-> Release notes file"
+        cat release_notes/v22.md
         
-    # - name: Set environment variables from script output
-    #   run: |
-    #     # Find the actual files that were created (after script runs)
-    #     VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-    #     VERSION="v${VERSION_NUM}"
+    - name: Set environment variables from script output
+      run: |
+        # Find the actual files that were created (after script runs)
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
         
-    #     # These will be set after the script creates the files
-    #     echo "PROPOSAL_FILE=proposals/038-upgrade-$VERSION.json" >> $GITHUB_ENV
-    #     echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
-    #     echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
+        # These will be set after the script creates the files
+        echo "PROPOSAL_FILE=proposals/038-upgrade-$VERSION.json" >> $GITHUB_ENV
+        echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
+        echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
         
-    # - name: Commit and push changes
-    #   run: |
-    #     # Check if any of the created files have changes
-    #     CHANGES_DETECTED=false
+    - name: Commit and push changes
+      run: |
+        # Check if any of the created files have changes
+        CHANGES_DETECTED=false
         
-    #     # Check each file individually and add only if changed
-    #     for file in "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}"; do
-    #       if [ -f "$file" ]; then
-    #         # Check if file has changes (new file or modified)
-    #         if git diff --quiet "$file" 2>/dev/null; then
-    #           echo "ℹ️  No changes in $file"
-    #         else
-    #           echo "📝 Changes detected in $file"
-    #           git add "$file"
-    #           CHANGES_DETECTED=true
-    #         fi
-    #       else
-    #         echo "⚠️  File $file does not exist"
-    #       fi
-    #     done
+        # Check each file individually and add only if changed
+        for file in "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}"; do
+          if [ -f "$file" ]; then
+            # Check if file has changes (new file or modified)
+            if git diff --quiet "$file" 2>/dev/null; then
+              echo "ℹ️  No changes in $file"
+            else
+              echo "📝 Changes detected in $file"
+              git add "$file"
+              CHANGES_DETECTED=true
+            fi
+          else
+            echo "⚠️  File $file does not exist"
+          fi
+        done
         
-    #     # Commit and push only if we have changes in the created files
-    #     if [ "$CHANGES_DETECTED" = true ]; then
-    #       git commit -m "Added release ${{ env.VERSION }}
+        # Commit and push only if we have changes in the created files
+        if [ "$CHANGES_DETECTED" = true ]; then
+          git commit -m "Added release ${{ env.VERSION }}
           
-    #       - Created ${{ env.PROPOSAL_FILE }}
-    #       - Created ${{ env.RELEASE_FILE }}
-    #       - Created ${{ env.RELEASE_NOTES_FILE }}
+          - Created ${{ env.PROPOSAL_FILE }}
+          - Created ${{ env.RELEASE_FILE }}
+          - Created ${{ env.RELEASE_NOTES_FILE }}
           
-    #       Release Tag: ${{ env.RELEASE_TAG }}
-    #       Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-    #       Deposit: ${{ env.DEPOSIT }}
-    #       Expedited: ${{ env.EXPEDITED }}"
+          Release Tag: ${{ env.RELEASE_TAG }}
+          Upgrade height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
+          Deposit: ${{ env.DEPOSIT }}
+          Expedited: ${{ env.EXPEDITED }}"
           
-    #       # Push the feature branch
-    #       git push origin "${{ env.BRANCH_NAME }}"
-    #       echo "✅ Changes committed and pushed"
-    #     else
-    #       echo "ℹ️  No changes detected in created files - skipping commit and push"
-    #     fi
+          # Push the feature branch
+          git push origin "${{ env.BRANCH_NAME }}"
+          echo "✅ Changes committed and pushed"
+        else
+          echo "ℹ️  No changes detected in created files - skipping commit and push"
+        fi
         
-    # - name: Create Pull Request
-    #   uses: peter-evans/create-pull-request@v5 # https://github.com/peter-evans/create-pull-request?tab=readme-ov-file
-    #   with:
-    #     token: ${{ secrets.GITHUB_TOKEN }}
-    #     branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
-    #     base: feat/do-85-generate-upgrade-proposals-n-release-binaries   # TODO Target: main
-    #     title: "Added release ${{ env.VERSION }}"
-    #     reviewers: wehappyfew,2xburnt
-    #     body: |
-    #       ## Upgrade to release ${{ env.VERSION }}
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5 # https://github.com/peter-evans/create-pull-request?tab=readme-ov-file
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ env.BRANCH_NAME }}  # Source: release/vXX.0.0
+        base: feat/do-85-generate-upgrade-proposals-n-release-binaries   # TODO Target: main
+        title: "Added release ${{ env.VERSION }}"
+        reviewers: wehappyfew,2xburnt
+        body: |
+          ## Upgrade to release ${{ env.VERSION }}
           
-    #       This PR upgrades to release ${{ env.VERSION }}.
+          This PR upgrades to release ${{ env.VERSION }}.
           
-    #       ### Files created/modified:
-    #       - `${{ env.PROPOSAL_FILE }}`
-    #       - `${{ env.RELEASE_FILE }}`
-    #       - `${{ env.RELEASE_NOTES_FILE }}`
+          ### Files created/modified:
+          - `${{ env.PROPOSAL_FILE }}`
+          - `${{ env.RELEASE_FILE }}`
+          - `${{ env.RELEASE_NOTES_FILE }}`
           
-    #       ### Configuration:
-    #       - **Release Tag**: ${{ env.RELEASE_TAG }}
-    #       - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
-    #       - **Deposit**: ${{ env.DEPOSIT }}
-    #       - **Expedited**: ${{ env.EXPEDITED }}
-    #     delete-branch: false
+          ### Configuration:
+          - **Release Tag**: ${{ env.RELEASE_TAG }}
+          - **Upgrade Height**: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)
+          - **Deposit**: ${{ env.DEPOSIT }}
+          - **Expedited**: ${{ env.EXPEDITED }}
+        delete-branch: false
