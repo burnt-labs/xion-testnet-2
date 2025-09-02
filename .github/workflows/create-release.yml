@@ -48,6 +48,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       
+    - name: Load prompts into environment variables before switching branches  
+      run: |
+        # Load prompts using base64 to avoid delimiter issues
+        CLAUDE_PROMPT_B64=$(cat .github/workflows/prompts/claude-api-prompt.md | base64 -w 0)
+        echo "CLAUDE_PROMPT_B64=$CLAUDE_PROMPT_B64" >> $GITHUB_ENV
+        
+        FALLBACK_PROMPT_B64=$(cat .github/workflows/prompts/fallback-template.md | base64 -w 0)
+        echo "FALLBACK_PROMPT_B64=$FALLBACK_PROMPT_B64" >> $GITHUB_ENV
+
     - name: Prepare branch variables and checkout
       run: |
         # Extract version from RELEASE_TAG and set branch name
@@ -246,15 +255,15 @@ jobs:
 
     - name: Generate release notes with Claude API
       run: |
-        # Load prompt directly from file
-        PROMPT=$(cat .github/workflows/prompts/claude-api-prompt.md)
+        # Decode the prompt from base64
+        PROMPT=$(echo "$CLAUDE_PROMPT_B64" | base64 -d)
         
         # Replace placeholders with environment variables
         PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
         PROMPT="${PROMPT//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
         PROMPT="${PROMPT//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
         
-        echo "Loaded Claude API prompt directly from file"
+        echo "Loaded Claude API prompt from external file"
         
         # Call Claude API
         CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
@@ -304,7 +313,7 @@ jobs:
         
     - name: Run release files creation script
       run: |
-        .github/workflows/scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
+        ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
         
     - name: debug - Echo release files
       run: |
@@ -409,7 +418,7 @@ jobs:
     - name: Prepare comprehensive PR body
       run: |
         # Generate comprehensive PR body using external script
-        .github/workflows/scripts/generate-pr-body.sh "${{ env.VERSION }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}" "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_COUNT }}" "${{ env.FILES_CHANGED }}" "${{ env.PREVIOUS_VERSION }}" "${{ env.DARWIN_AMD64_CHECKSUM }}" "${{ env.DARWIN_ARM64_CHECKSUM }}" "${{ env.LINUX_AMD64_CHECKSUM }}" "${{ env.LINUX_ARM64_CHECKSUM }}" "${{ github.run_number }}" "${{ github.sha }}"
+        ./scripts/generate-pr-body.sh "${{ env.VERSION }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}" "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_COUNT }}" "${{ env.FILES_CHANGED }}" "${{ env.PREVIOUS_VERSION }}" "${{ env.DARWIN_AMD64_CHECKSUM }}" "${{ env.DARWIN_ARM64_CHECKSUM }}" "${{ env.LINUX_AMD64_CHECKSUM }}" "${{ env.LINUX_ARM64_CHECKSUM }}" "${{ github.run_number }}" "${{ github.sha }}"
         
         echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
         
