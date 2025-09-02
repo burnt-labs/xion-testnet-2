@@ -313,8 +313,6 @@ jobs:
         
     - name: Run release files creation script
       run: |
-        # Clean up any existing files to ensure fresh creation
-        rm -f proposals/039-upgrade-v22.json releases/v22.json release_notes/v22.md
         ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
         
     - name: debug - Echo release files
