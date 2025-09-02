@@ -456,9 +456,7 @@ jobs:
             --base "${{ env.TARGET_BRANCH }}" \
             --head "${{ env.BRANCH_NAME }}" \
             --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
-            --body-file pr_body.md \
-            --reviewer wehappyfew \
-            --reviewer 2xburnt
+            --body-file pr_body.md
           echo "✅ PR created successfully"
         fi
         
