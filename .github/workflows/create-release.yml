@@ -408,7 +408,7 @@ jobs:
         fi
         
     - name: Prepare comprehensive PR body
-      if: env.SKIP_PR_CREATION != 'true'
+    # if: env.SKIP_PR_CREATION != 'true'
       run: |
         # Extract proposal number from filename
         PROPOSAL_NUM=$(basename "${{ env.PROPOSAL_FILE }}" | cut -d'-' -f1)
