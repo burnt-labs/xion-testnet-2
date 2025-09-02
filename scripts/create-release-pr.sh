@@ -219,18 +219,24 @@ SHOULD_UPDATE_RELEASE_NOTES=true
 if [ -f "$RELEASE_NOTES_FILE" ]; then
     echo "Release notes file already exists: $RELEASE_NOTES_FILE"
     
-    # Check if we have a new AI-generated template that might be different
-    if [ -f "release_notes_template.md" ]; then
-        # Compare with AI template if available
-        if cmp -s "release_notes_template.md" "$RELEASE_NOTES_FILE"; then
-            echo "✅ Release notes match AI template - no update needed"
-            SHOULD_UPDATE_RELEASE_NOTES=false
-        else
-            echo "📝 AI template differs from existing release notes - will update"
-        fi
+    # Check if the file is empty (for test runs)
+    if [ ! -s "$RELEASE_NOTES_FILE" ]; then
+        echo "📝 Release notes file is empty - will populate with skeleton template for testing"
+        SHOULD_UPDATE_RELEASE_NOTES=true
     else
-        echo "ℹ️  No AI template available - keeping existing release notes"
-        SHOULD_UPDATE_RELEASE_NOTES=false
+        # Check if we have a new AI-generated template that might be different
+        if [ -f "release_notes_template.md" ]; then
+            # Compare with AI template if available
+            if cmp -s "release_notes_template.md" "$RELEASE_NOTES_FILE"; then
+                echo "✅ Release notes match AI template - no update needed"
+                SHOULD_UPDATE_RELEASE_NOTES=false
+            else
+                echo "📝 AI template differs from existing release notes - will update"
+            fi
+        else
+            echo "ℹ️  No AI template available - keeping existing release notes"
+            SHOULD_UPDATE_RELEASE_NOTES=false
+        fi
     fi
 fi
 
@@ -242,31 +248,34 @@ if [ "$SHOULD_UPDATE_RELEASE_NOTES" = true ]; then
         echo "Using AI-generated release notes template"
         cp release_notes_template.md "$RELEASE_NOTES_FILE"
     else
-    echo "Using default release notes template"
+    echo "Using default release notes skeleton template"
     cat > "$RELEASE_NOTES_FILE" << EOF
-# Xion ${VERSION_FULL} Release Notes
+# Xion ${VERSION} Release Notes
 
 ## Overview
 
-Xion ${VERSION_FULL} includes [--ADD-HERE-YOUR-DESCRIPTION--]. This is the initial release with only ${VERSION_FULL} available.
+The Xion ${VERSION} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. This is the initial release with only ${VERSION_FULL} available.
 
 ## What's Changed
 
 ### ${VERSION_FULL} (Only Version)
 
-#### Major Changes
+#### WebAuthn & Authentication
+- **[--ADD-HERE-WEBAUTHN-FEATURE--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
 
-- **[Feature Name]**: [Description of major change] by [@username](https://github.com/username) in [#PR](https://github.com/burnt-labs/xion/pull/PR)
-- **[Feature Name]**: [Description of major change] by [@username](https://github.com/username) in [#PR](https://github.com/burnt-labs/xion/pull/PR)
+#### CosmWasm & Module Updates
+- **[--ADD-HERE-COSMWASM-UPDATE--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
+
+#### Protocol & Core Changes
+- **[--ADD-HERE-PROTOCOL-CHANGE--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
 
 #### Bug Fixes & Improvements
+- **[--ADD-HERE-BUG-FIX--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
+- **[--ADD-HERE-IMPROVEMENT--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
 
-- **[Fix Name]**: [Description of fix] by [@username](https://github.com/username) in [#PR](https://github.com/burnt-labs/xion/pull/PR)
-- **[Improvement Name]**: [Description of improvement] by [@username](https://github.com/username) in [#PR](https://github.com/burnt-labs/xion/pull/PR)
-
-#### Testing & Code Quality
-
-- **[Test Name]**: [Description of test improvements] by [@username](https://github.com/username) in [#PR](https://github.com/burnt-labs/xion/pull/PR)
+#### Code Quality & Testing
+- **[--ADD-HERE-TEST-UPDATE--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
+- **[--ADD-HERE-CODE-QUALITY--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
 
 ## Upgrade Information
 
@@ -281,12 +290,13 @@ Xion ${VERSION_FULL} includes [--ADD-HERE-YOUR-DESCRIPTION--]. This is the initi
 
 Special thanks to the following contributors who made this release possible:
 
-- [@--ADD-HERE-YOUR-VALUE--](https://github.com/--ADD-HERE-YOUR-VALUE--)
-- [@--ADD-HERE-YOUR-VALUE--](https://github.com/--ADD-HERE-YOUR-VALUE--)
+- [@--ADD-HERE-CONTRIBUTOR-1--](https://github.com/--ADD-HERE-CONTRIBUTOR-1--)
+- [@--ADD-HERE-CONTRIBUTOR-2--](https://github.com/--ADD-HERE-CONTRIBUTOR-2--)
+- [@--ADD-HERE-CONTRIBUTOR-3--](https://github.com/--ADD-HERE-CONTRIBUTOR-3--)
 
 ## Full Changelog
 
-[Previous version...${VERSION_FULL}](https://github.com/burnt-labs/xion/compare/--ADD-HERE-PREVIOUS-VERSION--...${VERSION_FULL})
+[--ADD-HERE-PREVIOUS-VERSION--...${VERSION_FULL}](https://github.com/burnt-labs/xion/compare/--ADD-HERE-PREVIOUS-VERSION--...${VERSION_FULL})
 
 ---
 
