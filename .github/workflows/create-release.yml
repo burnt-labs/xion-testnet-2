@@ -133,7 +133,7 @@ jobs:
         
         # Set the calculated height as environment variable
         echo "CALCULATED_HEIGHT=$ROUNDED_BLOCKS" >> $GITHUB_ENV
-
+      
     - name: Fetch release checksums
       run: |
         # Construct the checksums URL for the release
