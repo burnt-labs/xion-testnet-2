@@ -101,10 +101,10 @@ jobs:
     - name: Calculate block height
       run: |
         # Get current block height and timestamp
-        echo "Fetching block data from: ${{ env.XION_TESTNET_API }}/blocks/latest"
+        echo "Fetching block data from: ${{ env.XION_TESTNET_API }}/cosmos/base/tendermint/v1beta1/blocks/latest"
         
         # First, let's check if the API is responding
-        API_RESPONSE=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/latest" -H 'accept: application/json')
+        API_RESPONSE=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/cosmos/base/tendermint/v1beta1/blocks/latest" -H 'accept: application/json')
         echo "API Response: $API_RESPONSE"
         
         # Extract block height and time with error handling
@@ -125,7 +125,7 @@ jobs:
         
         # Get block from 10000 blocks ago
         OLD_BLOCK=$((CURRENT_BLOCK - 10000))
-        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time // empty')
+        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/cosmos/base/tendermint/v1beta1/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time // empty')
         
         echo "Old block ($OLD_BLOCK) time: $OLD_BLOCK_INFO"
         
