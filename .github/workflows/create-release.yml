@@ -340,6 +340,14 @@ jobs:
           # No need to modify it - it will be used as-is with placeholders
         fi
         
+        # Substitute template variables with actual values
+        echo "Substituting template variables in release notes template..."
+        sed -i "s/{{RELEASE_TAG}}/${{ env.RELEASE_TAG }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{CALCULATED_HEIGHT}}/${{ env.CALCULATED_HEIGHT }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
+        
+        echo "✅ Template variables substituted successfully"
+        
     - name: Run release files creation script
       run: |
         ./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}"
