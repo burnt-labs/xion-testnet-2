@@ -101,17 +101,41 @@ jobs:
     - name: Calculate block height
       run: |
         # Get current block height and timestamp
-        CURRENT_BLOCK=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/latest" -H 'accept: application/json' | jq -r '.block.header.height')
-        CURRENT_TIME=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/latest" -H 'accept: application/json' | jq -r '.block.header.time')
+        echo "Fetching block data from: ${{ env.XION_TESTNET_API }}/blocks/latest"
+        
+        # First, let's check if the API is responding
+        API_RESPONSE=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/latest" -H 'accept: application/json')
+        echo "API Response: $API_RESPONSE"
+        
+        # Extract block height and time with error handling
+        CURRENT_BLOCK=$(echo "$API_RESPONSE" | jq -r '.block.header.height // empty')
+        CURRENT_TIME=$(echo "$API_RESPONSE" | jq -r '.block.header.time // empty')
         
         echo "Current block: $CURRENT_BLOCK"
         echo "Current time: $CURRENT_TIME"
         
+        # Check if we got valid data
+        if [ "$CURRENT_BLOCK" = "null" ] || [ -z "$CURRENT_BLOCK" ] || [ "$CURRENT_TIME" = "null" ] || [ -z "$CURRENT_TIME" ]; then
+          echo "❌ ERROR: API returned null/empty values for block height or timestamp"
+          echo "This indicates the chain is not running or the API is not accessible"
+          echo "API Response was: $API_RESPONSE"
+          echo "Expected format: .block.header.height and .block.header.time should not be null"
+          exit 1
+        fi
+        
         # Get block from 10000 blocks ago
         OLD_BLOCK=$((CURRENT_BLOCK - 10000))
-        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time')
+        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time // empty')
         
         echo "Old block ($OLD_BLOCK) time: $OLD_BLOCK_INFO"
+        
+        # Check if old block data is valid
+        if [ "$OLD_BLOCK_INFO" = "null" ] || [ -z "$OLD_BLOCK_INFO" ]; then
+          echo "❌ ERROR: Could not retrieve block data from $OLD_BLOCK blocks ago"
+          echo "This indicates the chain history is not accessible or the block is too old"
+          echo "Old block info was: $OLD_BLOCK_INFO"
+          exit 1
+        fi
         
         # Calculate average block time (in seconds)
         CURRENT_TIMESTAMP=$(date -d "$CURRENT_TIME" +%s)
