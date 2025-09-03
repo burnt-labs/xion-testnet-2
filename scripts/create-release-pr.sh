@@ -243,12 +243,22 @@ fi
 if [ "$SHOULD_UPDATE_RELEASE_NOTES" = true ]; then
     echo "Creating/updating release notes file: $RELEASE_NOTES_FILE"
     
-    # Check if AI-generated template exists
-    if [ -f ".github/workflows/templates/release_notes_template.md" ]; then
-        echo "Using AI-generated release notes template"
-        cp .github/workflows/templates/release_notes_template.md "$RELEASE_NOTES_FILE"
-    else
-    echo "Using default release notes skeleton template"
+    # Check if AI-generated template exists and has valid content
+    if [ -f ".github/workflows/templates/release_notes_template.md" ] && [ -s ".github/workflows/templates/release_notes_template.md" ] && [ $(wc -c < ".github/workflows/templates/release_notes_template.md") -gt 50 ]; then
+        # Additional check: ensure it's not just "null" or empty content
+        TEMPLATE_CONTENT=$(cat ".github/workflows/templates/release_notes_template.md")
+        if [ "$TEMPLATE_CONTENT" != "null" ] && [ -n "$TEMPLATE_CONTENT" ]; then
+            echo "Using AI-generated release notes template"
+            cp .github/workflows/templates/release_notes_template.md "$RELEASE_NOTES_FILE"
+        else
+            echo "Template file exists but contains invalid content, using fallback template"
+            # Fall through to default template
+        fi
+    fi
+    
+    # Use default template if AI template is not available or invalid
+    if [ ! -f "$RELEASE_NOTES_FILE" ] || [ ! -s "$RELEASE_NOTES_FILE" ]; then
+        echo "Using default release notes skeleton template"
     cat > "$RELEASE_NOTES_FILE" << EOF
 # Xion ${VERSION} Release Notes
 

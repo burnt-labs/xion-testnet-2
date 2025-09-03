@@ -284,22 +284,31 @@ jobs:
             ]
           }')
         
-        # Extract the response content
-        RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text')
-        
-        # Save the generated release notes
-        echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
-        
-        echo "Generated release notes saved to generated_release_notes.md"
+        # Check if API call was successful and extract content
+        API_ERROR=$(echo "$CLAUDE_RESPONSE" | jq -r '.error.message // empty')
+        if [ -n "$API_ERROR" ]; then
+          echo "⚠️  Claude API error: $API_ERROR"
+          echo "CLAUDE_API_FAILED=true" >> $GITHUB_ENV
+        else
+          # Extract the response content and validate it
+          RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text // empty')
+          
+          # Check if content is valid (not null, not empty, not just whitespace)
+          if [ -n "$RELEASE_NOTES_CONTENT" ] && [ "$RELEASE_NOTES_CONTENT" != "null" ] && [ ${#RELEASE_NOTES_CONTENT} -gt 50 ]; then
+            echo "✅ Claude API returned valid content (${#RELEASE_NOTES_CONTENT} characters)"
+            echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
+            echo "CLAUDE_API_FAILED=false" >> $GITHUB_ENV
+          else
+            echo "⚠️  Claude API returned invalid/empty content: '$RELEASE_NOTES_CONTENT'"
+            echo "CLAUDE_API_FAILED=true" >> $GITHUB_ENV
+          fi
+        fi
          
     - name: Use fallback template if Claude API fails
       run: |
-        # Use the generated release notes if available, otherwise use template
-        if [ -f "generated_release_notes.md" ]; then
-          echo "Using AI-generated release notes"
-          cp generated_release_notes.md .github/workflows/templates/release_notes_template.md
-        else
-          echo "Using fallback template (Claude API may have failed)"
+        # Check if Claude API failed or if generated content is invalid
+        if [ "${{ env.CLAUDE_API_FAILED }}" = "true" ] || [ ! -f "generated_release_notes.md" ]; then
+          echo "Using fallback template (Claude API failed or returned invalid content)"
           
           # Load fallback template from external file
           FALLBACK_TEMPLATE=$(cat .github/workflows/prompts/fallback-template.md)
@@ -312,6 +321,26 @@ jobs:
           # Save the processed template
           echo "$FALLBACK_TEMPLATE" > .github/workflows/templates/release_notes_template.md
           echo "Created fallback template from external file"
+        else
+          # Validate the generated content before using it
+          if [ -s "generated_release_notes.md" ] && [ $(wc -c < generated_release_notes.md) -gt 50 ]; then
+            echo "Using AI-generated release notes"
+            cp generated_release_notes.md .github/workflows/templates/release_notes_template.md
+          else
+            echo "Generated content is too small or empty, using fallback template"
+            
+            # Load fallback template from external file
+            FALLBACK_TEMPLATE=$(cat .github/workflows/prompts/fallback-template.md)
+            
+            # Replace placeholders with environment variables
+            FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
+            FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
+            FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
+            
+            # Save the processed template
+            echo "$FALLBACK_TEMPLATE" > .github/workflows/templates/release_notes_template.md
+            echo "Created fallback template from external file"
+          fi
         fi
         
     - name: Run release files creation script
