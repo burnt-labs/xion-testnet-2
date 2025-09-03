@@ -27,8 +27,8 @@ The Xion {{RELEASE_TAG}} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. Th
 
 ## Upgrade Information
 
-- **Upgrade Height**: {{CALCULATED_HEIGHT}} (testnet)
-- **Proposal Number**: [--ADD-HERE-PROPOSAL-NUMBER--]
+- **Upgrade Height**: [{{CALCULATED_HEIGHT}}](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}}) (testnet)
+- **Proposal Number**: [--ADD-HERE-PROPOSAL-NUMBER--](https://www.mintscan.io/xion-testnet/proposals/--ADD-HERE-PROPOSAL-NUMBER--)
 
 ## Release Links
 

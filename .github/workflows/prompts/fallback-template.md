@@ -1,7 +1,7 @@
 # Xion {{RELEASE_TAG}} Upgrade Guide
 
 ## Overview
-- **Chain upgrade point**: TBD, at height `{{CALCULATED_HEIGHT}}`
+- **Chain upgrade point**: TBD, at height [`{{CALCULATED_HEIGHT}}`](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}})
 - **Go version**: [To be determined]
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/{{RELEASE_TAG}}
 
@@ -10,7 +10,7 @@ This document describes the steps for validators and full node operators to upgr
 **Note**: This may be documentation for a future release. Some details will be updated when the release is published.
 
 ## Upgrade Details
-The upgrade will take place at height `{{CALCULATED_HEIGHT}}` on the Xion testnet.
+The upgrade will take place at height [`{{CALCULATED_HEIGHT}}`](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}}) on the Xion testnet.
 
 ## Chain-id
 The chain-id of the network will remain the same, `xion-testnet-2`. This is an in-place migration of state.
@@ -61,7 +61,7 @@ The Xion testnet network will run [Xion {{RELEASE_TAG}}](https://github.com/burn
    # Should show version: {{RELEASE_TAG}}
    ```
 
-3. **Wait for upgrade height**: Run until upgrade height {{CALCULATED_HEIGHT}}, the node will panic.
+3. **Wait for upgrade height**: Run until upgrade height [{{CALCULATED_HEIGHT}}](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}}), the node will panic.
 
 4. **Switch binary**: Stop the node, switch to **Xion {{RELEASE_TAG}}** and restart.
 

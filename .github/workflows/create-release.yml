@@ -31,6 +31,9 @@ env:
   # Target branch for PRs (TODO: change to 'main' when ready)
   TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
   
+  # Mintscan configuration
+  MINTSCAN_CHAIN_ID: "xion-testnet"
+  
   # Input values from workflow_dispatch
   # RELEASE_TAG: ${{ github.event.inputs.release_tag }}
   RELEASE_TAG: v22.0.0 # TODO : delete this

@@ -289,8 +289,8 @@ The Xion ${VERSION} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. This is
 
 ## Upgrade Information
 
-- **Upgrade Height**: $HEIGHT (testnet)
-- **Proposal Number**: $NEXT_NUM
+- **Upgrade Height**: [$HEIGHT](https://www.mintscan.io/xion-testnet/blocks/$HEIGHT) (testnet)
+- **Proposal Number**: [$NEXT_NUM](https://www.mintscan.io/xion-testnet/proposals/$NEXT_NUM)
 
 ## Release Links
 

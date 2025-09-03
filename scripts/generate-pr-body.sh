@@ -5,6 +5,19 @@
 
 set -e
 
+# Function to generate Mintscan URLs
+generate_mintscan_block_url() {
+    local block_height="$1"
+    local chain_id="${MINTSCAN_CHAIN_ID:-xion-testnet}"
+    echo "https://www.mintscan.io/${chain_id}/blocks/${block_height}"
+}
+
+generate_mintscan_proposal_url() {
+    local proposal_id="$1"
+    local chain_id="${MINTSCAN_CHAIN_ID:-xion-testnet}"
+    echo "https://www.mintscan.io/${chain_id}/proposals/${proposal_id}"
+}
+
 VERSION="$1"
 HEIGHT="$2"
 DEPOSIT="$3"
@@ -23,6 +36,13 @@ LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
 
+# Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
+PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
+
+# Generate Mintscan URLs
+MINTSCAN_BLOCK_URL=$(generate_mintscan_block_url "$HEIGHT")
+MINTSCAN_PROPOSAL_URL=$(generate_mintscan_proposal_url "$PROPOSAL_NUMBER")
+
 # Create comprehensive PR body
 cat > pr_body.md << EOF
 # 🚀 Xion $RELEASE_TAG Upgrade
@@ -31,10 +51,10 @@ This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion t
 
 ## 📋 Overview
 
-- **Upgrade Height**: \`$HEIGHT\` (estimated: ~2 days from current block)
+- **Upgrade Height**: [$HEIGHT]($MINTSCAN_BLOCK_URL) (estimated: ~2 days from current block)
 - **Chain ID**: \`xion-testnet-2\` (in-place migration)
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
-- **Proposal**: \`$PROPOSAL_FILE\`
+- **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
 - **Governance Deposit**: $DEPOSIT
 - **Expedited**: $EXPEDITED
 
@@ -62,8 +82,8 @@ cat >> pr_body.md << EOF
 ## 📁 Files Modified
 
 ### Governance & Upgrade Files
-- **Proposal**: \`$PROPOSAL_FILE\`
-  - Upgrade height: \`$HEIGHT\`
+- **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
+  - Upgrade height: [$HEIGHT]($MINTSCAN_BLOCK_URL)
   - Chain upgrade to $RELEASE_TAG
   - Points to release config: \`$RELEASE_FILE\`
 
@@ -115,7 +135,7 @@ cat >> pr_body.md << EOF
 - **Network**: Stable connection during upgrade window
 
 ### Upgrade Process
-1. **Wait** for upgrade height \`$HEIGHT\`
+1. **Wait** for upgrade height [$HEIGHT]($MINTSCAN_BLOCK_URL)
 2. **Node will panic** with upgrade message at target height
 3. **Stop node** and switch to $RELEASE_TAG binary
 4. **Restart** with \`xiond start\`
@@ -130,7 +150,8 @@ xiond start --unsafe-skip-upgrade $HEIGHT
 ## 🔗 Resources
 
 - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
-- **Upgrade Proposal**: \`$PROPOSAL_FILE\`
+- **Upgrade Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
+- **Block Explorer**: [Mintscan](https://www.mintscan.io/${MINTSCAN_CHAIN_ID:-xion-testnet})
 - **Technical Documentation**: \`$RELEASE_NOTES_FILE\`
 - **Support**: Join Xion Discord/Telegram for upgrade assistance
 
