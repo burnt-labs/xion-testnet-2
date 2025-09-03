@@ -26,7 +26,7 @@ on:
 
 env:
   # API endpoints
-  XION_TESTNET_API: "https://api.xion-testnet-2.burnt.com/cosmos/base/tendermint/v1beta1"
+  XION_TESTNET_API: "https://api.xion-testnet-2.burnt.com"
   
   # Target branch for PRs (TODO: change to 'main' when ready)
   TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
@@ -59,9 +59,6 @@ jobs:
         # Load prompts using base64 to avoid delimiter issues
         CLAUDE_PROMPT_B64=$(cat .github/workflows/prompts/claude-api-prompt.md | base64 -w 0)
         echo "CLAUDE_PROMPT_B64=$CLAUDE_PROMPT_B64" >> $GITHUB_ENV
-        
-        FALLBACK_PROMPT_B64=$(cat .github/workflows/prompts/fallback-template.md | base64 -w 0)
-        echo "FALLBACK_PROMPT_B64=$FALLBACK_PROMPT_B64" >> $GITHUB_ENV
 
     - name: Prepare branch variables and checkout
       run: |
@@ -307,43 +304,16 @@ jobs:
           fi
         fi
          
-    - name: Use fallback template if Claude API fails
+    - name: Prepare release notes template
       run: |
-        # Check if Claude API failed or if generated content is invalid
-        if [ "${{ env.CLAUDE_API_FAILED }}" = "true" ] || [ ! -f "generated_release_notes.md" ]; then
-          echo "Using fallback template (Claude API failed or returned invalid content)"
-          
-          # Load fallback template from external file
-          FALLBACK_TEMPLATE=$(cat .github/workflows/prompts/fallback-template.md)
-          
-          # Replace placeholders with environment variables
-          FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
-          FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
-          FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
-          
-          # Save the processed template
-          echo "$FALLBACK_TEMPLATE" > .github/workflows/templates/release_notes_template.md
-          echo "Created fallback template from external file"
+        # Check if Claude API succeeded and generated valid content
+        if [ "${{ env.CLAUDE_API_FAILED }}" = "false" ] && [ -f "generated_release_notes.md" ] && [ -s "generated_release_notes.md" ] && [ $(wc -c < generated_release_notes.md) -gt 50 ]; then
+          echo "Using AI-generated release notes"
+          cp generated_release_notes.md .github/workflows/templates/release_notes_template.md
         else
-          # Validate the generated content before using it
-          if [ -s "generated_release_notes.md" ] && [ $(wc -c < generated_release_notes.md) -gt 50 ]; then
-            echo "Using AI-generated release notes"
-            cp generated_release_notes.md .github/workflows/templates/release_notes_template.md
-          else
-            echo "Generated content is too small or empty, using fallback template"
-            
-            # Load fallback template from external file
-            FALLBACK_TEMPLATE=$(cat .github/workflows/prompts/fallback-template.md)
-            
-            # Replace placeholders with environment variables
-            FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
-            FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
-            FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
-            
-            # Save the processed template
-            echo "$FALLBACK_TEMPLATE" > .github/workflows/templates/release_notes_template.md
-            echo "Created fallback template from external file"
-          fi
+          echo "Using release notes template with placeholder values (Claude API failed or returned invalid content)"
+          # The release_notes_template.md already exists with placeholder values
+          # No need to modify it - it will be used as-is with placeholders
         fi
         
     - name: Run release files creation script
