@@ -362,21 +362,38 @@ jobs:
         # Check each file individually and add only if changed
         for file in "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}"; do
           if [ -f "$file" ]; then
-            # Check if file has changes (new file or modified)
-            if git diff --quiet "$file" 2>/dev/null; then
-              echo "ℹ️  No changes in $file (reused existing file)"
+            # Check if file is untracked (new file) or has changes
+            if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+              # File is tracked, check for changes
+              if git diff --quiet "$file" 2>/dev/null; then
+                echo "ℹ️  No changes in $file (reused existing file)"
+              else
+                echo "📝 Changes detected in $file"
+                git add "$file"
+                CHANGES_DETECTED=true
+                
+                # Add appropriate message based on file type
+                if [[ "$file" == *"proposal"* ]]; then
+                  COMMIT_MESSAGE_PARTS+=("- Updated proposal: $file")
+                elif [[ "$file" == *"release"* && "$file" == *".json" ]]; then
+                  COMMIT_MESSAGE_PARTS+=("- Updated release config: $file")
+                elif [[ "$file" == *"release_notes"* ]]; then
+                  COMMIT_MESSAGE_PARTS+=("- Updated release notes: $file")
+                fi
+              fi
             else
-              echo "📝 Changes detected in $file"
+              # File is untracked (new file), add it
+              echo "📝 New file detected: $file"
               git add "$file"
               CHANGES_DETECTED=true
               
               # Add appropriate message based on file type
               if [[ "$file" == *"proposal"* ]]; then
-                COMMIT_MESSAGE_PARTS+=("- Updated proposal: $file")
+                COMMIT_MESSAGE_PARTS+=("- Created proposal: $file")
               elif [[ "$file" == *"release"* && "$file" == *".json" ]]; then
-                COMMIT_MESSAGE_PARTS+=("- Updated release config: $file")
+                COMMIT_MESSAGE_PARTS+=("- Created release config: $file")
               elif [[ "$file" == *"release_notes"* ]]; then
-                COMMIT_MESSAGE_PARTS+=("- Updated release notes: $file")
+                COMMIT_MESSAGE_PARTS+=("- Created release notes: $file")
               fi
             fi
           else
@@ -411,6 +428,14 @@ jobs:
           } > pr_commit_message.txt
           echo "ℹ️  No file changes detected - peter-evans action will handle empty commit if needed"
         fi
+        
+        # Debug: Show git status to verify staging
+        echo "📋 Git status after staging:"
+        git status --porcelain
+        
+        # Debug: Show staged files
+        echo "📋 Staged files:"
+        git diff --cached --name-only
         
         # Set environment variable for peter-evans action
         echo "COMMIT_MESSAGE_FILE=pr_commit_message.txt" >> $GITHUB_ENV
