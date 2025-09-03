@@ -2,7 +2,6 @@
 comparison_data.json
 generated_release_notes.md
 pr_body.md
-release_notes_template.md
 
 # Common git ignores
 *.tmp
