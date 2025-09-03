@@ -225,9 +225,9 @@ if [ -f "$RELEASE_NOTES_FILE" ]; then
         SHOULD_UPDATE_RELEASE_NOTES=true
     else
         # Check if we have a new AI-generated template that might be different
-        if [ -f "release_notes_template.md" ]; then
+        if [ -f ".github/workflows/templates/release_notes_template.md" ]; then
             # Compare with AI template if available
-            if cmp -s "release_notes_template.md" "$RELEASE_NOTES_FILE"; then
+            if cmp -s ".github/workflows/templates/release_notes_template.md" "$RELEASE_NOTES_FILE"; then
                 echo "✅ Release notes match AI template - no update needed"
                 SHOULD_UPDATE_RELEASE_NOTES=false
             else
@@ -244,9 +244,9 @@ if [ "$SHOULD_UPDATE_RELEASE_NOTES" = true ]; then
     echo "Creating/updating release notes file: $RELEASE_NOTES_FILE"
     
     # Check if AI-generated template exists
-    if [ -f "release_notes_template.md" ]; then
+    if [ -f ".github/workflows/templates/release_notes_template.md" ]; then
         echo "Using AI-generated release notes template"
-        cp release_notes_template.md "$RELEASE_NOTES_FILE"
+        cp .github/workflows/templates/release_notes_template.md "$RELEASE_NOTES_FILE"
     else
     echo "Using default release notes skeleton template"
     cat > "$RELEASE_NOTES_FILE" << EOF

@@ -297,7 +297,7 @@ jobs:
         # Use the generated release notes if available, otherwise use template
         if [ -f "generated_release_notes.md" ]; then
           echo "Using AI-generated release notes"
-          cp generated_release_notes.md release_notes_template.md
+          cp generated_release_notes.md .github/workflows/templates/release_notes_template.md
         else
           echo "Using fallback template (Claude API may have failed)"
           
@@ -310,7 +310,7 @@ jobs:
           FALLBACK_TEMPLATE="${FALLBACK_TEMPLATE//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
           
           # Save the processed template
-          echo "$FALLBACK_TEMPLATE" > release_notes_template.md
+          echo "$FALLBACK_TEMPLATE" > .github/workflows/templates/release_notes_template.md
           echo "Created fallback template from external file"
         fi
         
