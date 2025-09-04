@@ -49,4 +49,4 @@ Special thanks to the following contributors who made this release possible:
 
 ---
 
-For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/[--ADD-HERE-PROPOSAL-NUMBER--]-upgrade-[--ADD-HERE-VERSION--].json).
+For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{VERSION}}.json).

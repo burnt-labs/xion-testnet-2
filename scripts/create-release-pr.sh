@@ -84,7 +84,7 @@ fi
 
 echo "Version to create: $VERSION"
 
-# Check if a proposal with same version and parameters already exists
+# Check if a proposal with same version already exists
 EXISTING_PROPOSAL=""
 PROPOSAL_FILE=""
 NEXT_NUM=""
@@ -94,7 +94,7 @@ echo "Checking for existing proposals with version $VERSION..."
 for file in proposals/*-upgrade-${VERSION}.json; do
     if [ -f "$file" ]; then
         echo "Found existing proposal: $file"
-        # Check if the content matches our parameters
+        # Check current parameters for comparison
         if command -v jq >/dev/null 2>&1; then
             EXISTING_HEIGHT=$(jq -r '.messages[0].plan.height' "$file" 2>/dev/null)
             EXISTING_DEPOSIT=$(jq -r '.deposit' "$file" 2>/dev/null)
@@ -103,26 +103,24 @@ for file in proposals/*-upgrade-${VERSION}.json; do
             echo "  Existing: height=$EXISTING_HEIGHT, deposit=$EXISTING_DEPOSIT, expedited=$EXISTING_EXPEDITED"
             echo "  Current:  height=$HEIGHT, deposit=$DEPOSIT, expedited=$EXPEDITED"
             
-            if [ "$EXISTING_HEIGHT" = "$HEIGHT" ] && 
-               [ "$EXISTING_DEPOSIT" = "$DEPOSIT" ] && 
-               [ "$EXISTING_EXPEDITED" = "$EXPEDITED" ]; then
-                echo "✅ Found identical proposal: $file"
-                echo "   Parameters match - will reuse existing proposal file"
-                EXISTING_PROPOSAL="$file"
-                PROPOSAL_FILE="$file"
-                break
-            else
-                echo "   Parameters differ - will create new proposal"
-            fi
+            # Always reuse existing proposal for the same version, regardless of parameter differences
+            echo "✅ Found existing proposal for version $VERSION: $file"
+            echo "   Will update existing proposal with new parameters"
+            EXISTING_PROPOSAL="$file"
+            PROPOSAL_FILE="$file"
+            break
         else
-            echo "   jq not available - cannot compare content"
+            echo "   jq not available - will reuse existing proposal"
+            EXISTING_PROPOSAL="$file"
+            PROPOSAL_FILE="$file"
+            break
         fi
     fi
 done
 
-# If no matching proposal found, create a new one
+# If no existing proposal found for this version, create a new one
 if [ -z "$EXISTING_PROPOSAL" ]; then
-    echo "No existing proposal found with matching parameters. Creating new proposal..."
+    echo "No existing proposal found for version $VERSION. Creating new proposal..."
     
     # Find the next proposal number by checking existing files
     LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
@@ -143,7 +141,7 @@ if [ -z "$EXISTING_PROPOSAL" ]; then
 else
     # Extract the proposal number from existing file for other uses
     NEXT_NUM=$(basename "$EXISTING_PROPOSAL" | cut -d'-' -f1)
-    echo "Reusing existing proposal number: $NEXT_NUM"
+    echo "Using existing proposal number: $NEXT_NUM"
 fi
 AUTHORITY="xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc"
 
@@ -314,7 +312,7 @@ Special thanks to the following contributors who made this release possible:
 
 ---
 
-For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{RELEASE_TAG}}.json).
+For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{VERSION}}.json).
 EOF
     fi
 else
@@ -355,7 +353,7 @@ fi
 echo ""
 echo "=== SUMMARY ==="
 if [ -n "$EXISTING_PROPOSAL" ]; then
-    echo "✅ Reused existing proposal: $PROPOSAL_FILE"
+    echo "✅ Updated existing proposal: $PROPOSAL_FILE"
 else
     echo "📝 Created new proposal: $PROPOSAL_FILE"
 fi
