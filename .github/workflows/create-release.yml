@@ -368,7 +368,7 @@ jobs:
         sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
         sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" .github/workflows/templates/release_notes_template.md
         sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{VERSION}}/${{ env.VERSION }}|g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{VERSION}}/${{ env.VERSION }}/g" .github/workflows/templates/release_notes_template.md
         
         echo "✅ Template variables substituted successfully"
         
