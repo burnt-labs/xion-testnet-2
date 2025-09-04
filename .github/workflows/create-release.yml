@@ -365,6 +365,23 @@ jobs:
         
         echo "✅ Template variables substituted successfully"
         
+        # Now substitute variables in the actual release notes file that was created by the script
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
+        
+        if [ -f "$RELEASE_NOTES_FILE" ]; then
+          echo "Substituting template variables in release notes file: $RELEASE_NOTES_FILE"
+          sed -i "s/{{RELEASE_TAG}}/${{ env.RELEASE_TAG }}/g" "$RELEASE_NOTES_FILE"
+          sed -i "s/{{CALCULATED_HEIGHT}}/${{ env.CALCULATED_HEIGHT }}/g" "$RELEASE_NOTES_FILE"
+          sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" "$RELEASE_NOTES_FILE"
+          sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" "$RELEASE_NOTES_FILE"
+          sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" "$RELEASE_NOTES_FILE"
+          echo "✅ Release notes file variables substituted successfully"
+        else
+          echo "⚠️  Release notes file not found: $RELEASE_NOTES_FILE"
+        fi
+        
     - name: debug - Echo release files
       run: |
         echo "-> Proposal file"
