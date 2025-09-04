@@ -345,6 +345,9 @@ jobs:
         
     - name: Run release files creation script
       run: |
+        # Ensure template is in original state before script runs
+        git restore .github/workflows/templates/release_notes_template.md || true
+        
         SCRIPT_OUTPUT=$(./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}")
         echo "$SCRIPT_OUTPUT"
         
@@ -361,22 +364,11 @@ jobs:
         echo "DEBUG: VERSION_NUM extracted: $VERSION_NUM"
         echo "DEBUG: Final VERSION set to: $VERSION"
         
-    - name: Substitute variables in release_notes_template.md
+    - name: Substitute variables in release notes file
       run: |
-        # Substitute template variables with actual values (after script has set CALCULATED_PROPOSAL_NUMBER)
-        echo "Substituting template variables in release notes template..."
+        # Substitute template variables in the actual release notes file that was created by the script
         echo "DEBUG: VERSION=${{ env.VERSION }}"
         echo "DEBUG: RELEASE_TAG=${{ env.RELEASE_TAG }}"
-        sed -i "s/{{RELEASE_TAG}}/${{ env.RELEASE_TAG }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{CALCULATED_HEIGHT}}/${{ env.CALCULATED_HEIGHT }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{VERSION}}/${{ env.VERSION }}/g" .github/workflows/templates/release_notes_template.md
-        
-        echo "✅ Template variables substituted successfully"
-        
-        # Now substitute variables in the actual release notes file that was created by the script
         VERSION="${{ env.VERSION }}"
         RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
         
@@ -527,11 +519,6 @@ jobs:
         
         echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
 
-    - name: Clean up unneeded changes
-      run: |
-        # Restore the template file to its original state
-        git restore .github/workflows/templates/release_notes_template.md
-        echo "✅ Template file [release_notes_template.md] restored to original state"
 
     - name: Create or Update Pull Request
       env:
