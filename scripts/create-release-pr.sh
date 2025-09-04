@@ -263,15 +263,15 @@ if [ "$SHOULD_UPDATE_RELEASE_NOTES" = true ]; then
     if [ ! -f "$RELEASE_NOTES_FILE" ] || [ ! -s "$RELEASE_NOTES_FILE" ]; then
         echo "Using default release notes skeleton template"
     cat > "$RELEASE_NOTES_FILE" << EOF
-# Xion ${VERSION} Release Notes
+# Xion {{RELEASE_TAG}} Release Notes
 
 ## Overview
 
-The Xion ${VERSION} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. This is the initial release with only ${VERSION_FULL} available.
+The Xion {{RELEASE_TAG}} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. This is the initial release with only {{RELEASE_TAG}} available.
 
 ## What's Changed
 
-### ${VERSION_FULL} (Only Version)
+### {{RELEASE_TAG}} (Only Version)
 
 #### WebAuthn & Authentication
 - **[--ADD-HERE-WEBAUTHN-FEATURE--]**: [--ADD-HERE-DESCRIPTION--] by [@--ADD-HERE-USERNAME--](https://github.com/--ADD-HERE-USERNAME--) in [#--ADD-HERE-PR-NUMBER--](https://github.com/burnt-labs/xion/pull/--ADD-HERE-PR-NUMBER--)
@@ -292,13 +292,13 @@ The Xion ${VERSION} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. This is
 
 ## Upgrade Information
 
-- **Upgrade Height**: [$HEIGHT](https://www.mintscan.io/xion-testnet/blocks/$HEIGHT) (testnet)
-- **Proposal Number**: [$NEXT_NUM](https://www.mintscan.io/xion-testnet/proposals/$NEXT_NUM)
-- **Upgrade Name**: [$VERSION_FULL](https://github.com/burnt-labs/${NETWORK_NAME}/blob/main/proposals/$NEXT_NUM-upgrade-$VERSION.json)
+- **Upgrade Height**: [{{CALCULATED_HEIGHT}}](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}}) (testnet)
+- **Proposal Number**: [{{CALCULATED_PROPOSAL_NUMBER}}](https://www.mintscan.io/xion-testnet/proposals/{{CALCULATED_PROPOSAL_NUMBER}})
+- **Upgrade Name**: [{{RELEASE_TAG}}](https://github.com/burnt-labs/{{NETWORK_NAME}}/blob/main/proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{RELEASE_TAG}}.json)
 
 ## Release Links
 
-- **${VERSION_FULL}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/${VERSION_FULL})
+- **{{RELEASE_TAG}}**: [GitHub Release](https://github.com/burnt-labs/xion/releases/tag/{{RELEASE_TAG}})
 
 ## Contributors
 
@@ -310,11 +310,11 @@ Special thanks to the following contributors who made this release possible:
 
 ## Full Changelog
 
-[--ADD-HERE-PREVIOUS-VERSION--...${VERSION_FULL}](https://github.com/burnt-labs/xion/compare/--ADD-HERE-PREVIOUS-VERSION--...${VERSION_FULL})
+[{{PREVIOUS_VERSION}}...{{RELEASE_TAG}}](https://github.com/burnt-labs/xion/compare/{{PREVIOUS_VERSION}}...{{RELEASE_TAG}})
 
 ---
 
-For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/${NEXT_NUM}-upgrade-${VERSION}.json).
+For more information about the upgrade process, please refer to the [upgrade proposal](../proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{RELEASE_TAG}}.json).
 EOF
     fi
 else
