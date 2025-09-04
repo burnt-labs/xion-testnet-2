@@ -358,11 +358,15 @@ jobs:
         VERSION="v${VERSION_NUM}"
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Calculated short version: $VERSION"
+        echo "DEBUG: VERSION_NUM extracted: $VERSION_NUM"
+        echo "DEBUG: Final VERSION set to: $VERSION"
         
     - name: Substitute variables in release_notes_template.md
       run: |
         # Substitute template variables with actual values (after script has set CALCULATED_PROPOSAL_NUMBER)
         echo "Substituting template variables in release notes template..."
+        echo "DEBUG: VERSION=${{ env.VERSION }}"
+        echo "DEBUG: RELEASE_TAG=${{ env.RELEASE_TAG }}"
         sed -i "s/{{RELEASE_TAG}}/${{ env.RELEASE_TAG }}/g" .github/workflows/templates/release_notes_template.md
         sed -i "s/{{CALCULATED_HEIGHT}}/${{ env.CALCULATED_HEIGHT }}/g" .github/workflows/templates/release_notes_template.md
         sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
@@ -378,6 +382,7 @@ jobs:
         
         if [ -f "$RELEASE_NOTES_FILE" ]; then
           echo "Substituting template variables in release notes file: $RELEASE_NOTES_FILE"
+          echo "DEBUG: About to substitute VERSION=${{ env.VERSION }} in $RELEASE_NOTES_FILE"
           
           # Do substitutions in specific order to avoid conflicts
           sed -i "s|{{NETWORK_NAME}}|${{ env.NETWORK_NAME }}|g" "$RELEASE_NOTES_FILE"
