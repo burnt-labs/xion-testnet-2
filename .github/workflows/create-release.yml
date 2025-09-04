@@ -359,7 +359,7 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_ENV
         echo "Calculated short version: $VERSION"
         
-    - name: Substitute template variables
+    - name: Substitute variables in release_notes_template.md
       run: |
         # Substitute template variables with actual values (after script has set CALCULATED_PROPOSAL_NUMBER)
         echo "Substituting template variables in release notes template..."
@@ -373,8 +373,7 @@ jobs:
         echo "✅ Template variables substituted successfully"
         
         # Now substitute variables in the actual release notes file that was created by the script
-        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-        VERSION="v${VERSION_NUM}"
+        VERSION="${{ env.VERSION }}"
         RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
         
         if [ -f "$RELEASE_NOTES_FILE" ]; then
@@ -476,7 +475,7 @@ jobs:
         # Build commit message for peter-evans action to use
         if [ "$CHANGES_DETECTED" = true ]; then
           {
-            echo "Added release ${{ env.VERSION }} and historical release notes"
+            echo "Added release ${{ env.RELEASE_TAG }} and historical release notes"
             echo ""
             printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}"
             echo ""
