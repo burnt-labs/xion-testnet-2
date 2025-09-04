@@ -353,6 +353,12 @@ jobs:
         echo "CALCULATED_PROPOSAL_NUMBER=$PROPOSAL_NUMBER" >> $GITHUB_ENV
         echo "Extracted proposal number: $PROPOSAL_NUMBER"
         
+        # Calculate short version (v22 from v22.0.0)
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Calculated short version: $VERSION"
+        
     - name: Substitute template variables
       run: |
         # Substitute template variables with actual values (after script has set CALCULATED_PROPOSAL_NUMBER)
@@ -362,6 +368,7 @@ jobs:
         sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
         sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" .github/workflows/templates/release_notes_template.md
         sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{VERSION}}/${{ env.VERSION }}/g" .github/workflows/templates/release_notes_template.md
         
         echo "✅ Template variables substituted successfully"
         
@@ -377,6 +384,7 @@ jobs:
           sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" "$RELEASE_NOTES_FILE"
           sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" "$RELEASE_NOTES_FILE"
           sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" "$RELEASE_NOTES_FILE"
+          sed -i "s/{{VERSION}}/${{ env.VERSION }}/g" "$RELEASE_NOTES_FILE"
           echo "✅ Release notes file variables substituted successfully"
         else
           echo "⚠️  Release notes file not found: $RELEASE_NOTES_FILE"

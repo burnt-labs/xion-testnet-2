@@ -29,7 +29,7 @@ The Xion {{RELEASE_TAG}} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. Th
 
 - **Upgrade Height**: [{{CALCULATED_HEIGHT}}](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}}) (testnet)
 - **Proposal Number**: [{{CALCULATED_PROPOSAL_NUMBER}}](https://www.mintscan.io/xion-testnet/proposals/{{CALCULATED_PROPOSAL_NUMBER}})
-- **Upgrade Name**: [{{RELEASE_TAG}}](https://github.com/burnt-labs/{{NETWORK_NAME}}/blob/main/proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{RELEASE_TAG}}.json)
+- **Upgrade Name**: [{{VERSION}}](https://github.com/burnt-labs/{{NETWORK_NAME}}/blob/main/proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{VERSION}}.json)
 
 ## Release Links
 
