@@ -343,16 +343,6 @@ jobs:
           # No need to modify it - it will be used as-is with placeholders
         fi
         
-        # Substitute template variables with actual values
-        echo "Substituting template variables in release notes template..."
-        sed -i "s/{{RELEASE_TAG}}/${{ env.RELEASE_TAG }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{CALCULATED_HEIGHT}}/${{ env.CALCULATED_HEIGHT }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" .github/workflows/templates/release_notes_template.md
-        sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" .github/workflows/templates/release_notes_template.md
-        
-        echo "✅ Template variables substituted successfully"
-        
     - name: Run release files creation script
       run: |
         SCRIPT_OUTPUT=$(./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}")
@@ -362,6 +352,18 @@ jobs:
         PROPOSAL_NUMBER=$(echo "$SCRIPT_OUTPUT" | grep "Proposal number:" | awk '{print $3}')
         echo "CALCULATED_PROPOSAL_NUMBER=$PROPOSAL_NUMBER" >> $GITHUB_ENV
         echo "Extracted proposal number: $PROPOSAL_NUMBER"
+        
+    - name: Substitute template variables
+      run: |
+        # Substitute template variables with actual values (after script has set CALCULATED_PROPOSAL_NUMBER)
+        echo "Substituting template variables in release notes template..."
+        sed -i "s/{{RELEASE_TAG}}/${{ env.RELEASE_TAG }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{CALCULATED_HEIGHT}}/${{ env.CALCULATED_HEIGHT }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{PREVIOUS_VERSION}}/${{ env.PREVIOUS_VERSION }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{CALCULATED_PROPOSAL_NUMBER}}/${{ env.CALCULATED_PROPOSAL_NUMBER }}/g" .github/workflows/templates/release_notes_template.md
+        sed -i "s/{{NETWORK_NAME}}/${{ env.NETWORK_NAME }}/g" .github/workflows/templates/release_notes_template.md
+        
+        echo "✅ Template variables substituted successfully"
         
     - name: debug - Echo release files
       run: |
@@ -449,7 +451,7 @@ jobs:
         # Build commit message for peter-evans action to use
         if [ "$CHANGES_DETECTED" = true ]; then
           {
-            echo "Release ${{ env.VERSION }} update"
+            echo "Added release ${{ env.VERSION }} and historical release notes"
             echo ""
             printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}"
             echo ""
@@ -482,7 +484,7 @@ jobs:
         echo "📋 Staged files:"
         git diff --cached --name-only
         
-        # Set environment variable for peter-evans action
+        # Set environment variable 
         echo "COMMIT_MESSAGE_FILE=pr_commit_message.txt" >> $GITHUB_ENV
         
     - name: Prepare comprehensive PR body
