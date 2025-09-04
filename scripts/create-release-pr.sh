@@ -243,18 +243,23 @@ fi
 
 if [ "$SHOULD_UPDATE_RELEASE_NOTES" = true ]; then
     echo "Creating/updating release notes file: $RELEASE_NOTES_FILE"
+    echo "DEBUG: Checking for AI-generated content..."
     
-    # Check if AI-generated template exists and has valid content
-    if [ -f ".github/workflows/templates/release_notes_template.md" ] && [ -s ".github/workflows/templates/release_notes_template.md" ] && [ $(wc -c < ".github/workflows/templates/release_notes_template.md") -gt 50 ]; then
+    # Check if AI-generated content exists and has valid content
+    if [ -f "generated_release_notes.md" ] && [ -s "generated_release_notes.md" ] && [ $(wc -c < "generated_release_notes.md") -gt 50 ]; then
         # Additional check: ensure it's not just "null" or empty content
-        TEMPLATE_CONTENT=$(cat ".github/workflows/templates/release_notes_template.md")
+        TEMPLATE_CONTENT=$(cat "generated_release_notes.md")
         if [ "$TEMPLATE_CONTENT" != "null" ] && [ -n "$TEMPLATE_CONTENT" ]; then
-            echo "Using AI-generated release notes template"
-            cp .github/workflows/templates/release_notes_template.md "$RELEASE_NOTES_FILE"
+            echo "Using AI-generated release notes content"
+            cp generated_release_notes.md "$RELEASE_NOTES_FILE"
         else
-            echo "Template file exists but contains invalid content, using fallback template"
+            echo "AI-generated file exists but contains invalid content, using fallback template"
             # Fall through to default template
         fi
+    elif [ -f ".github/workflows/templates/release_notes_template.md" ] && [ -s ".github/workflows/templates/release_notes_template.md" ] && [ $(wc -c < ".github/workflows/templates/release_notes_template.md") -gt 50 ]; then
+        # Use clean template as fallback
+        echo "Using clean template file as fallback"
+        cp .github/workflows/templates/release_notes_template.md "$RELEASE_NOTES_FILE"
     fi
     
     # Use default template if AI template is not available or invalid

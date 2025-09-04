@@ -331,18 +331,6 @@ jobs:
           fi
         fi
          
-    - name: Prepare release notes template
-      run: |
-        # Check if Claude API succeeded and generated valid content
-        if [ "${{ env.CLAUDE_API_FAILED }}" = "false" ] && [ -f "generated_release_notes.md" ] && [ -s "generated_release_notes.md" ] && [ $(wc -c < generated_release_notes.md) -gt 50 ]; then
-          echo "Using AI-generated release notes"
-          cp generated_release_notes.md .github/workflows/templates/release_notes_template.md
-        else
-          echo "Using release notes template with placeholder values (Claude API failed or returned invalid content)"
-          # The release_notes_template.md already exists with placeholder values
-          # No need to modify it - it will be used as-is with placeholders
-        fi
-        
     - name: Run release files creation script
       run: |
         # Ensure template is in original state before script runs
