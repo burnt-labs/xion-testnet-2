@@ -8,13 +8,14 @@ set -e
 # Function to generate Mintscan URLs
 generate_mintscan_block_url() {
     local block_height="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
+    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}}"
     echo "https://www.mintscan.io/${chain_id}/blocks/${block_height}"
 }
 
+
 generate_mintscan_proposal_url() {
     local proposal_id="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
+    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}}"
     echo "https://www.mintscan.io/${chain_id}/proposals/${proposal_id}"
 }
 
