@@ -505,6 +505,8 @@ jobs:
         
         echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
 
+        cat pr_body.md
+
 
     - name: Create or Update Pull Request
       env:
