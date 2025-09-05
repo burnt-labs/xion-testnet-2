@@ -37,17 +37,6 @@ LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
 
-# Use environment variables directly instead of parameters
-NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
-MINTSCAN_CHAIN_ID="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
-
-echo "DEBUG: Environment variables in script:"
-echo "  NETWORK_NAME from env: '${NETWORK_NAME}'"
-echo "  MINTSCAN_CHAIN_ID from env: '${MINTSCAN_CHAIN_ID}'" 
-echo "  Script variables after assignment:"
-echo "    NETWORK_NAME: '$NETWORK_NAME'"
-echo "    MINTSCAN_CHAIN_ID: '$MINTSCAN_CHAIN_ID'"
-
 # Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
 
@@ -59,12 +48,12 @@ MINTSCAN_PROPOSAL_URL=$(generate_mintscan_proposal_url "$PROPOSAL_NUMBER")
 cat > pr_body.md << EOF
 # 🚀 Xion $RELEASE_TAG Upgrade
 
-This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion $NETWORK_NAME.
+This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion ${NETWORK_NAME:-SAMPLE-VALUE}.
 
 ## 📋 Overview
 
 - **Upgrade Height**: [$HEIGHT]($MINTSCAN_BLOCK_URL) (estimated: ~2 days from current block)
-- **Chain ID**:  \`$MINTSCAN_CHAIN_ID\` (in-place migration)
+- **Chain ID**: \`${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}\` (in-place migration)
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
 - **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
 - **Governance Deposit**: $DEPOSIT
