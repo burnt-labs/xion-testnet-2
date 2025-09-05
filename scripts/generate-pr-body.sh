@@ -36,8 +36,10 @@ LINUX_AMD64_CHECKSUM="${14}"
 LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
-NETWORK_NAME="${18}"
-MINTSCAN_CHAIN_ID="${19}"
+
+# Use environment variables directly instead of parameters
+NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
+MINTSCAN_CHAIN_ID="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
 
 # Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
