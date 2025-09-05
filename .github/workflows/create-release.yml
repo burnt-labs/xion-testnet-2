@@ -28,9 +28,9 @@ env:
   # API endpoints ref: https://docs.burnt.com/xion/developers/section-overview/public-endpoints-and-resources
   XION_API_URL: "https://api.xion-testnet-2.burnt.com"
   # Mintscan configuration
-  MINTSCAN_CHAIN_ID: "xion-testnet"
+  MINTSCAN_CHAIN_ID: "kabamaru-mintscan-wowowowowowow" #"xion-testnet"
   # Network name configuration
-  NETWORK_NAME: "xion-testnet-2"
+  NETWORK_NAME: "yoshimitsu-network-wowowowowowow" #"xion-testnet-2"
   
   # Target branch for PRs (TODO: change to 'main' when ready)
   TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
