@@ -365,6 +365,7 @@ jobs:
           
           # Do substitutions in specific order to avoid conflicts
           sed -i "s|{{NETWORK_NAME}}|${{ env.NETWORK_NAME }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{{MINTSCAN_CHAIN_ID}}|${{ env.MINTSCAN_CHAIN_ID }}|g" "$RELEASE_NOTES_FILE"
           sed -i "s|{{CALCULATED_HEIGHT}}|${{ env.CALCULATED_HEIGHT }}|g" "$RELEASE_NOTES_FILE"
           sed -i "s|{{CALCULATED_PROPOSAL_NUMBER}}|${{ env.CALCULATED_PROPOSAL_NUMBER }}|g" "$RELEASE_NOTES_FILE"
           sed -i "s|{{PREVIOUS_VERSION}}|${{ env.PREVIOUS_VERSION }}|g" "$RELEASE_NOTES_FILE"
