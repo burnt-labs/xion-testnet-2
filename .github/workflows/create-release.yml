@@ -499,6 +499,9 @@ jobs:
         echo "COMMIT_MESSAGE_FILE=pr_commit_message.txt" >> $GITHUB_ENV
         
     - name: Prepare comprehensive PR body
+      env:
+        NETWORK_NAME: ${{ env.NETWORK_NAME }}
+        MINTSCAN_CHAIN_ID: ${{ env.MINTSCAN_CHAIN_ID }}
       run: |
         # Generate comprehensive PR body using external script
         ./scripts/generate-pr-body.sh "${{ env.VERSION }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}" "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_COUNT }}" "${{ env.FILES_CHANGED }}" "${{ env.PREVIOUS_VERSION }}" "${{ env.DARWIN_AMD64_CHECKSUM }}" "${{ env.DARWIN_ARM64_CHECKSUM }}" "${{ env.LINUX_AMD64_CHECKSUM }}" "${{ env.LINUX_ARM64_CHECKSUM }}" "${{ github.run_number }}" "${{ github.sha }}"

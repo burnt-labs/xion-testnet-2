@@ -41,6 +41,13 @@ COMMIT_SHA="${17}"
 NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
 MINTSCAN_CHAIN_ID="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
 
+echo "DEBUG: Environment variables in script:"
+echo "  NETWORK_NAME from env: '${NETWORK_NAME}'"
+echo "  MINTSCAN_CHAIN_ID from env: '${MINTSCAN_CHAIN_ID}'" 
+echo "  Script variables after assignment:"
+echo "    NETWORK_NAME: '$NETWORK_NAME'"
+echo "    MINTSCAN_CHAIN_ID: '$MINTSCAN_CHAIN_ID'"
+
 # Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
 
