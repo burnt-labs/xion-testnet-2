@@ -6,8 +6,8 @@
 set -e
 
 # Use environment variables directly instead of parameters
-NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
-MINTSCAN_CHAIN_ID="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
+NETWORK_NAME="sdfsdfsdfsdfsdf" #"${NETWORK_NAME:-SAMPLE-VALUE}"
+MINTSCAN_CHAIN_ID="sdfsdfsdfsdfsdf" #"${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
 
 # Function to generate Mintscan URLs
 generate_mintscan_block_url() {
@@ -40,6 +40,11 @@ LINUX_AMD64_CHECKSUM="${14}"
 LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
+
+echo "DEBUG: Total parameters received: $#"
+echo "DEBUG: All parameters: $@"
+echo "DEBUG: NETWORK_NAME: '$NETWORK_NAME'"
+echo "DEBUG: MINTSCAN_CHAIN_ID: '$MINTSCAN_CHAIN_ID'"
 
 # Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
