@@ -506,9 +506,9 @@ jobs:
         # Generate comprehensive PR body using external script
         ./scripts/generate-pr-body.sh "${{ env.VERSION }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}" "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_COUNT }}" "${{ env.FILES_CHANGED }}" "${{ env.PREVIOUS_VERSION }}" "${{ env.DARWIN_AMD64_CHECKSUM }}" "${{ env.DARWIN_ARM64_CHECKSUM }}" "${{ env.LINUX_AMD64_CHECKSUM }}" "${{ env.LINUX_ARM64_CHECKSUM }}" "${{ github.run_number }}" "${{ github.sha }}"
         
-        echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
+        echo "PR_BODY_FILE=pr_description.md" >> $GITHUB_ENV
 
-        cat pr_body.md
+        cat pr_description.md
 
 
     - name: Create or Update Pull Request
@@ -537,7 +537,7 @@ jobs:
         if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
           echo "Updating existing PR #$EXISTING_PR"
           # Update existing PR body
-          gh pr edit "$EXISTING_PR" --body-file pr_body.md
+          gh pr edit "$EXISTING_PR" --body-file pr_description.md
           echo "✅ Updated existing PR #$EXISTING_PR"
         else
           echo "Creating new PR"
@@ -545,7 +545,7 @@ jobs:
             --base "${{ env.TARGET_BRANCH }}" \
             --head "${{ env.BRANCH_NAME }}" \
             --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
-            --body-file pr_body.md
+            --body-file pr_description.md
           echo "✅ PR created successfully"
         fi
         
