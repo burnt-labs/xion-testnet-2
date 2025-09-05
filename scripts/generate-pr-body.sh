@@ -51,12 +51,12 @@ MINTSCAN_PROPOSAL_URL=$(generate_mintscan_proposal_url "$PROPOSAL_NUMBER")
 cat > pr_body.md << EOF
 # 🚀 Xion $RELEASE_TAG Upgrade
 
-This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion $NETWORK_NAME.
+This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion "$NETWORK_NAME".
 
 ## 📋 Overview
 
 - **Upgrade Height**: [$HEIGHT]($MINTSCAN_BLOCK_URL) (estimated: ~2 days from current block)
-- **Chain ID**: \`$MINTSCAN_CHAIN_ID\` (in-place migration)
+- **Chain ID**: "$MINTSCAN_CHAIN_ID" (in-place migration)
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
 - **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
 - **Governance Deposit**: $DEPOSIT
