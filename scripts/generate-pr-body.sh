@@ -5,17 +5,21 @@
 
 set -e
 
+# Use environment variables directly instead of parameters
+NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
+MINTSCAN_CHAIN_ID="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
+
 # Function to generate Mintscan URLs
 generate_mintscan_block_url() {
     local block_height="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
+    local chain_id="$MINTSCAN_CHAIN_ID"
     echo "https://www.mintscan.io/${chain_id}/blocks/${block_height}"
 }
 
 
 generate_mintscan_proposal_url() {
     local proposal_id="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
+    local chain_id="$MINTSCAN_CHAIN_ID"
     echo "https://www.mintscan.io/${chain_id}/proposals/${proposal_id}"
 }
 
@@ -37,15 +41,6 @@ LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
 
-# Use environment variables directly instead of parameters
-NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
-MINTSCAN_CHAIN_ID="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
-
-echo "DEBUG: Total parameters received: $#"
-echo "DEBUG: All parameters: $@"
-echo "DEBUG: NETWORK_NAME: '$NETWORK_NAME'"
-echo "DEBUG: MINTSCAN_CHAIN_ID: '$MINTSCAN_CHAIN_ID'"
-
 # Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
 
@@ -57,12 +52,12 @@ MINTSCAN_PROPOSAL_URL=$(generate_mintscan_proposal_url "$PROPOSAL_NUMBER")
 cat > pr_body.md << EOF
 # 🚀 Xion $RELEASE_TAG Upgrade
 
-This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion ${NETWORK_NAME:-SAMPLE-VALUE}.
+This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion $NETWORK_NAME.
 
 ## 📋 Overview
 
 - **Upgrade Height**: [$HEIGHT]($MINTSCAN_BLOCK_URL) (estimated: ~2 days from current block)
-- **Chain ID**: \`${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}\` (in-place migration)
+- **Chain ID**:  \`$MINTSCAN_CHAIN_ID\` (in-place migration)
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
 - **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
 - **Governance Deposit**: $DEPOSIT
