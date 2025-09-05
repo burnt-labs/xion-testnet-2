@@ -52,15 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Clear potential caches
-      run: |
-        # Clear any local caches that might interfere
-        rm -rf ~/.cache/* || true
-        rm -rf /tmp/* || true
-        
-        # Force environment refresh
-        echo "CACHE_BUST=$(date +%s)" >> $GITHUB_ENV
-        
+
     - name: Checkout repository
       uses: actions/checkout@v4
       
@@ -518,57 +510,57 @@ jobs:
         echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
         cat pr_body.md
 
-    - name: Create or Update Pull Request
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        # Check if we have any staged files or changes to commit
-        if git diff --cached --quiet && git diff --quiet; then
-          echo "No changes detected, but creating empty commit to update PR parameters"
-          # Read the commit message from file
-          COMMIT_MSG=$(cat pr_commit_message.txt)
-          git commit --allow-empty -m "$COMMIT_MSG"
-        else
-          echo "Changes detected, committing staged files"
-          # Read the commit message from file  
-          COMMIT_MSG=$(cat pr_commit_message.txt)
-          git commit -m "$COMMIT_MSG"
-        fi
+    # - name: Create or Update Pull Request
+    #   env:
+    #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #   run: |
+    #     # Check if we have any staged files or changes to commit
+    #     if git diff --cached --quiet && git diff --quiet; then
+    #       echo "No changes detected, but creating empty commit to update PR parameters"
+    #       # Read the commit message from file
+    #       COMMIT_MSG=$(cat pr_commit_message.txt)
+    #       git commit --allow-empty -m "$COMMIT_MSG"
+    #     else
+    #       echo "Changes detected, committing staged files"
+    #       # Read the commit message from file  
+    #       COMMIT_MSG=$(cat pr_commit_message.txt)
+    #       git commit -m "$COMMIT_MSG"
+    #     fi
         
-        # Push the changes
-        git push origin "${{ env.BRANCH_NAME }}"
+    #     # Push the changes
+    #     git push origin "${{ env.BRANCH_NAME }}"
         
-        # Check if PR already exists
-        EXISTING_PR=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.TARGET_BRANCH }}" --json number --jq '.[0].number' 2>/dev/null || echo "")
+    #     # Check if PR already exists
+    #     EXISTING_PR=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.TARGET_BRANCH }}" --json number --jq '.[0].number' 2>/dev/null || echo "")
         
-        if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
-          echo "Updating existing PR #$EXISTING_PR"
-          # Update existing PR body
-          gh pr edit "$EXISTING_PR" --body-file pr_body.md
-          echo "✅ Updated existing PR #$EXISTING_PR"
-        else
-          echo "Creating new PR"
-          gh pr create \
-            --base "${{ env.TARGET_BRANCH }}" \
-            --head "${{ env.BRANCH_NAME }}" \
-            --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
-            --body-file pr_body.md
-          echo "✅ PR created successfully"
-        fi
+    #     if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+    #       echo "Updating existing PR #$EXISTING_PR"
+    #       # Update existing PR body
+    #       gh pr edit "$EXISTING_PR" --body-file pr_body.md
+    #       echo "✅ Updated existing PR #$EXISTING_PR"
+    #     else
+    #       echo "Creating new PR"
+    #       gh pr create \
+    #         --base "${{ env.TARGET_BRANCH }}" \
+    #         --head "${{ env.BRANCH_NAME }}" \
+    #         --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
+    #         --body-file pr_body.md
+    #       echo "✅ PR created successfully"
+    #     fi
         
-    - name: Workflow Summary
-      run: |
-        echo "## 📋 Workflow Summary"
-        echo ""
-        echo "✅ PR has been created/updated for release ${{ env.RELEASE_TAG }}"
-        echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
-        echo "   - Release config: ${{ env.RELEASE_FILE }}"
-        echo "   - Release notes: ${{ env.RELEASE_NOTES_FILE }}"
-        echo ""
-        echo "🔄 Configuration for this run:"
-        echo "   - Release Tag: ${{ env.RELEASE_TAG }}"
-        echo "   - Upgrade Height: ${{ env.CALCULATED_HEIGHT }}"
-        echo "   - Deposit: ${{ env.DEPOSIT }}"
-        echo "   - Expedited: ${{ env.EXPEDITED }}"
-        echo "   - Run Number: ${{ github.run_number }}"
+    # - name: Workflow Summary
+    #   run: |
+    #     echo "## 📋 Workflow Summary"
+    #     echo ""
+    #     echo "✅ PR has been created/updated for release ${{ env.RELEASE_TAG }}"
+    #     echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
+    #     echo "   - Release config: ${{ env.RELEASE_FILE }}"
+    #     echo "   - Release notes: ${{ env.RELEASE_NOTES_FILE }}"
+    #     echo ""
+    #     echo "🔄 Configuration for this run:"
+    #     echo "   - Release Tag: ${{ env.RELEASE_TAG }}"
+    #     echo "   - Upgrade Height: ${{ env.CALCULATED_HEIGHT }}"
+    #     echo "   - Deposit: ${{ env.DEPOSIT }}"
+    #     echo "   - Expedited: ${{ env.EXPEDITED }}"
+    #     echo "   - Run Number: ${{ github.run_number }}"
 

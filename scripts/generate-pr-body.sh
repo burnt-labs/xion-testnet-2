@@ -5,13 +5,16 @@
 
 set -e
 
+echo "DEBUG: Environment variables in script:"
+echo "  NETWORK_NAME from env: '${NETWORK_NAME}'"
+echo "  MINTSCAN_CHAIN_ID from env: '${MINTSCAN_CHAIN_ID}'" 
+
 # Function to generate Mintscan URLs
 generate_mintscan_block_url() {
     local block_height="$1"
     local chain_id="$MINTSCAN_CHAIN_ID"
     echo "https://www.mintscan.io/${chain_id}/blocks/${block_height}"
 }
-
 
 generate_mintscan_proposal_url() {
     local proposal_id="$1"
