@@ -8,13 +8,13 @@ set -e
 # Function to generate Mintscan URLs
 generate_mintscan_block_url() {
     local block_height="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}}"
+    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
     echo "https://www.mintscan.io/${chain_id}/blocks/${block_height}"
 }
 
 generate_mintscan_proposal_url() {
     local proposal_id="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}}"
+    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}"
     echo "https://www.mintscan.io/${chain_id}/proposals/${proposal_id}"
 }
 
@@ -35,6 +35,8 @@ LINUX_AMD64_CHECKSUM="${14}"
 LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
+NETWORK_NAME="${18}"
+MINTSCAN_CHAIN_ID="${19}"
 
 # Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
@@ -52,7 +54,7 @@ This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion $
 ## 📋 Overview
 
 - **Upgrade Height**: [$HEIGHT]($MINTSCAN_BLOCK_URL) (estimated: ~2 days from current block)
-- **Chain ID**: \`${NETWORK_NAME:-SAMPLE-VALUE}\` (in-place migration)
+- **Chain ID**: \`${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}\` (in-place migration)
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
 - **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
 - **Governance Deposit**: $DEPOSIT
