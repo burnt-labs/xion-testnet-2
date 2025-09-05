@@ -8,13 +8,13 @@ set -e
 # Function to generate Mintscan URLs
 generate_mintscan_block_url() {
     local block_height="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-xion-testnet}"
+    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}}"
     echo "https://www.mintscan.io/${chain_id}/blocks/${block_height}"
 }
 
 generate_mintscan_proposal_url() {
     local proposal_id="$1"
-    local chain_id="${MINTSCAN_CHAIN_ID:-xion-testnet}"
+    local chain_id="${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE}}"
     echo "https://www.mintscan.io/${chain_id}/proposals/${proposal_id}"
 }
 
@@ -47,12 +47,12 @@ MINTSCAN_PROPOSAL_URL=$(generate_mintscan_proposal_url "$PROPOSAL_NUMBER")
 cat > pr_body.md << EOF
 # 🚀 Xion $RELEASE_TAG Upgrade
 
-This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion testnet.
+This pull request implements the upgrade to **Xion $RELEASE_TAG** for the Xion ${NETWORK_NAME:-SAMPLE-VALUE}.
 
 ## 📋 Overview
 
 - **Upgrade Height**: [$HEIGHT]($MINTSCAN_BLOCK_URL) (estimated: ~2 days from current block)
-- **Chain ID**: \`xion-testnet-2\` (in-place migration)
+- **Chain ID**: \`${NETWORK_NAME:-SAMPLE-VALUE}\` (in-place migration)
 - **Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
 - **Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
 - **Governance Deposit**: $DEPOSIT
@@ -151,7 +151,7 @@ xiond start --unsafe-skip-upgrade $HEIGHT
 
 - **GitHub Release**: https://github.com/burnt-labs/xion/releases/tag/$RELEASE_TAG
 - **Upgrade Proposal**: [$PROPOSAL_NUMBER]($MINTSCAN_PROPOSAL_URL) (\`$PROPOSAL_FILE\`)
-- **Block Explorer**: [Mintscan](https://www.mintscan.io/${MINTSCAN_CHAIN_ID:-xion-testnet})
+- **Block Explorer**: [Mintscan](https://www.mintscan.io/${MINTSCAN_CHAIN_ID:-SAMPLE-VALUE})
 - **Technical Documentation**: \`$RELEASE_NOTES_FILE\`
 - **Support**: Join Xion Discord/Telegram for upgrade assistance
 

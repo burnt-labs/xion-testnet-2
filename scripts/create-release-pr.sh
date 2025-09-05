@@ -14,8 +14,8 @@ DARWIN_ARM64_CHECKSUM="${DARWIN_ARM64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_DARWIN_AR
 LINUX_AMD64_CHECKSUM="${LINUX_AMD64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_LINUX_AMD64:---ADD-HERE-YOUR-VALUE--}}"
 LINUX_ARM64_CHECKSUM="${LINUX_ARM64_CHECKSUM:-${PLACEHOLDER_CHECKSUM_LINUX_ARM64:---ADD-HERE-YOUR-VALUE--}}"
 
-# Network name (set by workflow, defaults to xion-testnet-2)
-NETWORK_NAME="${NETWORK_NAME:-xion-testnet-2}"
+# Network name (set by workflow)
+NETWORK_NAME="${NETWORK_NAME:-SAMPLE-VALUE}"
 
 # Validate checksums are not empty (fallback to placeholder if empty)
 DARWIN_AMD64_CHECKSUM="${DARWIN_AMD64_CHECKSUM:-"--ADD-HERE-YOUR-VALUE--"}"
@@ -295,8 +295,8 @@ The Xion {{RELEASE_TAG}} series includes [--ADD-HERE-OVERVIEW-DESCRIPTION--]. Th
 
 ## Upgrade Information
 
-- **Upgrade Height**: [{{CALCULATED_HEIGHT}}](https://www.mintscan.io/xion-testnet/blocks/{{CALCULATED_HEIGHT}}) (testnet)
-- **Proposal Number**: [{{CALCULATED_PROPOSAL_NUMBER}}](https://www.mintscan.io/xion-testnet/proposals/{{CALCULATED_PROPOSAL_NUMBER}})
+- **Upgrade Height**: [{{CALCULATED_HEIGHT}}](https://www.mintscan.io/{{MINTSCAN_CHAIN_ID}}/blocks/{{CALCULATED_HEIGHT}}) ({{NETWORK_NAME}})
+- **Proposal Number**: [{{CALCULATED_PROPOSAL_NUMBER}}](https://www.mintscan.io/{{MINTSCAN_CHAIN_ID}}/proposals/{{CALCULATED_PROPOSAL_NUMBER}})
 - **Upgrade Name**: [{{VERSION}}](https://github.com/burnt-labs/{{NETWORK_NAME}}/blob/main/proposals/{{CALCULATED_PROPOSAL_NUMBER}}-upgrade-{{VERSION}}.json)
 
 ## Release Links

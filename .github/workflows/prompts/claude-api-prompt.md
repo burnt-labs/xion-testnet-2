@@ -16,10 +16,10 @@ This document describes the steps for validators and full node operators to upgr
 **Note**: If this is a future release (not yet published), some details may be marked as "To Be Determined (TBD)" and will be updated when the release is available.
 
 ## Upgrade Details
-The upgrade will take place at height `{{CALCULATED_HEIGHT}}` on the Xion testnet.
+The upgrade will take place at height `{{CALCULATED_HEIGHT}}` on the Xion `{{NETWORK_NAME}}`.
 
 ## Chain-id
-The chain-id of the network will remain the same, `xion-testnet-2`. This is an in-place migration of state.
+The chain-id of the network will remain the same, `{{NETWORK_NAME}}`. This is an in-place migration of state.
 
 ## System Requirements
 - **RAM**: 16GB RAM is recommended to ensure a smooth upgrade
@@ -32,10 +32,10 @@ Prior to the upgrade, validators are encouraged to take a full data snapshot. Ge
 **Critical**: Back up the `.xiond/data/priv_validator_state.json` file after stopping the xiond process. This file is updated every block and is critical to prevent double-signing.
 
 ## Current Runtime
-The Xion testnet network, `xion-testnet-2`, is currently running [Xion {{PREVIOUS_VERSION}}](https://github.com/burnt-labs/xion/releases/tag/{{PREVIOUS_VERSION}}).
+The Xion network, `{{NETWORK_NAME}}`, is currently running [Xion {{PREVIOUS_VERSION}}](https://github.com/burnt-labs/xion/releases/tag/{{PREVIOUS_VERSION}}).
 
 ## Target Runtime
-The Xion testnet network will run [Xion {{RELEASE_TAG}}](https://github.com/burnt-labs/xion/releases/tag/{{RELEASE_TAG}}). Operators **MUST** use this version post-upgrade to remain connected to the network.
+The Xion `{{NETWORK_NAME}}` network will run [Xion {{RELEASE_TAG}}](https://github.com/burnt-labs/xion/releases/tag/{{RELEASE_TAG}}). Operators **MUST** use this version post-upgrade to remain connected to the network.
 
 ## What's Changed in {{RELEASE_TAG}}
 

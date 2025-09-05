@@ -3,7 +3,7 @@ name: Create Release PR
 on:
   push:
     branches:
-      # - main
+      # - main # TODO : change to 'main' when ready
       # - master
       - feat/do-85-generate-upgrade-proposals-n-release-binaries
 
@@ -25,18 +25,16 @@ on:
         type: boolean
 
 env:
-  # API endpoints
-  XION_TESTNET_API: "https://api.xion-testnet-2.burnt.com"
-  
-  # Target branch for PRs (TODO: change to 'main' when ready)
-  TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
-  
+  # API endpoints ref: https://docs.burnt.com/xion/developers/section-overview/public-endpoints-and-resources
+  XION_API_URL: "https://api.xion-testnet-2.burnt.com"
   # Mintscan configuration
   MINTSCAN_CHAIN_ID: "xion-testnet"
-  
   # Network name configuration
   NETWORK_NAME: "xion-testnet-2"
   
+  # Target branch for PRs (TODO: change to 'main' when ready)
+  TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
+
   # Input values from workflow_dispatch
   # RELEASE_TAG: ${{ github.event.inputs.release_tag }}
   RELEASE_TAG: v22.0.0 # TODO : delete this
@@ -104,10 +102,10 @@ jobs:
     - name: Calculate block height
       run: |
         # Get current block height and timestamp
-        echo "Fetching block data from: ${{ env.XION_TESTNET_API }}/cosmos/base/tendermint/v1beta1/blocks/latest"
+        echo "Fetching block data from: ${{ env.XION_API_URL }}/cosmos/base/tendermint/v1beta1/blocks/latest"
         
         # First, let's check if the API is responding
-        API_RESPONSE=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/cosmos/base/tendermint/v1beta1/blocks/latest" -H 'accept: application/json')
+        API_RESPONSE=$(curl -s -X 'GET' "${{ env.XION_API_URL }}/cosmos/base/tendermint/v1beta1/blocks/latest" -H 'accept: application/json')
         echo "API Response: $API_RESPONSE"
         
         # Extract block height and time with error handling
@@ -128,7 +126,7 @@ jobs:
         
         # Get block from 10000 blocks ago
         OLD_BLOCK=$((CURRENT_BLOCK - 10000))
-        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_TESTNET_API }}/cosmos/base/tendermint/v1beta1/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time // empty')
+        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_API_URL }}/cosmos/base/tendermint/v1beta1/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time // empty')
         
         echo "Old block ($OLD_BLOCK) time: $OLD_BLOCK_INFO"
         
