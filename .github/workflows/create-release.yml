@@ -22,121 +22,28 @@ on:
         default: false
         type: boolean
 
-env:
-  XION_API_URL: "https://api.xion-testnet-2.burnt.com"
-  MINTSCAN_CHAIN_ID: "xion-testnet"
-  NETWORK_NAME: "xion-testnet-2"
-  TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
-  RELEASE_TAG: v22.0.0
-  DEPOSIT: 1000000000uxion
-  EXPEDITED: false
-  PLACEHOLDER_CHECKSUM: "--ADD-HERE-YOUR-VALUE--"
-
 jobs:
   create-release-pr:
     runs-on: ubuntu-latest
+
+    env:
+      XION_API_URL: "https://api.xion-testnet-2.burnt.com"
+      MINTSCAN_CHAIN_ID: "xion-testnet"
+      NETWORK_NAME: "xion-testnet-2"
+      TARGET_BRANCH: "feat/do-85-generate-upgrade-proposals-n-release-binaries"
+      RELEASE_TAG: "v22.0.0"  # TODO: Use ${{ github.event.inputs.release_tag || 'v22.0.0' }}
+      DEPOSIT: "${{ github.event.inputs.deposit || '1000000000uxion' }}"
+      EXPEDITED: "${{ github.event.inputs.expedited || 'false' }}"
+      PLACEHOLDER_CHECKSUM: "--ADD-HERE-YOUR-VALUE--"
+      CLAUDE_API_KEY: "${{ secrets.BURNT_CLAUDE_API_KEY }}"
+      GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+      RUN_NUMBER: "${{ github.run_number }}"
+      COMMIT_SHA: "${{ github.sha }}"
+      GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Setup release branch
-      run: |
-        ./scripts/setup-release-branch.sh "${{ env.RELEASE_TAG }}" | tee /tmp/output
-        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
-
-    - name: Calculate upgrade height
-      run: |
-        ./scripts/calculate-upgrade-height.sh "${{ env.XION_API_URL }}" | tee /tmp/output
-        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
-
-    - name: Fetch release checksums
-      run: |
-        ./scripts/fetch-release-checksums.sh "${{ env.RELEASE_TAG }}" "${{ env.PLACEHOLDER_CHECKSUM }}" | tee /tmp/output
-        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
-
-    - name: Fetch GitHub comparison data
-      run: |
-        ./scripts/fetch-github-comparison.sh "${{ env.RELEASE_TAG }}" "${{ secrets.GITHUB_TOKEN }}" | tee /tmp/output
-        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
-
-    - name: Generate release notes with Claude API
-      run: |
-        ./scripts/generate-claude-notes.sh \
-          ".github/workflows/prompts/claude-api-prompt.md" \
-          "${{ env.RELEASE_TAG }}" \
-          "${{ env.CALCULATED_HEIGHT }}" \
-          "${{ env.PREVIOUS_VERSION }}" \
-          "${{ secrets.BURNT_CLAUDE_API_KEY }}"
-
-    - name: Create release files
-      run: |
-        git restore .github/workflows/templates/release_notes_template.md || true
-        ./scripts/create-release-pr.sh \
-          "${{ env.CALCULATED_HEIGHT }}" \
-          "${{ env.DEPOSIT }}" \
-          "${{ env.EXPEDITED }}" \
-          "${{ env.RELEASE_TAG }}" | tee /tmp/output
-
-        # Extract proposal number
-        PROPOSAL_NUMBER=$(grep "^Proposal number:" /tmp/output | sed 's/Proposal number: //')
-        echo "CALCULATED_PROPOSAL_NUMBER=$PROPOSAL_NUMBER" >> $GITHUB_ENV
-
-    - name: Determine file paths
-      run: |
-        ./scripts/determine-file-paths.sh "${{ env.RELEASE_TAG }}" | tee /tmp/output
-        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
-
-    - name: Substitute variables in release notes
-      run: |
-        ./scripts/substitute-release-notes.sh \
-          "${{ env.VERSION }}" \
-          "${{ env.NETWORK_NAME }}" \
-          "${{ env.MINTSCAN_CHAIN_ID }}" \
-          "${{ env.CALCULATED_HEIGHT }}" \
-          "${{ env.CALCULATED_PROPOSAL_NUMBER }}" \
-          "${{ env.PREVIOUS_VERSION }}" \
-          "${{ env.RELEASE_TAG }}"
-
-    - name: Generate PR body
-      run: |
-        ./scripts/generate-pr-body.sh \
-          "${{ env.VERSION }}" \
-          "${{ env.CALCULATED_HEIGHT }}" \
-          "${{ env.DEPOSIT }}" \
-          "${{ env.EXPEDITED }}" \
-          "${{ env.PROPOSAL_FILE }}" \
-          "${{ env.RELEASE_FILE }}" \
-          "${{ env.RELEASE_NOTES_FILE }}" \
-          "${{ env.RELEASE_TAG }}" \
-          "${{ env.COMMIT_COUNT }}" \
-          "${{ env.FILES_CHANGED }}" \
-          "${{ env.PREVIOUS_VERSION }}" \
-          "${{ env.DARWIN_AMD64_CHECKSUM }}" \
-          "${{ env.DARWIN_ARM64_CHECKSUM }}" \
-          "${{ env.LINUX_AMD64_CHECKSUM }}" \
-          "${{ env.LINUX_ARM64_CHECKSUM }}" \
-          "${{ github.run_number }}" \
-          "${{ github.sha }}"
-
-    - name: Commit and push PR
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        ./scripts/commit-and-push-pr.sh \
-          "${{ env.BRANCH_NAME }}" \
-          "${{ env.TARGET_BRANCH }}" \
-          "${{ env.RELEASE_TAG }}" \
-          "${{ env.VERSION }}" \
-          "${{ env.PROPOSAL_FILE }}" \
-          "${{ env.RELEASE_FILE }}" \
-          "${{ env.RELEASE_NOTES_FILE }}"
-
-    - name: Workflow summary
-      run: |
-        echo "## 📋 Workflow Summary"
-        echo "✅ PR created/updated for release ${{ env.RELEASE_TAG }}"
-        echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
-        echo "   - Release: ${{ env.RELEASE_FILE }}"
-        echo "   - Notes: ${{ env.RELEASE_NOTES_FILE }}"
-        echo "   - Height: ${{ env.CALCULATED_HEIGHT }}"
+    - name: Run release workflow
+      run: ./scripts/create-release-workflow.sh
