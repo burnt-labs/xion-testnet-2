@@ -1,0 +1,9 @@
+# Temporary CI/CD artifacts
+comparison_data.json
+generated_release_notes.md
+pr_body.md
+
+# Common git ignores
+*.tmp
+*.log
+.DS_Store

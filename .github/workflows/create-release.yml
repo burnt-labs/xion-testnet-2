@@ -1,0 +1,569 @@
+name: Create Release PR 
+
+on:
+  push:
+    branches:
+      - main 
+
+  workflow_dispatch: # NOTICE: To trigger the workflow_dispatch event, the workflow must be in the default branch.
+    inputs:
+      release_tag:
+        description: 'Release tag to update the chain registry with'
+        required: true
+        type: string
+      deposit:
+        description: 'Deposit amount (default: 1000000000uxion)'
+        required: false
+        default: '1000000000uxion'
+        type: string
+      expedited:
+        description: 'Expedited proposal'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  # API endpoints ref: https://docs.burnt.com/xion/developers/section-overview/public-endpoints-and-resources
+  XION_API_URL: "https://api.xion-testnet-2.burnt.com"
+  # Mintscan configuration
+  MINTSCAN_CHAIN_ID: "xion-testnet"
+  # Network name configuration
+  NETWORK_NAME: "xion-testnet-2"
+  
+  # Target branch for PRs (TODO: change to 'main' when ready)
+  TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
+
+  # Input values from workflow_dispatch
+  # RELEASE_TAG: ${{ github.event.inputs.release_tag }}
+  RELEASE_TAG: v22.0.0 # TODO : delete this
+  DEPOSIT: 1000000000uxion
+  EXPEDITED: false
+  
+  # Placeholder values for binary checksums
+  PLACEHOLDER_CHECKSUM_DARWIN_AMD64: "--ADD-HERE-YOUR-VALUE--"
+  PLACEHOLDER_CHECKSUM_DARWIN_ARM64: "--ADD-HERE-YOUR-VALUE--"
+  PLACEHOLDER_CHECKSUM_LINUX_AMD64: "--ADD-HERE-YOUR-VALUE--"
+  PLACEHOLDER_CHECKSUM_LINUX_ARM64: "--ADD-HERE-YOUR-VALUE--"
+
+jobs:
+  create-release-pr:
+    runs-on: ubuntu-latest
+    
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Load prompts into environment variables before switching branches  
+      run: |
+        # Load prompts using base64 to avoid delimiter issues
+        CLAUDE_PROMPT_B64=$(cat .github/workflows/prompts/claude-api-prompt.md | base64 -w 0)
+        echo "CLAUDE_PROMPT_B64=$CLAUDE_PROMPT_B64" >> $GITHUB_ENV
+
+    - name: Prepare branch variables and checkout
+      run: |
+        # Extract version from RELEASE_TAG and set branch name
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        BRANCH_NAME="release/${{ env.RELEASE_TAG }}"
+        
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        
+        # Set up git config
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Fetch all remote branches to ensure we have latest refs
+        git fetch origin
+        
+        # Check if remote branch exists and handle accordingly
+        if git ls-remote --heads origin "$BRANCH_NAME" | grep -q "$BRANCH_NAME"; then
+          echo "Remote branch $BRANCH_NAME exists, checking out and pulling latest changes"
+          
+          # Check if local branch exists
+          if git show-ref --verify --quiet refs/heads/"$BRANCH_NAME"; then
+            echo "Local branch exists, switching to it"
+            git checkout "$BRANCH_NAME"
+          else
+            echo "Local branch doesn't exist, creating from remote"
+            git checkout -b "$BRANCH_NAME" origin/"$BRANCH_NAME"
+          fi
+          
+          # Pull latest changes from remote to avoid conflicts
+          git pull origin "$BRANCH_NAME"
+          
+        else
+          echo "Remote branch $BRANCH_NAME doesn't exist, creating new branch"
+          git checkout -b "$BRANCH_NAME"
+        fi
+        
+    - name: Calculate block height
+      run: |
+        # Get current block height and timestamp
+        echo "Fetching block data from: ${{ env.XION_API_URL }}/cosmos/base/tendermint/v1beta1/blocks/latest"
+        
+        # First, let's check if the API is responding
+        API_RESPONSE=$(curl -s -X 'GET' "${{ env.XION_API_URL }}/cosmos/base/tendermint/v1beta1/blocks/latest" -H 'accept: application/json')
+        echo "API Response: $API_RESPONSE"
+        
+        # Extract block height and time with error handling
+        CURRENT_BLOCK=$(echo "$API_RESPONSE" | jq -r '.block.header.height // empty')
+        CURRENT_TIME=$(echo "$API_RESPONSE" | jq -r '.block.header.time // empty')
+        
+        echo "Current block: $CURRENT_BLOCK"
+        echo "Current time: $CURRENT_TIME"
+        
+        # Check if we got valid data
+        if [ "$CURRENT_BLOCK" = "null" ] || [ -z "$CURRENT_BLOCK" ] || [ "$CURRENT_TIME" = "null" ] || [ -z "$CURRENT_TIME" ]; then
+          echo "❌ ERROR: API returned null/empty values for block height or timestamp"
+          echo "This indicates the chain is not running or the API is not accessible"
+          echo "API Response was: $API_RESPONSE"
+          echo "Expected format: .block.header.height and .block.header.time should not be null"
+          exit 1
+        fi
+        
+        # Get block from 10000 blocks ago
+        OLD_BLOCK=$((CURRENT_BLOCK - 10000))
+        OLD_BLOCK_INFO=$(curl -s -X 'GET' "${{ env.XION_API_URL }}/cosmos/base/tendermint/v1beta1/blocks/$OLD_BLOCK" -H 'accept: application/json' | jq -r '.block.header.time // empty')
+        
+        echo "Old block ($OLD_BLOCK) time: $OLD_BLOCK_INFO"
+        
+        # Check if old block data is valid
+        if [ "$OLD_BLOCK_INFO" = "null" ] || [ -z "$OLD_BLOCK_INFO" ]; then
+          echo "❌ ERROR: Could not retrieve block data from $OLD_BLOCK blocks ago"
+          echo "This indicates the chain history is not accessible or the block is too old"
+          echo "Old block info was: $OLD_BLOCK_INFO"
+          exit 1
+        fi
+        
+        # Calculate average block time (in seconds)
+        CURRENT_TIMESTAMP=$(date -d "$CURRENT_TIME" +%s)
+        OLD_TIMESTAMP=$(date -d "$OLD_BLOCK_INFO" +%s)
+        TIME_DIFF=$((CURRENT_TIMESTAMP - OLD_TIMESTAMP))
+        AVERAGE_BLOCK_TIME=$(echo "scale=2; $TIME_DIFF / 10000" | bc)
+        
+        echo "Average block time: ${AVERAGE_BLOCK_TIME} seconds"
+        
+        # Calculate blocks for 2 days (172800 seconds)
+        BLOCKS_IN_2_DAYS=$(echo "scale=0; 172800 / $AVERAGE_BLOCK_TIME" | bc)
+        
+        # Calculate target block height (round to nearest 1000)
+        TARGET_BLOCKS=$((BLOCKS_IN_2_DAYS + CURRENT_BLOCK))
+        ROUNDED_BLOCKS=$(( (TARGET_BLOCKS + 500) / 1000 * 1000 ))
+        
+        echo "Blocks in 2 days: $BLOCKS_IN_2_DAYS"
+        echo "Target block height: $ROUNDED_BLOCKS"
+        
+        # Set the calculated height as environment variable
+        echo "CALCULATED_HEIGHT=$ROUNDED_BLOCKS" >> $GITHUB_ENV
+      
+    - name: Fetch release checksums
+      run: |
+        # Construct the checksums URL for the release
+        CHECKSUMS_URL="https://github.com/burnt-labs/xion/releases/download/${{ env.RELEASE_TAG }}/xiond-${{ env.RELEASE_TAG }}-checksums.txt"
+        echo "Fetching checksums from: $CHECKSUMS_URL"
+        
+        # Try to fetch the checksums file
+        CHECKSUMS_RESPONSE=$(curl -s -w "%{http_code}" "$CHECKSUMS_URL" -o checksums_temp.txt)
+        HTTP_CODE="${CHECKSUMS_RESPONSE: -3}"
+        
+        if [ "$HTTP_CODE" = "200" ]; then
+          echo "✅ Successfully fetched checksums for ${{ env.RELEASE_TAG }}"
+          
+          # Parse the checksums file and extract values
+          CHECKS_FILE="checksums_temp.txt"
+          
+          # Extract checksums for different platforms
+          DARWIN_AMD64_CHECKSUM=$(grep "darwin_amd64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          DARWIN_ARM64_CHECKSUM=$(grep "darwin_arm64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          LINUX_AMD64_CHECKSUM=$(grep "linux_amd64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          LINUX_ARM64_CHECKSUM=$(grep "linux_arm64.tar.gz" "$CHECKS_FILE" | awk '{print $1}')
+          
+          # Set environment variables with real checksums
+          echo "DARWIN_AMD64_CHECKSUM=$DARWIN_AMD64_CHECKSUM" >> $GITHUB_ENV
+          echo "DARWIN_ARM64_CHECKSUM=$DARWIN_ARM64_CHECKSUM" >> $GITHUB_ENV
+          echo "LINUX_AMD64_CHECKSUM=$LINUX_AMD64_CHECKSUM" >> $GITHUB_ENV
+          echo "LINUX_ARM64_CHECKSUM=$LINUX_ARM64_CHECKSUM" >> $GITHUB_ENV
+          
+          echo "✅ Using real checksums:"
+          echo "  Darwin AMD64: $DARWIN_AMD64_CHECKSUM"
+          echo "  Darwin ARM64: $DARWIN_ARM64_CHECKSUM"
+          echo "  Linux AMD64: $LINUX_AMD64_CHECKSUM"
+          echo "  Linux ARM64: $LINUX_ARM64_CHECKSUM"
+          
+        else
+          echo "⚠️  Checksums file not found for ${{ env.RELEASE_TAG }} (HTTP $HTTP_CODE)"
+          if [ "$HTTP_CODE" = "404" ]; then
+            echo "📝 This appears to be a future release - checksums will be available when the release is published"
+          fi
+          echo "📝 Using placeholder values for now"
+          
+          # Set environment variables with placeholder values
+          echo "DARWIN_AMD64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_AMD64 }}" >> $GITHUB_ENV
+          echo "DARWIN_ARM64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_DARWIN_ARM64 }}" >> $GITHUB_ENV
+          echo "LINUX_AMD64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_LINUX_AMD64 }}" >> $GITHUB_ENV
+          echo "LINUX_ARM64_CHECKSUM=${{ env.PLACEHOLDER_CHECKSUM_LINUX_ARM64 }}" >> $GITHUB_ENV
+          
+          echo "📝 Using placeholder checksums (will be updated when release is available)"
+        fi
+        
+        # Clean up temporary file
+        rm -f checksums_temp.txt
+  
+    - name: Get GitHub comparison data
+      run: |
+        # Extract version number from release tag
+        CURRENT_VERSION="${{ env.RELEASE_TAG }}"
+        # Extract major version number and calculate previous version
+        CURRENT_MAJOR=$(echo "$CURRENT_VERSION" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        PREVIOUS_MAJOR=$((CURRENT_MAJOR - 1))
+        
+        PREVIOUS_VERSION="v${PREVIOUS_MAJOR}.0.0"
+        
+        echo "Current version: $CURRENT_VERSION"
+        echo "Previous version: $PREVIOUS_VERSION"
+        
+        # Check if current version (future release) exists in the repository
+        CURRENT_TAG_EXISTS=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/burnt-labs/xion/git/refs/tags/$CURRENT_VERSION" | \
+          jq -r '.ref // "not_found"')
+        
+        if [[ "$CURRENT_TAG_EXISTS" == "not_found" ]]; then
+          echo "⚠️  Current version $CURRENT_VERSION doesn't exist yet (future release)"
+          echo "📝 Creating placeholder comparison data for future release documentation"
+          
+          # Create placeholder comparison data for future release
+          COMPARISON_DATA='{"total_commits": "TBD", "files": [], "commits": [], "ahead_by": "TBD", "message": "Future release - comparison will be available when release is published"}'
+          COMMIT_COUNT="TBD"
+          FILES_CHANGED="TBD"
+          
+          echo "-- Using placeholder data for future release --"
+        else
+          # Get GitHub comparison data for existing releases
+          COMPARISON_URL="https://api.github.com/repos/burnt-labs/xion/compare/$PREVIOUS_VERSION...$CURRENT_VERSION"
+          echo "Fetching comparison from: $COMPARISON_URL"
+          
+          # Fetch the comparison data
+          COMPARISON_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "$COMPARISON_URL")
+          
+          # Check if the API response contains an error
+          ERROR_MESSAGE=$(echo "$COMPARISON_DATA" | jq -r '.message // empty')
+          
+          if [[ "$ERROR_MESSAGE" == "Not Found" ]]; then
+            echo "⚠️  Previous version $PREVIOUS_VERSION not found in GitHub"
+            echo "📝 One of two versions doesn't exist"
+            
+            # Create empty comparison data
+            COMPARISON_DATA='{"total_commits": 0, "files": [], "commits": []}'
+            COMMIT_COUNT=0
+            FILES_CHANGED=0
+            
+            echo "-- Using empty comparison data --"
+          else
+            echo "✅ Successfully fetched comparison data"
+            
+            # Extract key information
+            COMMIT_COUNT=$(echo "$COMPARISON_DATA" | jq -r '.total_commits // 0')
+            FILES_CHANGED=$(echo "$COMPARISON_DATA" | jq -r '.files | length // 0')
+          fi
+        fi
+        
+        echo "Commits: $COMMIT_COUNT"
+        echo "Files changed: $FILES_CHANGED"
+        
+        # Save comparison data to file for Claude API (even if placeholder)
+        echo "$COMPARISON_DATA" > comparison_data.json
+        
+        # Set environment variables
+        echo "PREVIOUS_VERSION=$PREVIOUS_VERSION" >> $GITHUB_ENV
+        echo "COMMIT_COUNT=$COMMIT_COUNT" >> $GITHUB_ENV
+        echo "FILES_CHANGED=$FILES_CHANGED" >> $GITHUB_ENV
+
+    - name: Generate release notes with Claude API
+      run: |
+        # Decode the prompt from base64
+        PROMPT=$(echo "$CLAUDE_PROMPT_B64" | base64 -d)
+        
+        # Replace placeholders with environment variables
+        PROMPT="${PROMPT//\{\{RELEASE_TAG\}\}/${{ env.RELEASE_TAG }}}"
+        PROMPT="${PROMPT//\{\{CALCULATED_HEIGHT\}\}/${{ env.CALCULATED_HEIGHT }}}"
+        PROMPT="${PROMPT//\{\{PREVIOUS_VERSION\}\}/${{ env.PREVIOUS_VERSION }}}"
+        
+        echo "Loaded Claude API prompt from external file"
+        
+        # Call Claude API
+        CLAUDE_RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+          -H "Content-Type: application/json" \
+          -H "x-api-key: ${{ secrets.BURNT_CLAUDE_API_KEY }}" \
+          -H "anthropic-version: 2023-06-01" \
+          -d '{
+            "model": "claude-3-sonnet-20240229",
+            "max_tokens": 4000,
+            "messages": [
+              {
+                "role": "user",
+                "content": "'"$PROMPT"'\n\nGitHub Comparison Data:\n'"$(cat comparison_data.json | jq -c .)"'"
+              }
+            ]
+          }')
+        
+        # Check if API call was successful and extract content
+        API_ERROR=$(echo "$CLAUDE_RESPONSE" | jq -r '.error.message // empty')
+        if [ -n "$API_ERROR" ]; then
+          echo "⚠️  Claude API error: $API_ERROR"
+          echo "CLAUDE_API_FAILED=true" >> $GITHUB_ENV
+        else
+          # Extract the response content and validate it
+          RELEASE_NOTES_CONTENT=$(echo "$CLAUDE_RESPONSE" | jq -r '.content[0].text // empty')
+          
+          # Check if content is valid (not null, not empty, not just whitespace)
+          if [ -n "$RELEASE_NOTES_CONTENT" ] && [ "$RELEASE_NOTES_CONTENT" != "null" ] && [ ${#RELEASE_NOTES_CONTENT} -gt 50 ]; then
+            echo "✅ Claude API returned valid content (${#RELEASE_NOTES_CONTENT} characters)"
+            echo "$RELEASE_NOTES_CONTENT" > generated_release_notes.md
+            echo "CLAUDE_API_FAILED=false" >> $GITHUB_ENV
+          else
+            echo "⚠️  Claude API returned invalid/empty content: '$RELEASE_NOTES_CONTENT'"
+            echo "CLAUDE_API_FAILED=true" >> $GITHUB_ENV
+          fi
+        fi
+         
+    - name: Run release files creation script
+      run: |
+        # Ensure template is in original state before script runs
+        git restore .github/workflows/templates/release_notes_template.md || true
+        
+        SCRIPT_OUTPUT=$(./scripts/create-release-pr.sh "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.RELEASE_TAG }}")
+        echo "$SCRIPT_OUTPUT"
+        
+        # Extract proposal number from script output
+        PROPOSAL_NUMBER=$(echo "$SCRIPT_OUTPUT" | grep "^Proposal number:" | sed 's/Proposal number: //')
+        echo "CALCULATED_PROPOSAL_NUMBER=$PROPOSAL_NUMBER" >> $GITHUB_ENV
+        echo "Extracted proposal number: $PROPOSAL_NUMBER"
+        
+        # Calculate short version (v22 from v22.0.0)
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "Calculated short version: $VERSION"
+        echo "DEBUG: VERSION_NUM extracted: $VERSION_NUM"
+        echo "DEBUG: Final VERSION set to: $VERSION"
+        
+    - name: Substitute variables in release notes file
+      run: |
+        # Substitute template variables in the actual release notes file that was created by the script
+        echo "DEBUG: VERSION=${{ env.VERSION }}"
+        echo "DEBUG: RELEASE_TAG=${{ env.RELEASE_TAG }}"
+        VERSION="${{ env.VERSION }}"
+        RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
+        
+        if [ -f "$RELEASE_NOTES_FILE" ]; then
+          echo "Substituting template variables in release notes file: $RELEASE_NOTES_FILE"
+          echo "DEBUG: About to substitute VERSION=${{ env.VERSION }} in $RELEASE_NOTES_FILE"
+          
+          # Do substitutions in specific order to avoid conflicts
+          sed -i "s|{{NETWORK_NAME}}|${{ env.NETWORK_NAME }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{{MINTSCAN_CHAIN_ID}}|${{ env.MINTSCAN_CHAIN_ID }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{{CALCULATED_HEIGHT}}|${{ env.CALCULATED_HEIGHT }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{{CALCULATED_PROPOSAL_NUMBER}}|${{ env.CALCULATED_PROPOSAL_NUMBER }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{{PREVIOUS_VERSION}}|${{ env.PREVIOUS_VERSION }}|g" "$RELEASE_NOTES_FILE"
+          sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" "$RELEASE_NOTES_FILE"
+          # Do VERSION last to ensure it doesn't conflict with RELEASE_TAG
+          sed -i "s|{{VERSION}}|${{ env.VERSION }}|g" "$RELEASE_NOTES_FILE"
+          
+          echo "✅ Release notes file variables substituted successfully"
+        else
+          echo "⚠️  Release notes file not found: $RELEASE_NOTES_FILE"
+        fi
+        
+    - name: debug - Echo release files
+      run: |
+        echo "-> Proposal file"
+        cat proposals/038-upgrade-v22.json
+        
+        echo "-> Release file"
+        cat releases/v22.json
+        
+        echo "-> Release notes file"
+        cat release_notes/v22.md
+        
+    - name: Set environment variables from script output
+      run: |
+        # Find the actual files that were created (after script runs)
+        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+        VERSION="v${VERSION_NUM}"
+        
+        # Find the actual proposal file that was created/used by the script
+        ACTUAL_PROPOSAL_FILE=$(find proposals/ -name "*-upgrade-${VERSION}.json" | head -1)
+        if [ -z "$ACTUAL_PROPOSAL_FILE" ]; then
+          # Fallback: predict the next number if no file found yet
+          LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
+          if [ -z "$LATEST_PROPOSAL" ]; then
+            NEXT_NUM="001"
+          else
+            CURRENT_NUM=$(echo $LATEST_PROPOSAL | cut -d'-' -f1)
+            NEXT_NUM=$(printf "%03d" $((10#$CURRENT_NUM + 1)))
+          fi
+          ACTUAL_PROPOSAL_FILE="proposals/${NEXT_NUM}-upgrade-${VERSION}.json"
+        fi
+        
+        echo "PROPOSAL_FILE=$ACTUAL_PROPOSAL_FILE" >> $GITHUB_ENV
+        echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
+        echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
+        
+    - name: Stage changes for PR creation
+      run: |
+        # Check if any of the created files have changes and stage them
+        CHANGES_DETECTED=false
+        COMMIT_MESSAGE_PARTS=()
+        
+        # Check each file individually and add only if changed
+        for file in "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}"; do
+          if [ -f "$file" ]; then
+            # Check if file is untracked (new file) or has changes
+            if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
+              # File is tracked, check for changes
+              if git diff --quiet "$file" 2>/dev/null; then
+                echo "ℹ️  No changes in $file (reused existing file)"
+              else
+                echo "📝 Changes detected in $file"
+                git add "$file"
+                CHANGES_DETECTED=true
+                
+                # Add appropriate message based on file type
+                if [[ "$file" == *"proposal"* ]]; then
+                  COMMIT_MESSAGE_PARTS+=("- Updated proposal: $file")
+                elif [[ "$file" == *"release"* && "$file" == *".json" ]]; then
+                  COMMIT_MESSAGE_PARTS+=("- Updated release config: $file")
+                elif [[ "$file" == *"release_notes"* ]]; then
+                  COMMIT_MESSAGE_PARTS+=("- Updated release notes: $file")
+                fi
+              fi
+            else
+              # File is untracked (new file), add it
+              echo "📝 New file detected: $file"
+              git add "$file"
+              CHANGES_DETECTED=true
+              
+              # Add appropriate message based on file type
+              if [[ "$file" == *"proposal"* ]]; then
+                COMMIT_MESSAGE_PARTS+=("- Created proposal: $file")
+              elif [[ "$file" == *"release"* && "$file" == *".json" ]]; then
+                COMMIT_MESSAGE_PARTS+=("- Created release config: $file")
+              elif [[ "$file" == *"release_notes"* ]]; then
+                COMMIT_MESSAGE_PARTS+=("- Created release notes: $file")
+              fi
+            fi
+          else
+            echo "⚠️  File $file does not exist"
+          fi
+        done
+        
+        # Build commit message
+        if [ "$CHANGES_DETECTED" = true ]; then
+          {
+            echo "Added release ${{ env.RELEASE_TAG }} and historical release notes"
+            echo ""
+            printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}"
+            echo ""
+            echo "Configuration:"
+            echo "- Release Tag: ${{ env.RELEASE_TAG }}"
+            echo "- Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated: 2 days from current block)"
+            echo "- Deposit: ${{ env.DEPOSIT }}"
+            echo "- Expedited: ${{ env.EXPEDITED }}"
+          } > pr_commit_message.txt
+          echo "✅ File changes staged for PR creation"
+        else
+          {
+            echo "Update PR: Refresh upgrade parameters for ${{ env.VERSION }}"
+            echo ""
+            echo "Configuration refresh:"
+            echo "- Release Tag: ${{ env.RELEASE_TAG }}"
+            echo "- Upgrade Height: ${{ env.CALCULATED_HEIGHT }} (calculated 2 days from current block)"
+            echo "- Deposit: ${{ env.DEPOSIT }}"
+            echo "- Expedited: ${{ env.EXPEDITED }}"
+            echo "- Run: ${{ github.run_number }}"
+          } > pr_commit_message.txt
+          echo "ℹ️  No file changes detected - peter-evans action will handle empty commit if needed"
+        fi
+        
+        # Debug: Show git status to verify staging
+        echo "📋 Git status after staging:"
+        git status --porcelain
+        
+        # Debug: Show staged files
+        echo "📋 Staged files:"
+        git diff --cached --name-only
+        
+        # Set environment variable 
+        echo "COMMIT_MESSAGE_FILE=pr_commit_message.txt" >> $GITHUB_ENV
+        
+    - name: Prepare comprehensive PR body
+      env:
+        NETWORK_NAME: ${{ env.NETWORK_NAME }}
+        MINTSCAN_CHAIN_ID: ${{ env.MINTSCAN_CHAIN_ID }}
+      run: |
+        echo "DEBUG: Environment variables in script:"
+        echo "  NETWORK_NAME from env: '${{ env.NETWORK_NAME }}'"
+        echo "  MINTSCAN_CHAIN_ID from env: '${{ env.MINTSCAN_CHAIN_ID }}'" 
+
+        # Generate comprehensive PR body using external script
+        ./scripts/generate-pr-body.sh "${{ env.VERSION }}" "${{ env.CALCULATED_HEIGHT }}" "${{ env.DEPOSIT }}" "${{ env.EXPEDITED }}" "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}" "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_COUNT }}" "${{ env.FILES_CHANGED }}" "${{ env.PREVIOUS_VERSION }}" "${{ env.DARWIN_AMD64_CHECKSUM }}" "${{ env.DARWIN_ARM64_CHECKSUM }}" "${{ env.LINUX_AMD64_CHECKSUM }}" "${{ env.LINUX_ARM64_CHECKSUM }}" "${{ github.run_number }}" "${{ github.sha }}"
+        
+        echo "PR_BODY_FILE=pr_body.md" >> $GITHUB_ENV
+        cat pr_body.md
+
+    - name: Create or Update Pull Request
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        # Check if we have any staged files or changes to commit
+        if git diff --cached --quiet && git diff --quiet; then
+          echo "No changes detected, but creating empty commit to update PR parameters"
+          # Read the commit message from file
+          COMMIT_MSG=$(cat pr_commit_message.txt)
+          git commit --allow-empty -m "$COMMIT_MSG"
+        else
+          echo "Changes detected, committing staged files"
+          # Read the commit message from file  
+          COMMIT_MSG=$(cat pr_commit_message.txt)
+          git commit -m "$COMMIT_MSG"
+        fi
+        
+        # Push the changes
+        git push origin "${{ env.BRANCH_NAME }}"
+        
+        # Check if PR already exists
+        EXISTING_PR=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.TARGET_BRANCH }}" --json number --jq '.[0].number' 2>/dev/null || echo "")
+        
+        if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+          echo "Updating existing PR #$EXISTING_PR"
+          # Update existing PR body
+          gh pr edit "$EXISTING_PR" --body-file pr_body.md
+          echo "✅ Updated existing PR #$EXISTING_PR"
+        else
+          echo "Creating new PR"
+          gh pr create \
+            --base "${{ env.TARGET_BRANCH }}" \
+            --head "${{ env.BRANCH_NAME }}" \
+            --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
+            --body-file pr_body.md
+          echo "✅ PR created successfully"
+        fi
+        
+    - name: Workflow Summary
+      run: |
+        echo "## 📋 Workflow Summary"
+        echo ""
+        echo "✅ PR has been created/updated for release ${{ env.RELEASE_TAG }}"
+        echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
+        echo "   - Release config: ${{ env.RELEASE_FILE }}"
+        echo "   - Release notes: ${{ env.RELEASE_NOTES_FILE }}"
+        echo ""
+        echo "🔄 Configuration for this run:"
+        echo "   - Release Tag: ${{ env.RELEASE_TAG }}"
+        echo "   - Upgrade Height: ${{ env.CALCULATED_HEIGHT }}"
+        echo "   - Deposit: ${{ env.DEPOSIT }}"
+        echo "   - Expedited: ${{ env.EXPEDITED }}"
+        echo "   - Run Number: ${{ github.run_number }}"
+
