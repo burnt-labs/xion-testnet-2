@@ -27,7 +27,7 @@ env:
   MINTSCAN_CHAIN_ID: "xion-testnet"
   NETWORK_NAME: "xion-testnet-2"
   TARGET_BRANCH: feat/do-85-generate-upgrade-proposals-n-release-binaries
-  RELEASE_TAG: v22.0.0 # TODO: delete this
+  RELEASE_TAG: v22.0.0
   DEPOSIT: 1000000000uxion
   EXPEDITED: false
   PLACEHOLDER_CHECKSUM: "--ADD-HERE-YOUR-VALUE--"
@@ -41,38 +41,26 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Setup release branch
-      id: branch
       run: |
-        OUTPUT=$(./scripts/setup-release-branch.sh "${{ env.RELEASE_TAG }}")
-        echo "$OUTPUT"
-        echo "$OUTPUT" | grep "^VERSION=" >> $GITHUB_ENV
-        echo "$OUTPUT" | grep "^BRANCH_NAME=" >> $GITHUB_ENV
+        ./scripts/setup-release-branch.sh "${{ env.RELEASE_TAG }}" | tee /tmp/output
+        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
 
     - name: Calculate upgrade height
-      id: height
       run: |
-        OUTPUT=$(./scripts/calculate-upgrade-height.sh "${{ env.XION_API_URL }}")
-        echo "$OUTPUT"
-        echo "$OUTPUT" | grep "^CALCULATED_HEIGHT=" >> $GITHUB_ENV
+        ./scripts/calculate-upgrade-height.sh "${{ env.XION_API_URL }}" | tee /tmp/output
+        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
 
     - name: Fetch release checksums
-      id: checksums
       run: |
-        OUTPUT=$(./scripts/fetch-release-checksums.sh "${{ env.RELEASE_TAG }}" "${{ env.PLACEHOLDER_CHECKSUM }}")
-        echo "$OUTPUT"
-        echo "$OUTPUT" | grep "CHECKSUM=" >> $GITHUB_ENV
+        ./scripts/fetch-release-checksums.sh "${{ env.RELEASE_TAG }}" "${{ env.PLACEHOLDER_CHECKSUM }}" | tee /tmp/output
+        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
 
     - name: Fetch GitHub comparison data
-      id: comparison
       run: |
-        OUTPUT=$(./scripts/fetch-github-comparison.sh "${{ env.RELEASE_TAG }}" "${{ secrets.GITHUB_TOKEN }}")
-        echo "$OUTPUT"
-        echo "$OUTPUT" | grep "^PREVIOUS_VERSION=" >> $GITHUB_ENV
-        echo "$OUTPUT" | grep "^COMMIT_COUNT=" >> $GITHUB_ENV
-        echo "$OUTPUT" | grep "^FILES_CHANGED=" >> $GITHUB_ENV
+        ./scripts/fetch-github-comparison.sh "${{ env.RELEASE_TAG }}" "${{ secrets.GITHUB_TOKEN }}" | tee /tmp/output
+        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
 
     - name: Generate release notes with Claude API
-      id: claude
       run: |
         ./scripts/generate-claude-notes.sh \
           ".github/workflows/prompts/claude-api-prompt.md" \
@@ -82,62 +70,33 @@ jobs:
           "${{ secrets.BURNT_CLAUDE_API_KEY }}"
 
     - name: Create release files
-      id: release_files
       run: |
-        # Ensure template is in original state
         git restore .github/workflows/templates/release_notes_template.md || true
-
-        OUTPUT=$(./scripts/create-release-pr.sh \
+        ./scripts/create-release-pr.sh \
           "${{ env.CALCULATED_HEIGHT }}" \
           "${{ env.DEPOSIT }}" \
           "${{ env.EXPEDITED }}" \
-          "${{ env.RELEASE_TAG }}")
-        echo "$OUTPUT"
+          "${{ env.RELEASE_TAG }}" | tee /tmp/output
 
         # Extract proposal number
-        PROPOSAL_NUMBER=$(echo "$OUTPUT" | grep "^Proposal number:" | sed 's/Proposal number: //')
+        PROPOSAL_NUMBER=$(grep "^Proposal number:" /tmp/output | sed 's/Proposal number: //')
         echo "CALCULATED_PROPOSAL_NUMBER=$PROPOSAL_NUMBER" >> $GITHUB_ENV
 
-        # Calculate short version
-        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-        echo "VERSION=v${VERSION_NUM}" >> $GITHUB_ENV
+    - name: Determine file paths
+      run: |
+        ./scripts/determine-file-paths.sh "${{ env.RELEASE_TAG }}" | tee /tmp/output
+        grep -E '^[A-Z_]+=' /tmp/output >> $GITHUB_ENV
 
     - name: Substitute variables in release notes
       run: |
-        VERSION="${{ env.VERSION }}"
-        RELEASE_NOTES_FILE="release_notes/${VERSION}.md"
-
-        if [ -f "$RELEASE_NOTES_FILE" ]; then
-          sed -i "s|{{NETWORK_NAME}}|${{ env.NETWORK_NAME }}|g" "$RELEASE_NOTES_FILE"
-          sed -i "s|{{MINTSCAN_CHAIN_ID}}|${{ env.MINTSCAN_CHAIN_ID }}|g" "$RELEASE_NOTES_FILE"
-          sed -i "s|{{CALCULATED_HEIGHT}}|${{ env.CALCULATED_HEIGHT }}|g" "$RELEASE_NOTES_FILE"
-          sed -i "s|{{CALCULATED_PROPOSAL_NUMBER}}|${{ env.CALCULATED_PROPOSAL_NUMBER }}|g" "$RELEASE_NOTES_FILE"
-          sed -i "s|{{PREVIOUS_VERSION}}|${{ env.PREVIOUS_VERSION }}|g" "$RELEASE_NOTES_FILE"
-          sed -i "s|{{RELEASE_TAG}}|${{ env.RELEASE_TAG }}|g" "$RELEASE_NOTES_FILE"
-          sed -i "s|{{VERSION}}|${{ env.VERSION }}|g" "$RELEASE_NOTES_FILE"
-          echo "✅ Release notes variables substituted"
-        fi
-
-    - name: Set file paths
-      run: |
-        VERSION_NUM=$(echo "${{ env.RELEASE_TAG }}" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-        VERSION="v${VERSION_NUM}"
-
-        ACTUAL_PROPOSAL_FILE=$(find proposals/ -name "*-upgrade-${VERSION}.json" | head -1)
-        if [ -z "$ACTUAL_PROPOSAL_FILE" ]; then
-          LATEST_PROPOSAL=$(ls proposals/ | grep -E '^[0-9]{3}-upgrade-v[0-9]+\.json$' | sort -V | tail -1)
-          if [ -z "$LATEST_PROPOSAL" ]; then
-            NEXT_NUM="001"
-          else
-            CURRENT_NUM=$(echo $LATEST_PROPOSAL | cut -d'-' -f1)
-            NEXT_NUM=$(printf "%03d" $((10#$CURRENT_NUM + 1)))
-          fi
-          ACTUAL_PROPOSAL_FILE="proposals/${NEXT_NUM}-upgrade-${VERSION}.json"
-        fi
-
-        echo "PROPOSAL_FILE=$ACTUAL_PROPOSAL_FILE" >> $GITHUB_ENV
-        echo "RELEASE_FILE=releases/$VERSION.json" >> $GITHUB_ENV
-        echo "RELEASE_NOTES_FILE=release_notes/$VERSION.md" >> $GITHUB_ENV
+        ./scripts/substitute-release-notes.sh \
+          "${{ env.VERSION }}" \
+          "${{ env.NETWORK_NAME }}" \
+          "${{ env.MINTSCAN_CHAIN_ID }}" \
+          "${{ env.CALCULATED_HEIGHT }}" \
+          "${{ env.CALCULATED_PROPOSAL_NUMBER }}" \
+          "${{ env.PREVIOUS_VERSION }}" \
+          "${{ env.RELEASE_TAG }}"
 
     - name: Generate PR body
       run: |
@@ -160,77 +119,24 @@ jobs:
           "${{ github.run_number }}" \
           "${{ github.sha }}"
 
-    - name: Create or update pull request
+    - name: Commit and push PR
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        # Stage and commit changes
-        CHANGES_DETECTED=false
-        COMMIT_MESSAGE_PARTS=()
-
-        for file in "${{ env.PROPOSAL_FILE }}" "${{ env.RELEASE_FILE }}" "${{ env.RELEASE_NOTES_FILE }}"; do
-          if [ -f "$file" ]; then
-            if git ls-files --error-unmatch "$file" >/dev/null 2>&1; then
-              if ! git diff --quiet "$file" 2>/dev/null; then
-                git add "$file"
-                CHANGES_DETECTED=true
-                COMMIT_MESSAGE_PARTS+=("- Updated: $file")
-              fi
-            else
-              git add "$file"
-              CHANGES_DETECTED=true
-              COMMIT_MESSAGE_PARTS+=("- Created: $file")
-            fi
-          fi
-        done
-
-        # Create commit
-        if [ "$CHANGES_DETECTED" = true ]; then
-          {
-            echo "Added release ${{ env.RELEASE_TAG }} and historical release notes"
-            echo ""
-            printf '%s\n' "${COMMIT_MESSAGE_PARTS[@]}"
-          } > commit_message.txt
-        else
-          echo "Update PR: Refresh upgrade parameters for ${{ env.VERSION }}" > commit_message.txt
-        fi
-
-        if git diff --cached --quiet && git diff --quiet; then
-          git commit --allow-empty -m "$(cat commit_message.txt)"
-        else
-          git commit -m "$(cat commit_message.txt)"
-        fi
-
-        # Push and create/update PR
-        git push origin "${{ env.BRANCH_NAME }}"
-
-        EXISTING_PR=$(gh pr list --head "${{ env.BRANCH_NAME }}" --base "${{ env.TARGET_BRANCH }}" --json number --jq '.[0].number' 2>/dev/null || echo "")
-
-        if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
-          echo "Updating existing PR #$EXISTING_PR"
-          gh pr edit "$EXISTING_PR" --body-file pr_body.md
-          echo "✅ Updated PR #$EXISTING_PR"
-        else
-          echo "Creating new PR"
-          gh pr create \
-            --base "${{ env.TARGET_BRANCH }}" \
-            --head "${{ env.BRANCH_NAME }}" \
-            --title "🚀 Upgrade to Xion ${{ env.RELEASE_TAG }}" \
-            --body-file pr_body.md
-          echo "✅ PR created successfully"
-        fi
+        ./scripts/commit-and-push-pr.sh \
+          "${{ env.BRANCH_NAME }}" \
+          "${{ env.TARGET_BRANCH }}" \
+          "${{ env.RELEASE_TAG }}" \
+          "${{ env.VERSION }}" \
+          "${{ env.PROPOSAL_FILE }}" \
+          "${{ env.RELEASE_FILE }}" \
+          "${{ env.RELEASE_NOTES_FILE }}"
 
     - name: Workflow summary
       run: |
         echo "## 📋 Workflow Summary"
-        echo ""
         echo "✅ PR created/updated for release ${{ env.RELEASE_TAG }}"
         echo "   - Proposal: ${{ env.PROPOSAL_FILE }}"
-        echo "   - Release config: ${{ env.RELEASE_FILE }}"
-        echo "   - Release notes: ${{ env.RELEASE_NOTES_FILE }}"
-        echo ""
-        echo "🔄 Configuration:"
-        echo "   - Release Tag: ${{ env.RELEASE_TAG }}"
-        echo "   - Upgrade Height: ${{ env.CALCULATED_HEIGHT }}"
-        echo "   - Deposit: ${{ env.DEPOSIT }}"
-        echo "   - Expedited: ${{ env.EXPEDITED }}"
+        echo "   - Release: ${{ env.RELEASE_FILE }}"
+        echo "   - Notes: ${{ env.RELEASE_NOTES_FILE }}"
+        echo "   - Height: ${{ env.CALCULATED_HEIGHT }}"

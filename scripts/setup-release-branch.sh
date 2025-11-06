@@ -16,8 +16,12 @@ VERSION_NUM=$(echo "$RELEASE_TAG" | sed 's/v\([0-9]*\)\.0\.0/\1/')
 VERSION="v${VERSION_NUM}"
 BRANCH_NAME="release/$RELEASE_TAG"
 
+# Output results to stdout for workflow capture
 echo "VERSION=$VERSION"
 echo "BRANCH_NAME=$BRANCH_NAME"
+
+# Also write to stderr for logging
+echo "✅ Branch setup complete: $BRANCH_NAME (version: $VERSION)" >&2
 
 # Set up git config
 git config --local user.email "action@github.com"
