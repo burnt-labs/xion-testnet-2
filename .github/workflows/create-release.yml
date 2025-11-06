@@ -1,10 +1,6 @@
 name: Create Release PR
 
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
     inputs:
       release_tag:
@@ -30,8 +26,8 @@ jobs:
       XION_API_URL: "https://api.xion-testnet-2.burnt.com"
       MINTSCAN_CHAIN_ID: "xion-testnet"
       NETWORK_NAME: "xion-testnet-2"
-      TARGET_BRANCH: "feat/do-85-generate-upgrade-proposals-n-release-binaries"
-      RELEASE_TAG: "v22.0.0"  # TODO: Use ${{ github.event.inputs.release_tag || 'v22.0.0' }}
+      TARGET_BRANCH: "main"
+      RELEASE_TAG: "${{ github.event.inputs.release_tag || 'v22.0.0' }}"
       DEPOSIT: "${{ github.event.inputs.deposit || '1000000000uxion' }}"
       EXPEDITED: "${{ github.event.inputs.expedited || 'false' }}"
       PLACEHOLDER_CHECKSUM: "--ADD-HERE-YOUR-VALUE--"
