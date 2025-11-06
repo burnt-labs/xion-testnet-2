@@ -91,11 +91,14 @@ fetch_release_checksums() {
     LINUX_ARM64_CHECKSUM=$(grep "linux_arm64.tar.gz" checksums_temp.txt | awk '{print $1}')
     echo "✅ Real checksums fetched"
   else
+    echo "⚠️  Checksums not available for $RELEASE_TAG (HTTP ${HTTP_CODE: -3})"
+    echo "    This is expected for future releases not yet published"
+    echo "    URL: $CHECKSUMS_URL"
     DARWIN_AMD64_CHECKSUM="$PLACEHOLDER_CHECKSUM"
     DARWIN_ARM64_CHECKSUM="$PLACEHOLDER_CHECKSUM"
     LINUX_AMD64_CHECKSUM="$PLACEHOLDER_CHECKSUM"
     LINUX_ARM64_CHECKSUM="$PLACEHOLDER_CHECKSUM"
-    echo "⚠️  Using placeholder checksums"
+    echo "    Using placeholder checksums"
   fi
 
   rm -f checksums_temp.txt
@@ -149,7 +152,7 @@ generate_claude_notes() {
 
   cat > claude_request.json <<EOF
 {
-  "model": "claude-3-sonnet-20240229",
+  "model": "claude-3-5-sonnet-20241022",
   "max_tokens": 4000,
   "messages": [
     {
