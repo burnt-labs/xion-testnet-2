@@ -40,7 +40,7 @@ LINUX_ARM64_CHECKSUM="${15}"
 RUN_NUMBER="${16}"
 COMMIT_SHA="${17}"
 
-# Extract proposal number from proposal file path (e.g., "proposals/038-upgrade-v22.json" -> "038")
+# Extract proposal number from proposal file path (e.g., "proposals/041-upgrade-v22.json" -> "038")
 PROPOSAL_NUMBER=$(basename "$PROPOSAL_FILE" | cut -d'-' -f1)
 
 # Generate Mintscan URLs

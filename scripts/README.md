@@ -57,7 +57,7 @@ Running the workflow with:
 - Expedited: `false`
 
 When the latest release is `v21.json`, will create:
-- `proposals/038-upgrade-v22.json`
+- `proposals/041-upgrade-v22.json`
 - `releases/v22.json`
 - `release_notes/v22.md`
 
@@ -172,7 +172,7 @@ Xion v22.0.0 includes [--ADD-HERE-YOUR-DESCRIPTION--]. This is the initial relea
 
 ## Upgrade Information
 - **Upgrade Height**: 7500000 (testnet)
-- **Proposal Number**: 038
+- **Proposal Number**: 041
 ```
 
 ## Post-Generation Steps
@@ -191,7 +191,7 @@ The system automatically handles proposal numbering:
 - Scans existing proposal files to find the highest number
 - Increments by 1 for the new proposal
 - Handles gaps in numbering (if files are deleted or missing)
-- Uses zero-padded 3-digit format (001, 002, 038, etc.)
+- Uses zero-padded 3-digit format (001, 002, 041, etc.)
 
 ## Requirements
 
@@ -213,6 +213,6 @@ If you need to remove generated files:
 
 ```bash
 # Remove specific proposal and release
-rm proposals/038-upgrade-v22.json
+rm proposals/041-upgrade-v22.json
 rm releases/v22.json
 ```
