@@ -1,0 +1,18 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "plan": {
+        "name": "v22",
+        "height": "9300000",
+        "info": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/main/releases/v22.json",
+        "upgraded_client_state": null
+      }
+    }
+  ],
+  "title": "Software Upgrade v22",
+  "summary": "Software Upgrade v22",
+  "deposit": "5000000000uxion",
+  "expedited": true
+}
