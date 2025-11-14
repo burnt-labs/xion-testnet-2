@@ -1,0 +1,8 @@
+{
+  "binaries": {
+    "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/v25.0.0/xiond_25.0.0_darwin_amd64.tar.gz?checksum=sha256:113292fa8cee61b4251b28b3d1a72cde09184daac3d055928f0cfa4fe396d702",
+    "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/v25.0.0/xiond_25.0.0_darwin_arm64.tar.gz?checksum=sha256:b4bba12ef6f5bd8b935824e116a93734ed8d6c7ea328ec32c100e53143fb4ac3",
+    "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/v25.0.0/xiond_25.0.0_linux_amd64.tar.gz?checksum=sha256:c39c95e9b661cb64a4aa4be811da4cfdabaacece726307a719c41d711815c8f7",
+    "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/v25.0.0/xiond_25.0.0_linux_arm64.tar.gz?checksum=sha256:0580d6b2950874851ab62e8e67dbcedf6ad7453d27434488e8e34e592e30f0b5"
+  }
+}
