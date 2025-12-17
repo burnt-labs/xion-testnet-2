@@ -1,0 +1,20 @@
+{
+    "messages": [
+        {
+            "@type": "/cosmos.mint.v1beta1.MsgUpdateParams",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "params": {
+                "mint_denom": "uxion",
+                "inflation_rate_change": "0.130000000000000000",
+                "inflation_max": "0.200000000000000000",
+                "inflation_min": "0.070000000000000000",
+                "goal_bonded": "0.670000000000000000",
+                "blocks_per_year": "13000000"
+            }
+        }
+    ],
+    "title": "Update blocks per year",
+    "summary": "Update blocks_per_year from 6311520 to 13000000 to better reflect actual block production rate",
+    "deposit": "1000000000uxion",
+    "expedited": false
+}
