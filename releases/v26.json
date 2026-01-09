@@ -1,0 +1,8 @@
+{
+  "binaries": {
+    "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/v26.0.0-rc1/xiond_26.0.0-rc1_darwin_amd64.tar.gz?checksum=sha256:PLACEHOLDER",
+    "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/v26.0.0-rc1/xiond_26.0.0-rc1_darwin_arm64.tar.gz?checksum=sha256:PLACEHOLDER",
+    "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/v26.0.0-rc1/xiond_26.0.0-rc1_linux_amd64.tar.gz?checksum=sha256:PLACEHOLDER",
+    "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/v26.0.0-rc1/xiond_26.0.0-rc1_linux_arm64.tar.gz?checksum=sha256:PLACEHOLDER"
+  }
+}
