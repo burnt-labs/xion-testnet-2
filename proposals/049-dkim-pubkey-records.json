@@ -27,7 +27,16 @@
                     "selector": "selector1",
                     "version": "0",
                     "key_type": "0"
+                },
+                {
+                    "domain": "proton.me",
+                    "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn46zCm3zHBmS1zePKxA+RIXw41Nu6l91NpLLBnWnrcZ35H/843XNWPZEQ0OgGwx/yqTXETMLXIDjGEWlK1E1mpdguqu+3s7SuIHoo5+i6mgyxJguljkwc3dk8ojnJ6VVUPnDh5GJArkAhXxEb1aOK1BVGM0yDlmYdmaOfd48qcx5iODP/MFc8pivfxEXTIL+aUz7+X69lMiwUSHpWYL3/a5X3nLD0zEntxv08xs8J/rpuRg4v+OXEOhcNvhkeiRZqJBdpJTkoEZfGvdTct+U0YYC69NW0ClUcKio2uDPmxU1xvfvHbSTW2gHYk8RpYZaxLACULdMo+Vt4Na/oIR+swIDAQAB",
+                    "poseidon_hash": "NDg2ODc4MTQ0MTAzMjQyMjEyOTc1MzU1NjM5NDUxMTc4MjAyMDYyMzMzNjk3OTk0MTYwMTg0MjM0NTk2NzQwNzAzMzEzMjQwOTk0",
+                    "selector": "ck677gxvmnehzmitcrhii5zb3q.protonmail",
+                    "version": "0",
+                    "key_type": "0"
                 }
+
             ]
         }
     ],
