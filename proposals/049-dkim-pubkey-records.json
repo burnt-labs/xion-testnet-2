@@ -35,6 +35,22 @@
                     "selector": "ck677gxvmnehzmitcrhii5zb3q.protonmail",
                     "version": "0",
                     "key_type": "0"
+                },
+                {
+                    "domain": "yahoo.com",
+                    "pub_key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDrEee0Ri4Juz+QfiWYui/E9UGSXau/2P8LjnTD8V4Unn+2FAZVGE3kL23bzeoULYv4PeleB3gfmJiDJOKU3Ns5L4KJAUUHjFwDebt0NP+sBK0VKeTATL2Yr/S3bT/xhy+1xtj4RkdV7fVxTn56Lb4udUnwuxK4V5b5PdOKj/+XcwIDAQAB",
+                    "poseidon_hash": "NDUwNzQ0NTYwNTEwOTI4ODQyNTExNDU5MDI0OTU0MDYxNjU1NDI1NzkzOTI2MzI0MTY5NDk2Mzc3MTY3MTY2NjkwOTU3NDAxMTY5",
+                    "selector": "s1024",
+                    "version": "0",
+                    "key_type": "0"
+                },
+                {
+                    "domain": "fastmail.com",
+                    "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvfZ2hWGUdZ5l9BjjJyPyKhPuN9dsjjGHk7p+64dfhtvxxaptrlsMTNprSwGbEgVI+GIp9dqXoqYNH9LF9KIkJUyVmbaQKo8Ho8BEBSpkiqIkW4AE7D1ppO6pLcqulAx2kszcvonKyu8KuQiVrLXsi+zFpVGgdO1E2qkCabJXBgc1qPaY/iWJB1SjXM60ERlEJd6MlWjfYHgK4qNguhVoHwKjCvFdCdAfk47VS/SCOKsX0WvXEcQCjuLAiF7RM+ZzUj1poaXsgzm2XFEUjTrgJv2OQvZr3FS5WYPvYlDeMUR0AeKITOajuK9dvIkEgLYYLd6rOwq5+yIXPB0jt8dpYQIDAQAB",
+                    "poseidon_hash": "NTA2NjMyMjU2MDA0NDM2MDI4NzM5MjkwNTg3MTg4NzMwNjM0Nzk4ODAwNDYyMjIyODYwNjI4NzYxODQ3NjQ3NjY0NTUwMzM3NzAxNg==",
+                    "selector": "fm2",
+                    "version": "0",
+                    "key_type": "0"
                 }
 
             ]
