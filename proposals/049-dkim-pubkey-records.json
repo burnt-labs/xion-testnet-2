@@ -9,56 +9,55 @@
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAntvSKT1hkqhKe0xcaZ0x+QbouDsJuBfby/S82jxsoC/SodmfmVs2D1KAH3mi1AqdMdU12h2VfETeOJkgGYq5ljd996AJ7ud2SyOLQmlhaNHH7Lx+Mdab8/zDN1SdxPARDgcM7AsRECHwQ15R20FaKUABGu4NTbR2fDKnYwiq5jQyBkLWP+LgGOgfUF4T4HZb2PY2bQtEP6QeqOtcW4rrsH24L7XhD+HSZb1hsitrE0VPbhJzxDwI4JF815XMnSVjZgYUXP8CxI1Y0FONlqtQYgsorZ9apoW1KPQe8brSSlRsi9sXB/tu56LmG7tEDNmrZ5XUwQYUUADBOu7t1niwXwIDAQAB",
                     "poseidon_hash": "NjYzMjM1MzcxMzA4NTE1NzkyNTUwNDAwODQ0MzA3ODkxOTcxNjMyMjM4NjE1NjE2MDYwMjIxODUzNjk2MTAyODA0NjQ2ODIzNzE5Mg==",
                     "selector": "20230601",
-                    "version": "0",
-                    "key_type": "0"
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 },
                 {
                     "domain": "icloud.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1ZEfbkf4TbO2TDZI67WhJ6G8Dwk3SJyAbBlE/QKdyXFZB4HfEU7AcuZBzcXSJFE03DlmyOkUAmaaR8yFlwooHyaKRLIaT3epGlL5YGowyfItLly2k0Jj0IOICRxWrB378b7qMeimE8KlH1UNaVpRTTi0XIYjIKAOpTlBmkM9a/3Rl4NWy8pLYApXD+WCkYxPcxoAAgaN8osqGTCJ5r+VHFU7Wm9xqq3MZmnfo0bzInF4UajCKjJAQa+HNuh95DWIYP/wV77/PxkEakOtzkbJMlFJiK/hMJ+HQUvTbtKW2s+t4uDK8DI16Rotsn6e0hS8xuXPmVte9ZzplD0fQgm2qwIDAQAB",
                     "poseidon_hash": "MjA3MzkyMzQyNjkxMDY2OTU4MDA2ODQ1ODU2MDQxNTQyNDIzNjU1MTkyNzY5MzQ5Mjk1NjgyNzE1MTc2MzEwMjcyMTYzNzc2ODEyNjQ=",
                     "selector": "1a1hai",
-                    "version": "0",
-                    "key_type": "0"
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 },
                 {
                     "domain": "outlook.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvWyktrIL8DO/+UGvMbv7cPd/Xogpbs7pgVw8y9ldO6AAMmg8+ijENl/c7Fb1MfKM7uG3LMwAr0dVVKyM+mbkoX2k5L7lsROQr0Z9gGSpu7xrnZOa58+/pIhd2Xk/DFPpa5+TKbWodbsSZPRN8z0RY5x59jdzSclXlEyN9mEZdmOiKTsOP6A7vQxfSya9jg5N81dfNNvP7HnWejMMsKyIMrXptxOhIBuEYH67JDe98QgX14oHvGM2Uz53if/SW8MF09rYh9sp4ZsaWLIg6T343JzlbtrsGRGCDJ9JPpxRWZimtz+Up/BlKzT6sCCrBihb/Bi3pZiEBB4Ui/vruL5RCQIDAQAB",
                     "poseidon_hash": "MjQzMTI1NDU0MjY0NDU3Nzk0NTEyNjY0NDQ5MDE4OTc0MzY1OTY3NzM0MzQzNjQ0MDMwNDI2NDY1NDA4NzA2NTM1MzkyNTIxNjAyNg==",
                     "selector": "selector1",
-                    "version": "0",
-                    "key_type": "0"
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 },
                 {
                     "domain": "proton.me",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn46zCm3zHBmS1zePKxA+RIXw41Nu6l91NpLLBnWnrcZ35H/843XNWPZEQ0OgGwx/yqTXETMLXIDjGEWlK1E1mpdguqu+3s7SuIHoo5+i6mgyxJguljkwc3dk8ojnJ6VVUPnDh5GJArkAhXxEb1aOK1BVGM0yDlmYdmaOfd48qcx5iODP/MFc8pivfxEXTIL+aUz7+X69lMiwUSHpWYL3/a5X3nLD0zEntxv08xs8J/rpuRg4v+OXEOhcNvhkeiRZqJBdpJTkoEZfGvdTct+U0YYC69NW0ClUcKio2uDPmxU1xvfvHbSTW2gHYk8RpYZaxLACULdMo+Vt4Na/oIR+swIDAQAB",
                     "poseidon_hash": "NDg2ODc4MTQ0MTAzMjQyMjEyOTc1MzU1NjM5NDUxMTc4MjAyMDYyMzMzNjk3OTk0MTYwMTg0MjM0NTk2NzQwNzAzMzEzMjQwOTk0",
                     "selector": "ck677gxvmnehzmitcrhii5zb3q.protonmail",
-                    "version": "0",
-                    "key_type": "0"
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 },
                 {
                     "domain": "yahoo.com",
                     "pub_key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDrEee0Ri4Juz+QfiWYui/E9UGSXau/2P8LjnTD8V4Unn+2FAZVGE3kL23bzeoULYv4PeleB3gfmJiDJOKU3Ns5L4KJAUUHjFwDebt0NP+sBK0VKeTATL2Yr/S3bT/xhy+1xtj4RkdV7fVxTn56Lb4udUnwuxK4V5b5PdOKj/+XcwIDAQAB",
                     "poseidon_hash": "NDUwNzQ0NTYwNTEwOTI4ODQyNTExNDU5MDI0OTU0MDYxNjU1NDI1NzkzOTI2MzI0MTY5NDk2Mzc3MTY3MTY2NjkwOTU3NDAxMTY5",
                     "selector": "s1024",
-                    "version": "0",
-                    "key_type": "0"
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 },
                 {
                     "domain": "fastmail.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvfZ2hWGUdZ5l9BjjJyPyKhPuN9dsjjGHk7p+64dfhtvxxaptrlsMTNprSwGbEgVI+GIp9dqXoqYNH9LF9KIkJUyVmbaQKo8Ho8BEBSpkiqIkW4AE7D1ppO6pLcqulAx2kszcvonKyu8KuQiVrLXsi+zFpVGgdO1E2qkCabJXBgc1qPaY/iWJB1SjXM60ERlEJd6MlWjfYHgK4qNguhVoHwKjCvFdCdAfk47VS/SCOKsX0WvXEcQCjuLAiF7RM+ZzUj1poaXsgzm2XFEUjTrgJv2OQvZr3FS5WYPvYlDeMUR0AeKITOajuK9dvIkEgLYYLd6rOwq5+yIXPB0jt8dpYQIDAQAB",
                     "poseidon_hash": "NTA2NjMyMjU2MDA0NDM2MDI4NzM5MjkwNTg3MTg4NzMwNjM0Nzk4ODAwNDYyMjIyODYwNjI4NzYxODQ3NjQ3NjY0NTUwMzM3NzAxNg==",
                     "selector": "fm2",
-                    "version": "0",
-                    "key_type": "0"
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 }
-
             ]
         }
     ],
     "title": "Add DKIM Public Keys for Gmail, iCloud, and Outlook",
     "summary": "This proposal adds DKIM public key records for major email providers (Gmail, iCloud, and Outlook) to enable email-based authentication in the DKIM module.",
     "deposit": "5000000000uxion",
-    "expedited": false,
+    "expedited": true,
     "metadata": ""
 }
