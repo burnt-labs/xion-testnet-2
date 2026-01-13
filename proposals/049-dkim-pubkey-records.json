@@ -7,6 +7,7 @@
                 {
                     "domain": "gmail.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAntvSKT1hkqhKe0xcaZ0x+QbouDsJuBfby/S82jxsoC/SodmfmVs2D1KAH3mi1AqdMdU12h2VfETeOJkgGYq5ljd996AJ7ud2SyOLQmlhaNHH7Lx+Mdab8/zDN1SdxPARDgcM7AsRECHwQ15R20FaKUABGu4NTbR2fDKnYwiq5jQyBkLWP+LgGOgfUF4T4HZb2PY2bQtEP6QeqOtcW4rrsH24L7XhD+HSZb1hsitrE0VPbhJzxDwI4JF815XMnSVjZgYUXP8CxI1Y0FONlqtQYgsorZ9apoW1KPQe8brSSlRsi9sXB/tu56LmG7tEDNmrZ5XUwQYUUADBOu7t1niwXwIDAQAB",
+                    "poseidon_hash": "NjYzMjM1MzcxMzA4NTE1NzkyNTUwNDAwODQ0MzA3ODkxOTcxNjMyMjM4NjE1NjE2MDYwMjIxODUzNjk2MTAyODA0NjQ2ODIzNzE5Mg==",
                     "selector": "20230601",
                     "version": "0",
                     "key_type": "0"
@@ -14,6 +15,7 @@
                 {
                     "domain": "icloud.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1ZEfbkf4TbO2TDZI67WhJ6G8Dwk3SJyAbBlE/QKdyXFZB4HfEU7AcuZBzcXSJFE03DlmyOkUAmaaR8yFlwooHyaKRLIaT3epGlL5YGowyfItLly2k0Jj0IOICRxWrB378b7qMeimE8KlH1UNaVpRTTi0XIYjIKAOpTlBmkM9a/3Rl4NWy8pLYApXD+WCkYxPcxoAAgaN8osqGTCJ5r+VHFU7Wm9xqq3MZmnfo0bzInF4UajCKjJAQa+HNuh95DWIYP/wV77/PxkEakOtzkbJMlFJiK/hMJ+HQUvTbtKW2s+t4uDK8DI16Rotsn6e0hS8xuXPmVte9ZzplD0fQgm2qwIDAQAB",
+                    "poseidon_hash": "MjA3MzkyMzQyNjkxMDY2OTU4MDA2ODQ1ODU2MDQxNTQyNDIzNjU1MTkyNzY5MzQ5Mjk1NjgyNzE1MTc2MzEwMjcyMTYzNzc2ODEyNjQ=",
                     "selector": "1a1hai",
                     "version": "0",
                     "key_type": "0"
@@ -21,6 +23,7 @@
                 {
                     "domain": "outlook.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvWyktrIL8DO/+UGvMbv7cPd/Xogpbs7pgVw8y9ldO6AAMmg8+ijENl/c7Fb1MfKM7uG3LMwAr0dVVKyM+mbkoX2k5L7lsROQr0Z9gGSpu7xrnZOa58+/pIhd2Xk/DFPpa5+TKbWodbsSZPRN8z0RY5x59jdzSclXlEyN9mEZdmOiKTsOP6A7vQxfSya9jg5N81dfNNvP7HnWejMMsKyIMrXptxOhIBuEYH67JDe98QgX14oHvGM2Uz53if/SW8MF09rYh9sp4ZsaWLIg6T343JzlbtrsGRGCDJ9JPpxRWZimtz+Up/BlKzT6sCCrBihb/Bi3pZiEBB4Ui/vruL5RCQIDAQAB",
+                    "poseidon_hash": "MjQzMTI1NDU0MjY0NDU3Nzk0NTEyNjY0NDQ5MDE4OTc0MzY1OTY3NzM0MzQzNjQ0MDMwNDI2NDY1NDA4NzA2NTM1MzkyNTIxNjAyNg==",
                     "selector": "selector1",
                     "version": "0",
                     "key_type": "0"
