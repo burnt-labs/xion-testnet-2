@@ -23,7 +23,7 @@
                 {
                     "domain": "outlook.com",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvWyktrIL8DO/+UGvMbv7cPd/Xogpbs7pgVw8y9ldO6AAMmg8+ijENl/c7Fb1MfKM7uG3LMwAr0dVVKyM+mbkoX2k5L7lsROQr0Z9gGSpu7xrnZOa58+/pIhd2Xk/DFPpa5+TKbWodbsSZPRN8z0RY5x59jdzSclXlEyN9mEZdmOiKTsOP6A7vQxfSya9jg5N81dfNNvP7HnWejMMsKyIMrXptxOhIBuEYH67JDe98QgX14oHvGM2Uz53if/SW8MF09rYh9sp4ZsaWLIg6T343JzlbtrsGRGCDJ9JPpxRWZimtz+Up/BlKzT6sCCrBihb/Bi3pZiEBB4Ui/vruL5RCQIDAQAB",
-                    "poseidon_hash": "MjQzMTI1NDU0MjY0NDU3Nzk0NTEyNjY0NDQ5MDE4OTc0MzY1OTY3NzM0MzQzNjQ0MDMwNDI2NDY1NDA4NzA2NTM1MzkyNTIxNjAyNg==",
+                    "poseidon_hash": "BWAKkwjeKx9CkZs11wzMGfOwrdFcHzlKDcFhhotsxxo=",
                     "selector": "selector1",
                     "version": "VERSION_DKIM1_UNSPECIFIED",
                     "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
