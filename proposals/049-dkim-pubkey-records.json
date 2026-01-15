@@ -25,14 +25,20 @@
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvWyktrIL8DO/+UGvMbv7cPd/Xogpbs7pgVw8y9ldO6AAMmg8+ijENl/c7Fb1MfKM7uG3LMwAr0dVVKyM+mbkoX2k5L7lsROQr0Z9gGSpu7xrnZOa58+/pIhd2Xk/DFPpa5+TKbWodbsSZPRN8z0RY5x59jdzSclXlEyN9mEZdmOiKTsOP6A7vQxfSya9jg5N81dfNNvP7HnWejMMsKyIMrXptxOhIBuEYH67JDe98QgX14oHvGM2Uz53if/SW8MF09rYh9sp4ZsaWLIg6T343JzlbtrsGRGCDJ9JPpxRWZimtz+Up/BlKzT6sCCrBihb/Bi3pZiEBB4Ui/vruL5RCQIDAQAB",
                     "poseidon_hash": "MjQzMTI1NDU0MjY0NDU3Nzk0NTEyNjY0NDQ5MDE4OTc0MzY1OTY3NzM0MzQzNjQ0MDMwNDI2NDY1NDA4NzA2NTM1MzkyNTIxNjAyNg==",
                     "selector": "selector1",
+<<<<<<< HEAD
                     "version": "VERSION_DKIM1_UNSPECIFIED",
                     "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
+=======
+                    "version": "0",
+                    "key_type": "0"
+>>>>>>> f7ac7ca (Added proton email client dkim pub key record)
                 },
                 {
                     "domain": "proton.me",
                     "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn46zCm3zHBmS1zePKxA+RIXw41Nu6l91NpLLBnWnrcZ35H/843XNWPZEQ0OgGwx/yqTXETMLXIDjGEWlK1E1mpdguqu+3s7SuIHoo5+i6mgyxJguljkwc3dk8ojnJ6VVUPnDh5GJArkAhXxEb1aOK1BVGM0yDlmYdmaOfd48qcx5iODP/MFc8pivfxEXTIL+aUz7+X69lMiwUSHpWYL3/a5X3nLD0zEntxv08xs8J/rpuRg4v+OXEOhcNvhkeiRZqJBdpJTkoEZfGvdTct+U0YYC69NW0ClUcKio2uDPmxU1xvfvHbSTW2gHYk8RpYZaxLACULdMo+Vt4Na/oIR+swIDAQAB",
                     "poseidon_hash": "NDg2ODc4MTQ0MTAzMjQyMjEyOTc1MzU1NjM5NDUxMTc4MjAyMDYyMzMzNjk3OTk0MTYwMTg0MjM0NTk2NzQwNzAzMzEzMjQwOTk0",
                     "selector": "ck677gxvmnehzmitcrhii5zb3q.protonmail",
+<<<<<<< HEAD
                     "version": "VERSION_DKIM1_UNSPECIFIED",
                     "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
                 },
@@ -51,7 +57,12 @@
                     "selector": "fm2",
                     "version": "VERSION_DKIM1_UNSPECIFIED",
                     "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
+=======
+                    "version": "0",
+                    "key_type": "0"
+>>>>>>> f7ac7ca (Added proton email client dkim pub key record)
                 }
+
             ]
         }
     ],
