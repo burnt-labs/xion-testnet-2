@@ -1,0 +1,14 @@
+{
+  "messages": [
+    {
+      "@type": "/ibc.core.client.v1.MsgRecoverClient",
+      "subject_client_id": "07-tendermint-2",
+      "substitute_client_id": "07-tendermint-17",
+      "signer": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc"
+    }
+  ],
+  "title": "EXPEDITED: Recover expired Osmosis client 07-tendermint-2",
+  "summary": "EXPEDITED proposal to recover the expired IBC client 07-tendermint-2 for Osmosis testnet using the active substitute client 07-tendermint-17. This will restore IBC connectivity to Osmosis testnet.",
+  "deposit": "5000000000",
+  "expedited": true
+}
