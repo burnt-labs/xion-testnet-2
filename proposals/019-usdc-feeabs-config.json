@@ -1,0 +1,30 @@
+{
+  "messages": [
+    {
+      "@type": "/xion.feeabs.v1beta1.MsgUpdateParams",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "params": {
+        "native_ibced_in_osmosis": "ibc/C34D578ABDA051E1CB3AC2C24834E7E43E0F7FA37DB8EE114FB5F263AF545622",
+        "osmosis_query_twap_path": "\"/osmosis.twap.v1beta1.Query/ArithmeticTwapToNow\"",
+        "chain_name": "xion",
+        "ibc_transfer_channel": "channel-2",
+        "ibc_query_icq_channel": "channel-10",
+        "osmosis_crosschain_swap_address": "osmo15ny0qhmtrzvz2mu3tgzezlge65f8lmxvaf9ylqhhyrsgwehw88kq6pfkmd"
+      }
+    },
+    {
+      "@type": "/xion.feeabs.v1beta1.MsgAddHostZone",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "host_chain_config": {
+        "ibc_denom": "ibc/13B2C536BB057AC79D5616B8EA1B9540EC1F2170718CAFF6F0083C966FFFED0B",
+        "osmosis_pool_token_denom_in": "uosmo",
+        "pool_id": "928",
+        "status": "HOST_CHAIN_FEE_ABS_STATUS_UNSPECIFIED"
+      }
+    }
+  ],
+  "title": "Setup fee abstraction using osmo",
+  "summary": "This proposal updates the fee abstraction module by configuring support for OSMO from the Osmosis chain. It sets the IBC denomination for native OSMO, defines the IBC transfer channel (channel-1) and ICQ query channel (channel-14), and registers the Osmosis cross-chain swap address used for routing transactions involving Osmosis assets. Additionally, the proposal updates the Host Zone pool configuration to recognize the OSMO IBC denomination from Osmosis, linking it to pool ID 2444 for use in fee abstraction swaps. The status of the Host Zone is marked as UPDATED to reflect the activation of this configuration.",
+  "deposit": "5000000000",
+  "expedited": true
+}
