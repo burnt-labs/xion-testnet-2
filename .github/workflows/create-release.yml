@@ -1,19 +1,33 @@
 name: Create Release PR
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       release_tag:
-        description: 'Release tag to update the chain registry with'
         required: true
         type: string
       deposit:
-        description: 'Deposit amount (default: 1000000000uxion)'
         required: false
-        default: '1000000000uxion'
+        default: "1000000000uxion"
         type: string
       expedited:
-        description: 'Expedited proposal'
+        required: false
+        default: false
+        type: boolean
+
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to update the chain registry with"
+        required: true
+        type: string
+      deposit:
+        description: "Deposit amount (default: 1000000000uxion)"
+        required: false
+        default: "1000000000uxion"
+        type: string
+      expedited:
+        description: "Expedited proposal"
         required: false
         default: false
         type: boolean
@@ -27,9 +41,11 @@ jobs:
       MINTSCAN_CHAIN_ID: "xion-testnet"
       NETWORK_NAME: "xion-testnet-2"
       TARGET_BRANCH: "main"
-      RELEASE_TAG: "${{ github.event.inputs.release_tag || 'v22.0.0' }}"
-      DEPOSIT: "${{ github.event.inputs.deposit || '1000000000uxion' }}"
-      EXPEDITED: "${{ github.event.inputs.expedited || 'false' }}"
+      RELEASE_TAG: "${{ inputs.release_tag }}"
+      DEPOSIT: "${{ inputs.deposit || '1000000000uxion' }}"
+      EXPEDITED: "${{ inputs.expedited || 'false' }}"
+      # Testnet: 48h non-expedited, 24h expedited
+      UPGRADE_WINDOW_SECONDS: "${{ inputs.expedited == true && '86400' || '172800' }}"
       PLACEHOLDER_CHECKSUM: "--ADD-HERE-YOUR-VALUE--"
       CLAUDE_API_KEY: "${{ secrets.BURNT_CLAUDE_API_KEY }}"
       GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
@@ -38,8 +54,8 @@ jobs:
       GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Run release workflow
-      run: ./scripts/orchestrate-release.sh
+      - name: Run release workflow
+        run: ./scripts/orchestrate-release.sh
