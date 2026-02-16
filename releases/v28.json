@@ -1,0 +1,8 @@
+{
+  "binaries": {
+    "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/v28.0.0-rc12/xiond_28.0.0-rc12_darwin_amd64.tar.gz",
+    "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/v28.0.0-rc12/xiond_28.0.0-rc12_darwin_arm64.tar.gz",
+    "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/v28.0.0-rc12/xiond_28.0.0-rc12_linux_amd64.tar.gz",
+    "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/v28.0.0-rc12/xiond_28.0.0-rc12_linux_arm64.tar.gz"
+  }
+}
