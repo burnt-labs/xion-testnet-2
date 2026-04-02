@@ -27,6 +27,6 @@
 # # Assign a role as a Code Owner:
 # /config/ @@maintainer
 
-* @burnt-labs/burnt-engineering/burnt-protocol
+* @burnt-labs/burnt-protocol
 
-.github/ @burnt-labs/burnt-engineering/burnt-devops
+.github/ @burnt-labs/burnt-devops
