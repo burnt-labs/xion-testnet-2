@@ -1,0 +1,23 @@
+{
+    "messages": [
+        {
+            "@type": "/xion.dkim.v1.MsgAddDkimPubKeys",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "dkim_pubkeys": [
+                {
+                    "domain": "burnt.com",
+                    "pub_key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDl/NganeSWTkvH+myXHF1xw10h9do+CniB5C8ppjLViGTfT9fH487djdKKXP1DcOHYq/Q4uDNySr9ObqkiFRwALv+CemPbS7MAoFTLAL1YvqP/qCdR6n/kg3s10AwLObbokyTwb7e31z0fDSNRMs9aovA9gI80LRSf7Y/k8XKoRwIDAQAB",
+                    "poseidon_hash": "Kta+yFzylsw9OK1YPjUerY047cDedB7H9gg3IlTEfRc=",
+                    "selector": "google",
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
+                }
+            ]
+        }
+    ],
+    "title": "Add DKIM Public Key for burnt.com",
+    "summary": "This proposal adds the DKIM public key record for burnt.com to enable email-based authentication for burnt.com email addresses in the DKIM module.",
+    "deposit": "5000000000uxion",
+    "expedited": true,
+    "metadata": ""
+}
