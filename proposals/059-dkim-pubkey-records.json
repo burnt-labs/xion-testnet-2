@@ -15,8 +15,8 @@
             ]
         }
     ],
-    "title": "Update DKIM Public Key for gmail.com",
-    "summary": "This proposal updates the DKIM public key record for gmail to enable email-based authentication for gmail email addresses in the DKIM module.",
+    "title": "Add new DKIM Public Key for gmail.com",
+    "summary": "This proposal adds in new DKIM public key record for gmail to enable email-based authentication for gmail email addresses in the DKIM module.",
     "deposit": "5000000000uxion",
     "expedited": true
 }
