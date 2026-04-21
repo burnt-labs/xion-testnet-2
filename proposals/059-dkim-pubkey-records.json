@@ -1,0 +1,22 @@
+{
+    "messages": [
+        {
+            "@type": "/xion.dkim.v1.MsgAddDkimPubKeys",
+            "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+            "dkim_pubkeys": [
+                {
+                    "domain": "gmail.com",
+                    "pub_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtOzIjTYVUYZDbm03lsL4MGxSUVJWALTSueNRnCvCdM5d0i26EVUH7jprqIFdBSnMXQDHCkwcH1bFjtbfHCzFfWlpzOWducPPU0E+ut0rRqIy4NKY8CJlW39Q+AHJ70h+k2VadmQt0A1Yijg/Dk73NuJAz8KDNgz2x14nDVkINRlynAU7EosarRRhVGKqlNrYdp/os6QYaetfYNdQRJDecOARNObGRET/sW0m5Ya5SBGsaw8VSGluCwSZh+zShTXaOyA1WnpHNtAoCQClFPn9vmm6Cb0Z2gYF0g/+qZ1FCnaj1+aaJGzhqVOXGtHGWM3dLpwC7Rul6STfFD521JeqpQIDAQAB",
+                    "poseidon_hash": "KAsQiG1tPLap+HDZQplrQgu/xR470fQw4YaQpoWbbY8=",
+                    "selector": "20251104",
+                    "version": "VERSION_DKIM1_UNSPECIFIED",
+                    "key_type": "KEY_TYPE_RSA_UNSPECIFIED"
+                }
+            ]
+        }
+    ],
+    "title": "Add new DKIM Public Key for gmail.com",
+    "summary": "This proposal adds in new DKIM public key record for gmail to enable email-based authentication for gmail email addresses in the DKIM module.",
+    "deposit": "5000000000uxion",
+    "expedited": true
+}
