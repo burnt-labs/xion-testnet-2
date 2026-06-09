@@ -1,0 +1,18 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "plan": {
+        "name": "v30",
+        "height": "15950000",
+        "info": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/chore/rebranding/releases/v30.json",
+        "upgraded_client_state": null
+      }
+    }
+  ],
+  "title": "Software Upgrade v30",
+  "summary": "Replacement for proposal 060 with the corrected upgrade info URL. Schedules the v30 software upgrade. This upgrade runs standard module migrations, removes the testnet JWK audience 'poc-leaked-private-key' and its audience claim, and adds Verona-facing aliases to the existing uxion bank denomination metadata. The Verona metadata change is alias-only: uxion keeps existing alias 'microxion' and adds 'uverona' and 'microverona'; mxion keeps existing alias 'millixion' and adds 'mverona' and 'milliverona'; XION keeps existing alias 'xion' and adds 'verona' and 'VERONA'. This proposal preserves the base denomination uxion, display denomination XION, token name xion, token symbol XION, chain ID, Bech32 prefixes, module names, protobuf packages, REST paths, balances, staking denom, mint denom, and gas denom.",
+  "deposit": "5000000000uxion",
+  "expedited": true
+}
