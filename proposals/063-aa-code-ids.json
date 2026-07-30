@@ -27,7 +27,7 @@
     }
   ],
   "title": "EXPEDITED: Update and pin account code ids to 1, 21, 95 and 1880",
-  "summary": "EXPEDITED proposal to add code id 1880 to the abstract account module's allowed_code_ids and pin it in the wasm module. Code 1880 has checksum d27a379ff65eb47a9e538e3a3d46101de2a6c0b86ba3d0bf014c0403849414e6. The existing allowed code ids 1, 21 and 95 are retained, and all four code ids are pinned so that instantiating and executing accounts from them is more gas efficient. Other abstract account params are unchanged: allow_all_code_ids remains false, max_gas_before and max_gas_after remain 5000000.",
+  "summary": "EXPEDITED proposal to add code id 1880 to the abstract account module's allowed_code_ids and pin it in the wasm module. Code 1880 is the XION abstract account contract (cw2 contract name 'account', version 0.1.1) with checksum d27a379ff65eb47a9e538e3a3d46101de2a6c0b86ba3d0bf014c0403849414e6. It exports the before_tx and after_tx abstract account entry points and supports the Secp256K1, Secp256R1/Passkey, Ed25519, EthWallet, JWT and ZKEmail authenticator types; the ZKEmail authenticator is the addition over the currently allowed account code ids. Allowing this code id lets new accounts be registered from it and lets existing accounts migrate to it. The existing allowed code ids 1, 21 and 95 are retained, and all four code ids are pinned so that instantiating and executing accounts from them is more gas efficient. Other abstract account params are unchanged: allow_all_code_ids remains false, max_gas_before and max_gas_after remain 5000000.",
   "deposit": "5000000000uxion",
   "expedited": true
 }
