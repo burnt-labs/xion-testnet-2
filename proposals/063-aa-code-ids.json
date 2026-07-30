@@ -1,0 +1,33 @@
+{
+  "messages": [
+    {
+      "@type": "/abstractaccount.v1.MsgUpdateParams",
+      "sender": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "params": {
+        "allow_all_code_ids": false,
+        "allowed_code_ids": [
+          1,
+          21,
+          95,
+          1880
+        ],
+        "max_gas_before": "5000000",
+        "max_gas_after": "5000000"
+      }
+    },
+    {
+      "@type": "/cosmwasm.wasm.v1.MsgPinCodes",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "code_ids": [
+        1,
+        21,
+        95,
+        1880
+      ]
+    }
+  ],
+  "title": "EXPEDITED: Update and pin account code ids to 1, 21, 95 and 1880",
+  "summary": "EXPEDITED proposal to add code id 1880 to the abstract account module's allowed_code_ids and pin it in the wasm module. Code 1880 has checksum d27a379ff65eb47a9e538e3a3d46101de2a6c0b86ba3d0bf014c0403849414e6. The existing allowed code ids 1, 21 and 95 are retained, and all four code ids are pinned so that instantiating and executing accounts from them is more gas efficient. Other abstract account params are unchanged: allow_all_code_ids remains false, max_gas_before and max_gas_after remain 5000000.",
+  "deposit": "5000000000uxion",
+  "expedited": true
+}
