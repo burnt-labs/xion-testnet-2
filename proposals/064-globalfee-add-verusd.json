@@ -1,0 +1,26 @@
+{
+    "title": "Add verUSD to globalfee module",
+    "description": "Add the Verona USD token factory denomination (factory/xion17grq736740r70awldugfs3mls3stu9haewctv2/verusd, display verUSD, 6 decimals) to the globalfee module's MinimumGasPricesParam so that transaction fees may be paid in verUSD. The minimum gas price is set to 0.005 verUSD per unit of gas, matching the existing Noble $USDC rate. MinimumGasPricesParam is replaced in full, so the existing entries are restated unchanged: Noble $USDC (ibc/6490A7EAB61059BFC1CDDEB05917DD70BDF3A611654162A1A47DB930D40D8AF4) at 0.005 and uxion at 0.001. Denominations are listed in ascending order as required by the module's parameter validation. No other globalfee parameters are changed: BypassMinFeeMsgTypes and MaxTotalBypassMinFeeMsgGasUsage are untouched.",
+    "changes": [
+        {
+            "subspace": "globalfee",
+            "key": "MinimumGasPricesParam",
+            "value": [
+                {
+                    "denom": "factory/xion17grq736740r70awldugfs3mls3stu9haewctv2/verusd",
+                    "amount": "0.005000000000000000"
+                },
+                {
+                    "denom": "ibc/6490A7EAB61059BFC1CDDEB05917DD70BDF3A611654162A1A47DB930D40D8AF4",
+                    "amount": "0.005000000000000000"
+                },
+                {
+                    "denom": "uxion",
+                    "amount": "0.001000000000000000"
+                }
+            ]
+        }
+    ],
+    "deposit": "5000000000uxion",
+    "expedited": true
+}
