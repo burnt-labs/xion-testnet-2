@@ -5,14 +5,14 @@
       "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
       "plan": {
         "name": "v32",
-        "height": "19019008",
+        "height": "19019021",
         "info": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/main/releases/v32.json",
         "upgraded_client_state": null
       }
     }
   ],
   "title": "Software Upgrade v32 (Bakula)",
-  "summary": "Upgrade xion-testnet-2 to v32 (codename Bakula, xiond v32.0.0-rc1) at block height 19019008, expected around 2026-10-23 15:00 UTC (based on the average block time of 4.03s over the last 10,000 blocks as of 2026-10-22 21:52 UTC). v32 moves XION to Cosmos SDK v0.55, CometBFT v0.40, ibc-go v11 and wasmd v0.70, and adds ML-DSA-65 (FIPS 204) post-quantum signatures for native account keys. The upgrade handler removes the group, nft, circuit and crisis modules, moves the globalfee and jwk params out of x/params into their own modules, migrates IBC channel send sequences to the ibc-go v11 layout and runs the standard module migrations. On xion-testnet-2 it also registers the address entries of accounts instantiated under code 1880's checksum. Breaking for integrators: accounts created after the upgrade get account numbers of 2^63 or more, which needs CosmJS 0.39+ with bigint account numbers; the gov v1beta1 queries, the x/params, group, nft, circuit and crisis endpoints, and SIGN_MODE_TEXTUAL are removed. Release notes: https://github.com/burnt-labs/xion/releases/tag/v32.0.0-rc1",
+  "summary": "Upgrade xion-testnet-2 to v32 (codename Bakula, xiond v32.0.0-rc1) at block height 19019021, expected around 2026-10-23 15:00 UTC (based on the average block time of 4.03s over the last 10,000 blocks as of 2026-10-23 02:19 UTC). v32 moves XION to Cosmos SDK v0.55, CometBFT v0.40, ibc-go v11 and wasmd v0.70, and adds ML-DSA-65 (FIPS 204) post-quantum signatures for native account keys. The upgrade handler removes the group, nft, circuit and crisis modules, moves the globalfee and jwk params out of x/params into their own modules, migrates IBC channel send sequences to the ibc-go v11 layout and runs the standard module migrations. On xion-testnet-2 it also registers the address entries of accounts instantiated under code 1880's checksum. Breaking for integrators: accounts created after the upgrade get account numbers of 2^63 or more, which needs CosmJS 0.39+ with bigint account numbers; the gov v1beta1 queries, the x/params, group, nft, circuit and crisis endpoints, and SIGN_MODE_TEXTUAL are removed. Release notes: https://github.com/burnt-labs/xion/releases/tag/v32.0.0-rc1",
   "deposit": "5000000000uxion",
   "expedited": true
 }
