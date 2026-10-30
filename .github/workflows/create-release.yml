@@ -34,7 +34,7 @@ on:
 
 jobs:
   create-release-pr:
-    runs-on: ubuntu-latest
+    runs-on: ubicloud-standard-2
 
     env:
       XION_API_URL: "https://api.xion-testnet-2.burnt.com"
