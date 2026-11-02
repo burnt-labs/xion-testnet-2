@@ -1,8 +1,8 @@
 {
   "binaries": {
-    "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc1/xiond_33.0.0-rc1_darwin_amd64.tar.gz?checksum=sha256:TBD",
-    "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc1/xiond_33.0.0-rc1_darwin_arm64.tar.gz?checksum=sha256:TBD",
-    "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc1/xiond_33.0.0-rc1_linux_amd64.tar.gz?checksum=sha256:TBD",
-    "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc1/xiond_33.0.0-rc1_linux_arm64.tar.gz?checksum=sha256:TBD"
+    "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc2/xiond_33.0.0-rc2_darwin_amd64.tar.gz?checksum=sha256:0b904d83d8f39a885adb911fd724b3c650c9d38b4ac3e5e6a2d2dd0ccce6f65c",
+    "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc2/xiond_33.0.0-rc2_darwin_arm64.tar.gz?checksum=sha256:33e2d4bb637bb41a76ff8532acb806c3c8455bf1a27101038ffaa013eab41bb4",
+    "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc2/xiond_33.0.0-rc2_linux_amd64.tar.gz?checksum=sha256:2749651e95e21f0b8f4a42cfe5fd91f14b15b234de146030240b629720e8cbc1",
+    "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/v33.0.0-rc2/xiond_33.0.0-rc2_linux_arm64.tar.gz?checksum=sha256:f350bac73c95377800bb71a0c8d034c159bd8156f3d4c57fc86dc258decb2b1e"
   }
 }
