@@ -1,0 +1,18 @@
+{
+  "messages": [
+    {
+      "@type": "/cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+      "authority": "xion10d07y265gmmuvt4z0w9aw880jnsr700jctf8qc",
+      "plan": {
+        "name": "v33",
+        "height": "19487000",
+        "info": "https://raw.githubusercontent.com/burnt-labs/xion-testnet-2/main/releases/v33.json",
+        "upgraded_client_state": null
+      }
+    }
+  ],
+  "title": "Software Upgrade v33",
+  "summary": "Upgrade xion-testnet-2 to v33 (xiond v33.0.0-rc2) at block height 19487000, expected around 2026-11-03 02:00 UTC. v33 is a maintenance release on top of v32: the upgrade handler runs the standard module migrations and rewrites the legacy feegrant allowance-queue entries that were stored with an empty value into the BoolValue encoding the SDK v0.55 feegrant keeper expects, so expiring legacy allowances no longer fail the feegrant EndBlocker. No stores are added, renamed or removed. The xiond default for consensus.timeout_commit is now applied as 1s on freshly generated configs. Release notes: https://github.com/burnt-labs/xion/releases/tag/v33.0.0-rc2",
+  "deposit": "5000000000uxion",
+  "expedited": true
+}
