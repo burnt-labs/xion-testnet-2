@@ -53,17 +53,20 @@ cd "$(dirname "$0")/.."
 
 # Determine version from argument or calculate from latest release
 if [ -n "$RELEASE_TAG" ]; then
-    # Validate RELEASE_TAG format (should be like v22.0.0)
-    if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.0\.0$ ]]; then
-        echo "Error: RELEASE_TAG must be in format vX.0.0 (e.g., v22.0.0)"
+    # Validate RELEASE_TAG format: vX.0.0 with an optional pre-release suffix
+    # (e.g., v22.0.0 or v33.0.0-rc2). Testnet upgrades ship release candidates.
+    if [[ ! "$RELEASE_TAG" =~ ^v([0-9]+)\.0\.0(-[0-9A-Za-z.-]+)?$ ]]; then
+        echo "Error: RELEASE_TAG must be in format vX.0.0 or vX.0.0-suffix (e.g., v22.0.0, v33.0.0-rc2)"
         echo "Provided: '$RELEASE_TAG'"
         exit 1
     fi
     
     # Use RELEASE_TAG from argument (full version for content)
     VERSION_FULL="$RELEASE_TAG"
-    VERSION_NUM=$(echo "$VERSION_FULL" | sed 's/v\([0-9]*\)\.0\.0/\1/')
-    # Create short version for filenames (v22 instead of v22.0.0)
+    VERSION_NUM="${BASH_REMATCH[1]}"
+    # Create short version for filenames (v22 instead of v22.0.0). Release
+    # candidates use the same name (v33 for v33.0.0-rc2): it is the on-chain
+    # upgrade name, which the proposal plan and releases/<name>.json must match.
     VERSION="v${VERSION_NUM}"
     echo "Using specified version: $VERSION_FULL (files will use: $VERSION)"
 else
@@ -202,10 +205,10 @@ if [ "$SHOULD_UPDATE_RELEASE" = true ]; then
     cat > "$RELEASE_FILE" << EOF
 {
     "binaries": {
-        "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_darwin_amd64.tar.gz?checksum=sha256:${DARWIN_AMD64_CHECKSUM}",
-        "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_darwin_arm64.tar.gz?checksum=sha256:${DARWIN_ARM64_CHECKSUM}",
-        "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_linux_amd64.tar.gz?checksum=sha256:${LINUX_AMD64_CHECKSUM}",
-        "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_NUM}.0.0_linux_arm64.tar.gz?checksum=sha256:${LINUX_ARM64_CHECKSUM}"
+        "darwin/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_FULL#v}_darwin_amd64.tar.gz?checksum=sha256:${DARWIN_AMD64_CHECKSUM}",
+        "darwin/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_FULL#v}_darwin_arm64.tar.gz?checksum=sha256:${DARWIN_ARM64_CHECKSUM}",
+        "linux/amd64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_FULL#v}_linux_amd64.tar.gz?checksum=sha256:${LINUX_AMD64_CHECKSUM}",
+        "linux/arm64": "https://github.com/burnt-labs/xion/releases/download/${VERSION_FULL}/xiond_${VERSION_FULL#v}_linux_arm64.tar.gz?checksum=sha256:${LINUX_ARM64_CHECKSUM}"
     }
 }
 EOF
