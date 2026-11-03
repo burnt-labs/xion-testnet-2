@@ -28,7 +28,7 @@ COMMIT_SHA="${COMMIT_SHA:-}"
 setup_release_branch() {
   echo "📋 Setting up release branch..."
 
-  VERSION_NUM=$(echo "$RELEASE_TAG" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+  VERSION_NUM=$(echo "$RELEASE_TAG" | sed -E 's/^v([0-9]+)\..*/\1/')
   VERSION="v${VERSION_NUM}"
   BRANCH_NAME="release/$RELEASE_TAG"
 
@@ -82,14 +82,14 @@ calculate_upgrade_height() {
 fetch_release_checksums() {
   echo "📋 Fetching release checksums..."
 
-  CHECKSUMS_URL="https://github.com/burnt-labs/xion/releases/download/$RELEASE_TAG/xiond-$RELEASE_TAG-checksums.txt"
-  HTTP_CODE=$(curl -s -w "%{http_code}" "$CHECKSUMS_URL" -o checksums_temp.txt)
+  CHECKSUMS_URL="https://github.com/burnt-labs/xion/releases/download/$RELEASE_TAG/xiond-${RELEASE_TAG#v}-checksums.txt"
+  HTTP_CODE=$(curl -sL -w "%{http_code}" "$CHECKSUMS_URL" -o checksums_temp.txt)
 
   if [ "${HTTP_CODE: -3}" = "200" ]; then
-    DARWIN_AMD64_CHECKSUM=$(grep "darwin_amd64.tar.gz" checksums_temp.txt | awk '{print $1}')
-    DARWIN_ARM64_CHECKSUM=$(grep "darwin_arm64.tar.gz" checksums_temp.txt | awk '{print $1}')
-    LINUX_AMD64_CHECKSUM=$(grep "linux_amd64.tar.gz" checksums_temp.txt | awk '{print $1}')
-    LINUX_ARM64_CHECKSUM=$(grep "linux_arm64.tar.gz" checksums_temp.txt | awk '{print $1}')
+    DARWIN_AMD64_CHECKSUM=$(grep -E "_darwin_amd64\.tar\.gz$" checksums_temp.txt | awk '{print $1}')
+    DARWIN_ARM64_CHECKSUM=$(grep -E "_darwin_arm64\.tar\.gz$" checksums_temp.txt | awk '{print $1}')
+    LINUX_AMD64_CHECKSUM=$(grep -E "_linux_amd64\.tar\.gz$" checksums_temp.txt | awk '{print $1}')
+    LINUX_ARM64_CHECKSUM=$(grep -E "_linux_arm64\.tar\.gz$" checksums_temp.txt | awk '{print $1}')
     echo "✅ Real checksums fetched"
   else
     echo "⚠️  Checksums not available for $RELEASE_TAG (HTTP ${HTTP_CODE: -3})"
@@ -102,13 +102,16 @@ fetch_release_checksums() {
     echo "    Using placeholder checksums"
   fi
 
+  # create-release-pr.sh reads these from the environment
+  export DARWIN_AMD64_CHECKSUM DARWIN_ARM64_CHECKSUM LINUX_AMD64_CHECKSUM LINUX_ARM64_CHECKSUM
+
   rm -f checksums_temp.txt
 }
 
 fetch_github_comparison() {
   echo "📋 Fetching GitHub comparison data..."
 
-  CURRENT_MAJOR=$(echo "$RELEASE_TAG" | sed 's/v\([0-9]*\)\.0\.0/\1/')
+  CURRENT_MAJOR=$(echo "$RELEASE_TAG" | sed -E 's/^v([0-9]+)\..*/\1/')
   PREVIOUS_MAJOR=$((CURRENT_MAJOR - 1))
   PREVIOUS_VERSION="v${PREVIOUS_MAJOR}.0.0"
 
@@ -189,8 +192,14 @@ create_release_files() {
 
   git restore .github/workflows/templates/release_notes_template.md 2>/dev/null || true
 
-  OUTPUT=$(./scripts/create-release-pr.sh "$CALCULATED_HEIGHT" "$DEPOSIT" "$EXPEDITED" "$RELEASE_TAG")
-  CALCULATED_PROPOSAL_NUMBER=$(echo "$OUTPUT" | grep "^Proposal number:" | sed 's/Proposal number: //')
+  # Tee the child's output to the log so its errors are visible; pipefail keeps
+  # its exit status (a plain $(...) capture hid the error message).
+  OUTPUT_FILE=$(mktemp)
+  set -o pipefail
+  ./scripts/create-release-pr.sh "$CALCULATED_HEIGHT" "$DEPOSIT" "$EXPEDITED" "$RELEASE_TAG" | tee "$OUTPUT_FILE"
+  set +o pipefail
+  CALCULATED_PROPOSAL_NUMBER=$(grep "^Proposal number:" "$OUTPUT_FILE" | sed 's/Proposal number: //')
+  rm -f "$OUTPUT_FILE"
 
   echo "✅ Proposal number: $CALCULATED_PROPOSAL_NUMBER"
 }
